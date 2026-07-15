@@ -1,7 +1,8 @@
 import { buildApp } from './app.js';
-import { loadConfig } from './config.js';
+import { assertRunnableConfig, loadConfig } from './config.js';
 
 const config = loadConfig();
+assertRunnableConfig(config);
 const app = buildApp(config);
 
 try {
