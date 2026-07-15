@@ -2,13 +2,13 @@
 
 - Checkpoint date: 2026-07-16
 - Branch: `rebuild/lm-comment-hackathon`
-- Latest completed implementation commit: `7ca8213`
+- Latest completed implementation commit: `f31ceac`
 - Latest deployment commit: `c32ca14`
-- Current phase: H5 - results, editing, regeneration, and copy
+- Current phase: H6 - product shell and polish
 - Active implementation blocker: none
 - Physical-device acceptance: pending owner phone connection
 - Demo rehearsal count: 0 / 5
-- Resume from: connect reviewed OCR text to native generation and polished result cards
+- Resume from: finish the Expo Home, Setup, Demo, Diagnostics, and Settings routes
 
 ## Phase checklist
 
@@ -17,7 +17,7 @@
 - [x] H2 One-frame capture - implementation and unit gate complete; final phone MediaProjection acceptance pending
 - [x] H3 Crop/OCR - implementation and automated/API 36 offline gate complete; physical portrait/landscape acceptance pending
 - [x] H4 Relay/Groq - private native configuration, strict client, live Groq route, and APK secret gate complete
-- [ ] H5 Results/copy - not implemented
+- [x] H5 Results/copy - native generation, editing, regeneration, clipboard, and same-session recapture complete
 - [ ] H6 Product shell/polish - foundation exists; full product pass pending
 - [ ] H7 Hardening/rehearsal - not started
 
@@ -74,21 +74,31 @@
 - Live Kotlin-to-production relay canary returns the exact requested count without printing content.
 - Commit: `7ca8213` (`feat(relay): add real Groq generation route`).
 
+### H5 results, editing, regeneration, and copy
+
+- Editable reviewed text, five tones, optional 500-character instruction, and one-to-three result count.
+- Cancellable native relay generation with duplicate-request and stale-result guards plus stable error mapping.
+- Selectable result cards, explicit editing, regenerate, clipboard copy with haptic feedback, and no auto-posting.
+- New Capture safely clears sensitive state and waits for two measured frames before CaptureCloak can be shown again.
+- Standalone manual-entry sessions return the user to an available bubble instead of opening an unusable capture path.
+- Rotation preserves active generation/results while Close clears in-memory text, bitmaps, OCR, and network work.
+- Commit: `f31ceac` (`feat(results): add edit regenerate and copy`).
+
 ## Remaining work in mandatory order
 
-1. H5: finish review -> generating -> editable result cards -> regenerate/copy/new capture, with duplicate/cancellation guards and no auto-post.
-2. H6: finish the polished Expo Home, Setup, Demo, Diagnostics, and Settings routes in dark/light themes.
-3. H7: run final secret/security/static gates, API 36 full-flow repetition, priority-phone portrait/landscape workflows, release signing, and five rehearsals.
+1. H6: finish the polished Expo Home, Setup, Demo, Diagnostics, and Settings routes in dark/light themes.
+2. H7: run final secret/security/static gates, API 36 full-flow repetition, priority-phone portrait/landscape workflows, release signing, and five rehearsals.
 
 ## Evidence at this checkpoint
 
-- `pnpm quality`: PASS after H4 - scope, naming, expanded native secret scan, lint, typecheck, 18 relay tests, and relay production build.
-- Native `:lm-comment-android:testDebugUnitTest`: PASS - 63 tests (62 pass, one opt-in live skip); explicit live Kotlin canary PASS.
+- `pnpm quality`: PASS after H5 - scope, naming, expanded native secret scan, lint, typecheck, 18 relay tests, and relay production build.
+- Native `:lm-comment-android:testDebugUnitTest`: PASS - 73 tests (72 pass, one opt-in live skip); focused H5 workflow suite 16/16 PASS.
 - API 36 x86_64 instrumentation: PASS - private config persistence/safe status plus bundled offline OCR and secure direct-manual behavior (3 tests).
-- Arm64 debug APK: PASS - 100,654,144 bytes (95.99 MiB); APK Signature Scheme v2 verified.
+- Arm64 debug APK: PASS - 102,691,686 bytes (97.93 MiB); APK Signature Scheme v2 verified.
 - Exact local Groq key and generic `gsk_` pattern scan of every decompressed APK entry: PASS.
 - H3 evidence: `artifacts/evidence/h3-crop-ocr-20260715.md`.
 - H4 evidence: `artifacts/evidence/h4-native-relay-20260715.md`.
+- H5 evidence: `artifacts/evidence/h5-results-workflow-20260716.md`.
 - Relay/VPS evidence: `artifacts/evidence/relay-deployment-20260715.md`.
 - Public HTTPS health, invalid-token sanitization, live Groq structured generation, relay/Caddy log scan, and blocked direct port: PASS.
 - Physical phone install/capture/crop/OCR evidence: PENDING - no ADB phone connected.
