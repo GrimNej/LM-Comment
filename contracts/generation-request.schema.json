@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sourceText", "tone", "instruction", "optionCount"],
+  "properties": {
+    "sourceText": { "type": "string", "minLength": 1, "maxLength": 8000 },
+    "tone": {
+      "type": "string",
+      "enum": ["natural", "professional", "friendly", "witty", "concise"]
+    },
+    "instruction": { "type": "string", "maxLength": 500 },
+    "optionCount": { "type": "integer", "minimum": 1, "maximum": 3 }
+  }
+}

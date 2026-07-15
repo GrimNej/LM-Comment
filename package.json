@@ -1,0 +1,31 @@
+{
+  "name": "lm-comment",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A screen-aware Android writing assistant built for a hackathon demo.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": "22.13.x",
+    "pnpm": "10.34.5"
+  },
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "check:scope": "node scripts/check-scope.mjs",
+    "check:naming": "node scripts/check-naming.mjs",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "check": "pnpm check:scope && pnpm check:naming && pnpm check:secrets",
+    "quality": "pnpm check && pnpm lint && pnpm typecheck && pnpm test && pnpm relay:build",
+    "mobile:prebuild": "pnpm --filter @lm-comment/mobile prebuild",
+    "mobile:android:debug": "node scripts/android-build.mjs debug",
+    "mobile:android:release": "node scripts/android-build.mjs release",
+    "relay:dev": "pnpm --filter @lm-comment/relay dev",
+    "relay:build": "pnpm --filter @lm-comment/relay build",
+    "relay:start": "pnpm --filter @lm-comment/relay start",
+    "relay:canary": "pnpm --filter @lm-comment/relay canary",
+    "collect:evidence": "node scripts/collect-evidence.mjs"
+  }
+}

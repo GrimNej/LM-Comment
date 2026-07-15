@@ -1,0 +1,27 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'com.grimnej.lmcomment'
+version = '0.1.0'
+
+android {
+  // Keep generated Android classes out of the application namespace. Kotlin
+  // source remains in the frozen com.grimnej.lmcomment package hierarchy.
+  namespace "com.grimnej.lmcomment.nativebridge"
+  buildFeatures {
+    buildConfig false
+  }
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+dependencies {
+  implementation 'androidx.core:core-ktx:1.17.0'
+}

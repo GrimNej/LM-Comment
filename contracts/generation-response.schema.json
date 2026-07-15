@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "options"],
+  "properties": {
+    "requestId": { "type": "string", "format": "uuid" },
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "text": { "type": "string", "minLength": 1, "maxLength": 700 }
+        }
+      }
+    }
+  }
+}

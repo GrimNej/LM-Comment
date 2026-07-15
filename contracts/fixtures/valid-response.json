@@ -1,0 +1,13 @@
+{
+  "requestId": "aa7fbfed-5e87-4987-8ca4-9df6f169d3ae",
+  "options": [
+    {
+      "id": "b9d53cc0-b48e-401f-8792-876142b47836",
+      "text": "That focus paid off—the simpler design is easier to understand, maintain, and build on together."
+    },
+    {
+      "id": "9ce54289-d046-41f1-b870-d5b44d1dd176",
+      "text": "Choosing the smaller architecture was a worthwhile tradeoff if it lets the entire team reason about the product clearly."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+# Dependencies and caches
+node_modules/
+.pnpm-store/
+.turbo/
+.expo/
+.gradle/
+**/build/
+**/dist/
+**/.kotlin/
+
+# Generated native projects (recreated with Expo prebuild)
+apps/mobile/android/
+apps/mobile/ios/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+credentials.json
+local.properties
+
+# Outputs and evidence
+artifacts/
+coverage/
+*.apk
+*.aab
+*.log
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Generated module artifacts
+modules/lm-comment-android/pnpm-lock.yaml
+modules/lm-comment-android/pnpm-workspace.yaml

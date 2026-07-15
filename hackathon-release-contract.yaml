@@ -1,0 +1,120 @@
+schemaVersion: 1
+
+product:
+  name: LM-Comment
+  releaseType: hackathon-demo
+  legacyRepository: https://github.com/GrimNej/Peek-A-Comment
+
+distribution:
+  signedApkRequired: true
+  directApkSupported: true
+  googlePlaySubmission: excluded
+  appBundleRequired: false
+
+platform:
+  primary: android
+  primaryPhysicalDevice: required
+  latestPixelEmulatorApi36: required
+  secondaryPhysicalDevice: optional
+  api26Compatibility: bestEffort
+  foldables: excluded
+  multiWindow: excluded
+  splitScreenCapture: excluded
+
+capture:
+  floatingBubble: required
+  bubbleForegroundServiceType: specialUse
+  oneShotMediaProjection: required
+  captureForegroundServiceType: mediaProjection
+  fullDisplayCapture: required
+  appWindowCapture: excluded
+  focusSession: excluded
+  screenshotPersistence: forbidden
+  screenshotUpload: forbidden
+  bubbleMustBeAbsentFromFrame: required
+  lmCommentSurfaceMustBeAbsentFromFrame: required
+  preAllocationPixelBudget: required
+  secureFlagBeforeFrameAcquisition: forbidden
+  secureFlagAfterFrameAcquisition: required
+
+workflow:
+  implementation: nativeComposeActivity
+  windowModes:
+    - captureCloak
+    - sensitiveWorkflow
+  noHistory: false
+  fullScreenSystemOverlay: excluded
+  cropEditor: required
+  editableOcrText: required
+  manualTextFallback: required
+  builtInDemoFixtures: required
+
+ocr:
+  engine: mlKitTextRecognitionV2
+  modelDelivery: bundled
+  script: latin
+  networkRequired: false
+
+generation:
+  mode: managedRelayOnly
+  provider: groq
+  modelConfiguredOnServer: true
+  streaming: excluded
+  outputOptions:
+    minimum: 1
+    maximum: 3
+    exactRequestedCountRequired: true
+    normalizedDuplicatesForbidden: true
+  automaticPosting: forbidden
+
+backend:
+  framework: fastify
+  database: none
+  authentication: x-demo-token
+  endpoints:
+    - GET /healthz
+    - POST /v1/generate
+  requestBodyLogging: forbidden
+  responseBodyLogging: forbidden
+  defaultLimits:
+    requestsPerMinute: 3
+    dailyRequests: 100
+    sourceCharacters: 8000
+    completionTokens: 700
+
+nativeDemoConfiguration:
+  storage: privateSharedPreferences
+  requiredFields:
+    - relayBaseUrl
+    - demoToken
+    - defaultTone
+    - optionCount
+    - demoMode
+  releaseUrlScheme: https
+  tokenVisibleInDiagnostics: false
+
+demo:
+  completeRehearsalsRequired: 5
+  prerecordedFallbackRequired: true
+  sessionHardLimitMinutes: 45
+  inactivityTimeoutInDemoMode: disabled
+
+excluded:
+  - auth0
+  - accounts
+  - directByok
+  - multipleProviders
+  - streaming
+  - databases
+  - adminService
+  - moderationSystem
+  - cloudSql
+  - valkey
+  - focusSession
+  - appWindowCapture
+  - profileSync
+  - draftHistory
+  - customProviderOrigins
+  - dynamicModelCatalog
+  - automaticFailover
+  - googlePlaySubmission
