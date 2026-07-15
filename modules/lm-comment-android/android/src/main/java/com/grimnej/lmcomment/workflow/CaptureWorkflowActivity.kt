@@ -1,6 +1,8 @@
 package com.grimnej.lmcomment.workflow
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -14,7 +16,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.ResultReceiver
+import android.provider.Settings
 import android.view.Choreographer
+import android.view.HapticFeedbackConstants
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -27,6 +31,7 @@ import androidx.core.view.WindowCompat
 import com.grimnej.lmcomment.bubble.BubbleOverlayService
 import com.grimnej.lmcomment.capture.CaptureError
 import com.grimnej.lmcomment.capture.OneShotCaptureService
+import com.grimnej.lmcomment.config.DemoConfigurationStore
 
 class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Listener {
     private val viewModel by viewModels<WorkflowViewModel>()
@@ -36,6 +41,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     private var cleanupComplete = false
     private var consentLaunched = false
     private var directManualEntry = false
+    private var newCaptureTransitionInProgress = false
 
     private val projectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -79,6 +85,9 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Configuration is process-local private data supplied by the Expo shell.
+        // Hand it directly to the workflow without ever logging the demo token.
+        viewModel.setDemoConfiguration(DemoConfigurationStore(this).read())
         workflowSessionId = intent.getStringExtra(BubbleOverlayService.EXTRA_WORKFLOW_SESSION_ID)
         directManualEntry = intent.getBooleanExtra(EXTRA_MANUAL_ENTRY, false)
         consentLaunched = savedInstanceState?.getBoolean(STATE_CONSENT_LAUNCHED) == true
@@ -112,6 +121,20 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
                     onReviewedTextChange = viewModel::updateReviewedText,
                     onBackToCrop = { viewModel.backToCrop() },
                     onRetryOcr = { viewModel.extractText() },
+                    onToneChange = viewModel::updateTone,
+                    onInstructionChange = viewModel::updateInstruction,
+                    onOptionCountChange = viewModel::updateOptionCount,
+                    onGenerate = viewModel::generate,
+                    onCancelGeneration = viewModel::cancelGeneration,
+                    onSelectResult = viewModel::selectResult,
+                    onEditResult = viewModel::beginEdit,
+                    onEditDraftChange = viewModel::updateEditText,
+                    onSaveEdit = viewModel::saveEdit,
+                    onCancelEdit = viewModel::cancelEdit,
+                    onCopyResult = ::copyResult,
+                    onRegenerate = viewModel::regenerate,
+                    onBackToReview = viewModel::backToReview,
+                    onNewCapture = ::startNewCapture,
                     onClose = { finishWorkflow() },
                 ),
             )
@@ -136,11 +159,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         } else if (workflowSessionId == null) {
             finishWorkflow(CaptureError.CAPTURE_FAILED)
         } else {
-            bindService(
-                Intent(this, OneShotCaptureService::class.java),
-                captureConnection,
-                Context.BIND_AUTO_CREATE,
-            )
+            bindCaptureService()
         }
     }
 
@@ -190,6 +209,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         if (sessionId != workflowSessionId || isFinishing) return
         val bitmap = captureBinder?.takeBitmap(sessionId)
             ?: return finishWorkflow(CaptureError.CAPTURE_FAILED)
+        newCaptureTransitionInProgress = false
         enterSensitiveWorkflow()
         viewModel.acceptFrame(bitmap)
         releaseCaptureBinding(cancel = false)
@@ -220,6 +240,89 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         Choreographer.getInstance().postFrameCallback {
             if (!isFinishing && !isDestroyed) block()
         }
+    }
+
+    /**
+     * Starts a fresh one-shot capture while retaining the bubble service's
+     * existing workflow session. Sensitive Compose content is removed while
+     * the window is still opaque and secure; only the following frame becomes
+     * the transparent, non-secure capture cloak.
+     */
+    private fun startNewCapture() {
+        if (cleanupComplete || newCaptureTransitionInProgress || isFinishing) return
+        if (workflowSessionId == null) {
+            // Standalone manual mode has no bubble-owned workflow session. Keep
+            // capture user-initiated: prepare the bubble, close this secure
+            // activity, and let the user choose content before tapping it.
+            if (Settings.canDrawOverlays(this)) {
+                ContextCompat.startForegroundService(
+                    this,
+                    Intent(this, BubbleOverlayService::class.java)
+                        .setAction(BubbleOverlayService.ACTION_START),
+                )
+                Toast.makeText(
+                    this,
+                    "Bubble ready. Open the content, then tap the bubble.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Enable Display over other apps to start a new capture.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+            finishWorkflow()
+            return
+        }
+
+        newCaptureTransitionInProgress = true
+        directManualEntry = false
+        intent.putExtra(EXTRA_MANUAL_ENTRY, false)
+        releaseCaptureBinding(cancel = true)
+        enterSensitiveWorkflow()
+        viewModel.prepareForNewCapture()
+        // The first callback runs before the frame that draws CaptureCloak.
+        // Waiting for the following callback guarantees one complete opaque,
+        // secure frame has disposed the prior results before FLAG_SECURE clears.
+        waitOneFrame {
+            waitOneFrame {
+                consentLaunched = false
+                configureCaptureCloak()
+                bindCaptureService()
+            }
+        }
+    }
+
+    private fun bindCaptureService() {
+        if (cleanupComplete || serviceBound || isFinishing) return
+        val bound = runCatching {
+            bindService(
+                Intent(this, OneShotCaptureService::class.java),
+                captureConnection,
+                Context.BIND_AUTO_CREATE,
+            )
+        }.getOrDefault(false)
+        if (!bound) finishWorkflow(CaptureError.CAPTURE_SERVICE_DISCONNECTED)
+    }
+
+    /** Copies only the exact option text resolved by the ViewModel on a tap. */
+    private fun copyResult(optionId: String) {
+        val text = viewModel.resultTextForCopy(optionId) ?: return
+        val copied = runCatching {
+            getSystemService(ClipboardManager::class.java).setPrimaryClip(
+                ClipData.newPlainText("LM-Comment option", text),
+            )
+        }.isSuccess
+        if (!copied) return
+
+        val feedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            HapticFeedbackConstants.CONFIRM
+        } else {
+            HapticFeedbackConstants.VIRTUAL_KEY
+        }
+        window.decorView.performHapticFeedback(feedback)
+        viewModel.markCopied(optionId)
     }
 
     private fun finishWorkflow(error: CaptureError? = null) {

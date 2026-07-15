@@ -3,6 +3,10 @@ package com.grimnej.lmcomment.workflow
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -43,15 +47,23 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.grimnej.lmcomment.config.Tone
 import com.grimnej.lmcomment.crop.CropEditor
 import com.grimnej.lmcomment.crop.NormalizedCropRect
+import com.grimnej.lmcomment.relay.GenerationContractCodec
+import com.grimnej.lmcomment.relay.GenerationOption
+import com.grimnej.lmcomment.relay.RelayFailureCode
 import kotlin.math.roundToInt
 
 private val Graphite = Color(0xFF090B10)
@@ -64,6 +76,7 @@ private val Violet = Color(0xFF9B8CFF)
 private val Cyan = Color(0xFF55E1D0)
 private val Outline = Color(0xFF313A4E)
 private val Warning = Color(0xFFFFC978)
+private val Success = Color(0xFF72E6A6)
 private val CardShape = RoundedCornerShape(22.dp)
 private val ControlShape = RoundedCornerShape(15.dp)
 
@@ -77,6 +90,20 @@ data class WorkflowActions(
     val onReviewedTextChange: (String) -> Unit,
     val onBackToCrop: () -> Unit,
     val onRetryOcr: () -> Unit,
+    val onToneChange: (Tone) -> Unit,
+    val onInstructionChange: (String) -> Unit,
+    val onOptionCountChange: (Int) -> Unit,
+    val onGenerate: () -> Unit,
+    val onCancelGeneration: () -> Unit,
+    val onSelectResult: (String) -> Unit,
+    val onEditResult: (String) -> Unit,
+    val onEditDraftChange: (String) -> Unit,
+    val onSaveEdit: () -> Unit,
+    val onCancelEdit: () -> Unit,
+    val onCopyResult: (String) -> Unit,
+    val onRegenerate: () -> Unit,
+    val onBackToReview: () -> Unit,
+    val onNewCapture: () -> Unit,
     val onClose: () -> Unit,
 )
 
@@ -108,6 +135,10 @@ fun WorkflowScreen(state: WorkflowState, actions: WorkflowActions) {
                     }
                 }
                 is WorkflowState.OcrError -> OcrErrorScreen(state, actions)
+                is WorkflowState.Generating -> GeneratingScreen(state, actions)
+                is WorkflowState.ShowingResults -> ResultsScreen(state, actions)
+                is WorkflowState.EditingResult -> EditResultScreen(state, actions)
+                is WorkflowState.GenerationError -> GenerationErrorScreen(state, actions)
                 is WorkflowState.Closing -> Unit
             }
         }
@@ -378,93 +409,867 @@ private fun ReviewScreen(state: WorkflowState.ReviewingText, actions: WorkflowAc
             }
         }
         Column(
-            Modifier
-                .fillMaxSize()
-                .then(
-                    if (isLandscape) {
-                        Modifier.verticalScroll(rememberScrollState())
-                    } else {
-                        Modifier
-                    },
-                ),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .widthIn(max = 760.dp)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
         ) {
             ScreenHeader(
                 eyebrow = if (state.manualEntry) "MANUAL CONTEXT" else "TEXT FOUND",
-                title = if (state.manualEntry) "Write the context" else "Make it yours",
+                title = if (state.manualEntry) "Start with the context" else "Shape the reply",
                 onClose = actions.onClose,
                 compact = isLandscape,
             )
             Spacer(Modifier.height(if (isLandscape) 10.dp else 16.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(CardShape)
-                    .background(Surface.copy(alpha = 0.94f))
-                    .border(1.dp, Outline, CardShape)
-                    .padding(horizontal = 15.dp, vertical = 11.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    Modifier
-                        .size(8.dp)
-                        .clip(RoundedCornerShape(99.dp))
-                        .background(Cyan),
-                )
-                Spacer(Modifier.width(9.dp))
-                Text(
-                    when {
-                        state.manualEntry -> "Ready for your own text"
-                        state.blocks.size == 1 -> "1 text block detected"
-                        else -> "${state.blocks.size} text blocks detected"
-                    },
-                    color = TextSecondary,
-                    fontSize = 13.sp,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    "${state.text.length} chars",
-                    color = TextMuted,
-                    fontSize = 12.sp,
-                )
-            }
+            ContextStatusRow(
+                manualEntry = state.manualEntry,
+                blockCount = state.blocks.size,
+                characterCount = state.text.length,
+            )
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 value = state.text,
-                onValueChange = actions.onReviewedTextChange,
+                onValueChange = {
+                    actions.onReviewedTextChange(
+                        it.take(GenerationContractCodec.MAX_SOURCE_CHARACTERS),
+                    )
+                },
                 label = { Text("Context text") },
                 placeholder = { Text("Type or paste the words you want help responding to") },
-                supportingText = { Text("Editable now, and again before you copy a result.") },
+                supportingText = {
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(
+                            if (state.text.isBlank()) {
+                                "Add context before generating."
+                            } else {
+                                "Only this text is sent when you tap Generate."
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text("${state.text.length}/${GenerationContractCodec.MAX_SOURCE_CHARACTERS}")
+                    }
+                },
                 shape = CardShape,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .then(
-                        if (isLandscape) {
-                            Modifier.heightIn(min = 160.dp)
-                        } else {
-                            Modifier
-                                .weight(1f)
-                                .heightIn(min = 220.dp)
-                        },
-                    )
+                    .heightIn(min = if (isLandscape) 145.dp else 200.dp)
                     .focusRequester(focusRequester),
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(22.dp))
+
+            SectionHeading(
+                step = "01",
+                title = "Choose a voice",
+                detail = "Set the feel of every option.",
+            )
+            Spacer(Modifier.height(11.dp))
+            TonePicker(
+                selected = state.tone,
+                onSelected = actions.onToneChange,
+            )
+
+            Spacer(Modifier.height(22.dp))
+            SectionHeading(
+                step = "02",
+                title = "Add direction",
+                detail = "Optional — a detail, constraint, or point to include.",
+            )
+            Spacer(Modifier.height(11.dp))
+            OutlinedTextField(
+                value = state.instruction,
+                onValueChange = {
+                    actions.onInstructionChange(
+                        it.take(GenerationContractCodec.MAX_INSTRUCTION_CHARACTERS),
+                    )
+                },
+                label = { Text("Extra instruction (optional)") },
+                placeholder = { Text("e.g. Mention that Friday afternoon works best") },
+                supportingText = {
+                    Text(
+                        "${state.instruction.length}/${GenerationContractCodec.MAX_INSTRUCTION_CHARACTERS}",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End,
+                    )
+                },
+                minLines = 2,
+                maxLines = 4,
+                shape = CardShape,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            Spacer(Modifier.height(22.dp))
+            SectionHeading(
+                step = "03",
+                title = "How many options?",
+                detail = "Keep it focused or compare a few approaches.",
+            )
+            Spacer(Modifier.height(11.dp))
+            OptionCountSelector(
+                selected = state.optionCount,
+                onSelected = actions.onOptionCountChange,
+            )
+
+            if (!state.demoConfigured) {
+                Spacer(Modifier.height(14.dp))
+                ConfigurationNotice()
+            }
+
+            Spacer(Modifier.height(18.dp))
+            PrimaryButton(
+                text = when (state.optionCount) {
+                    1 -> "Generate 1 option"
+                    else -> "Generate ${state.optionCount} options"
+                },
+                onClick = actions.onGenerate,
+                enabled = state.text.isNotBlank() && state.demoConfigured,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(10.dp))
             if (state.canReturnToCrop) {
                 SecondaryButton(
                     text = "Back to crop",
                     onClick = actions.onBackToCrop,
                     modifier = Modifier.fillMaxWidth(),
                 )
-            } else {
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+private fun ContextStatusRow(
+    manualEntry: Boolean,
+    blockCount: Int,
+    characterCount: Int,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(Surface.copy(alpha = 0.94f))
+            .border(1.dp, Outline, CardShape)
+            .padding(horizontal = 15.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(8.dp)
+                .clip(RoundedCornerShape(99.dp))
+                .background(Cyan),
+        )
+        Spacer(Modifier.width(9.dp))
+        Text(
+            when {
+                manualEntry -> "Your text is ready to shape"
+                blockCount == 1 -> "1 text block found on-device"
+                else -> "$blockCount text blocks found on-device"
+            },
+            color = TextSecondary,
+            fontSize = 13.sp,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            "$characterCount chars",
+            color = TextMuted,
+            fontSize = 12.sp,
+        )
+    }
+}
+
+@Composable
+private fun SectionHeading(step: String, title: String, detail: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(11.dp))
+                .background(Color(0x169B8CFF))
+                .border(1.dp, Color(0x449B8CFF), RoundedCornerShape(11.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                step,
+                color = Violet,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.7.sp,
+            )
+        }
+        Spacer(Modifier.width(11.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                title,
+                color = TextPrimary,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                detail,
+                color = TextMuted,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun TonePicker(selected: Tone, onSelected: (Tone) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Tone.entries.forEach { tone ->
+            ToneChip(
+                tone = tone,
+                selected = tone == selected,
+                onClick = { onSelected(tone) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToneChip(tone: Tone, selected: Boolean, onClick: () -> Unit) {
+    val label = when (tone) {
+        Tone.NATURAL -> "Natural"
+        Tone.PROFESSIONAL -> "Professional"
+        Tone.FRIENDLY -> "Friendly"
+        Tone.WITTY -> "Witty"
+        Tone.CONCISE -> "Concise"
+    }
+    OutlinedButton(
+        onClick = onClick,
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (selected) Violet.copy(alpha = 0.18f) else Surface,
+            contentColor = if (selected) TextPrimary else TextSecondary,
+        ),
+        border = BorderStroke(
+            1.dp,
+            if (selected) Violet else Outline,
+        ),
+        shape = RoundedCornerShape(999.dp),
+        modifier = Modifier
+            .heightIn(min = 48.dp)
+            .semantics { this.selected = selected },
+    ) {
+        if (selected) {
+            Box(
+                Modifier
+                    .size(7.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(Cyan),
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+        Text(label, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun OptionCountSelector(selected: Int, onSelected: (Int) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(ControlShape)
+            .background(Surface)
+            .border(1.dp, Outline, ControlShape)
+            .padding(4.dp)
+            .selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        (1..3).forEach { count ->
+            val isSelected = selected == count
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isSelected) Violet.copy(alpha = 0.2f) else Color.Transparent,
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (isSelected) Violet.copy(alpha = 0.72f) else Color.Transparent,
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    .selectable(
+                        selected = isSelected,
+                        onClick = { onSelected(count) },
+                        role = Role.RadioButton,
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "$count",
+                        color = if (isSelected) TextPrimary else TextSecondary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        if (count == 1) "option" else "options",
+                        color = if (isSelected) Violet else TextMuted,
+                        fontSize = 10.sp,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConfigurationNotice() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(ControlShape)
+            .background(Warning.copy(alpha = 0.09f))
+            .border(1.dp, Warning.copy(alpha = 0.36f), ControlShape)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "!",
+            color = Warning,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(Modifier.width(11.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                "Demo access is not configured",
+                color = TextPrimary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                "Return to setup in LM-Comment, then reopen this workflow.",
+                color = TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 17.sp,
+            )
+        }
+    }
+}
+
+@Composable
+private fun GeneratingScreen(state: WorkflowState.Generating, actions: WorkflowActions) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding()
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+    ) {
+        val isLandscape = maxWidth > maxHeight
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .widthIn(max = 720.dp)
+                .fillMaxSize(),
+        ) {
+            ScreenHeader(
+                eyebrow = "SECURE GENERATION",
+                title = "Writing options…",
+                onClose = actions.onClose,
+                compact = isLandscape,
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(if (isLandscape) 88.dp else 106.dp)
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(Color(0x149B8CFF))
+                        .border(1.dp, Color(0x559B8CFF), RoundedCornerShape(32.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(if (isLandscape) 42.dp else 48.dp),
+                        color = Cyan,
+                        trackColor = Outline,
+                        strokeWidth = 3.dp,
+                    )
+                    Box(
+                        Modifier
+                            .size(10.dp)
+                            .clip(RoundedCornerShape(99.dp))
+                            .background(Violet),
+                    )
+                }
+                Spacer(Modifier.height(if (isLandscape) 18.dp else 26.dp))
+                Text(
+                    "TURNING CONTEXT INTO LANGUAGE",
+                    color = Cyan,
+                    fontSize = 11.sp,
+                    letterSpacing = 1.45.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Finding the right words",
+                    color = TextPrimary,
+                    fontSize = if (isLandscape) 25.sp else 30.sp,
+                    lineHeight = if (isLandscape) 29.sp else 35.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Spacer(Modifier.height(9.dp))
+                Text(
+                    "This usually takes a few seconds. You can cancel safely at any time.",
+                    color = TextSecondary,
+                    fontSize = 15.sp,
+                    lineHeight = 21.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.widthIn(max = 430.dp),
+                )
+                Spacer(Modifier.height(22.dp))
+                DraftSummaryCard(
+                    tone = state.draft.tone,
+                    optionCount = state.draft.optionCount,
+                    sourceLength = state.draft.sourceText.length,
+                )
+            }
+            SecondaryButton(
+                text = "Cancel generation",
+                onClick = actions.onCancelGeneration,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DraftSummaryCard(tone: Tone, optionCount: Int, sourceLength: Int) {
+    Row(
+        modifier = Modifier
+            .widthIn(max = 430.dp)
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(Surface.copy(alpha = 0.94f))
+            .border(1.dp, Outline, CardShape)
+            .padding(15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(Cyan.copy(alpha = 0.1f))
+                .border(1.dp, Cyan.copy(alpha = 0.35f), RoundedCornerShape(13.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("✦", color = Cyan, fontSize = 17.sp)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                "${toneDisplayName(tone)} · $optionCount ${if (optionCount == 1) "option" else "options"}",
+                color = TextPrimary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                "$sourceLength characters of context",
+                color = TextMuted,
+                fontSize = 12.sp,
+            )
+        }
+        PrivacyBadge(text = "IN FLIGHT")
+    }
+}
+
+@Composable
+private fun ResultsScreen(state: WorkflowState.ShowingResults, actions: WorkflowActions) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding()
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+    ) {
+        val isLandscape = maxWidth > maxHeight
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .widthIn(max = 780.dp)
+                .fillMaxSize(),
+        ) {
+            ScreenHeader(
+                eyebrow = "${state.options.size} ${if (state.options.size == 1) "OPTION" else "OPTIONS"} READY",
+                title = "Pick what feels like you",
+                onClose = actions.onClose,
+                compact = isLandscape,
+            )
+            Spacer(Modifier.height(if (isLandscape) 10.dp else 14.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(ControlShape)
+                    .background(Cyan.copy(alpha = 0.07f))
+                    .border(1.dp, Cyan.copy(alpha = 0.24f), ControlShape)
+                    .padding(horizontal = 14.dp, vertical = 11.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier
+                        .size(8.dp)
+                        .clip(RoundedCornerShape(99.dp))
+                        .background(Success),
+                )
+                Spacer(Modifier.width(9.dp))
+                Text(
+                    "Tap a card to select it. Edit anything before copying.",
+                    color = TextSecondary,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                state.options.forEachIndexed { index, option ->
+                    ResultCard(
+                        option = option,
+                        number = index + 1,
+                        selected = state.selectedOptionId == option.id,
+                        copied = state.copiedOptionId == option.id,
+                        onSelect = { actions.onSelectResult(option.id) },
+                        onEdit = { actions.onEditResult(option.id) },
+                        onCopy = { actions.onCopyResult(option.id) },
+                    )
+                }
+                Spacer(Modifier.height(2.dp))
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                SecondaryButton(
+                    text = "New capture",
+                    onClick = actions.onNewCapture,
+                    modifier = Modifier.weight(1f),
+                )
                 PrimaryButton(
-                    text = "Done for now",
-                    onClick = actions.onClose,
-                    modifier = Modifier.fillMaxWidth(),
+                    text = "Regenerate",
+                    onClick = actions.onRegenerate,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            TextButton(
+                onClick = actions.onBackToReview,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp),
+            ) {
+                Text(
+                    "Back to text and settings",
+                    color = TextSecondary,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
         }
     }
+}
+
+@Composable
+private fun ResultCard(
+    option: GenerationOption,
+    number: Int,
+    selected: Boolean,
+    copied: Boolean,
+    onSelect: () -> Unit,
+    onEdit: () -> Unit,
+    onCopy: () -> Unit,
+) {
+    val cardOutline = when {
+        copied -> Success.copy(alpha = 0.66f)
+        selected -> Violet
+        else -> Outline
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(CardShape)
+            .background(
+                when {
+                    copied -> Success.copy(alpha = 0.055f)
+                    selected -> Violet.copy(alpha = 0.075f)
+                    else -> Surface.copy(alpha = 0.95f)
+                },
+            )
+            .border(if (selected || copied) 1.5.dp else 1.dp, cardOutline, CardShape)
+            .clickable(onClick = onSelect)
+            .semantics { this.selected = selected }
+            .padding(16.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(if (selected) Violet.copy(alpha = 0.2f) else GraphiteRaised)
+                    .border(
+                        1.dp,
+                        if (selected) Violet.copy(alpha = 0.6f) else Outline,
+                        RoundedCornerShape(11.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "$number",
+                    color = if (selected) Violet else TextSecondary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Spacer(Modifier.width(10.dp))
+            Text(
+                "OPTION ${number.toString().padStart(2, '0')}",
+                color = TextMuted,
+                fontSize = 10.sp,
+                letterSpacing = 1.2.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+            )
+            if (copied) {
+                StatusLabel(text = "COPIED", color = Success)
+            } else if (selected) {
+                StatusLabel(text = "SELECTED", color = Violet)
+            }
+        }
+        Spacer(Modifier.height(13.dp))
+        Text(
+            option.text,
+            color = TextPrimary,
+            fontSize = 16.sp,
+            lineHeight = 23.sp,
+        )
+        Spacer(Modifier.height(15.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+            ResultActionButton(
+                text = "Edit",
+                onClick = onEdit,
+                modifier = Modifier.weight(1f),
+            )
+            ResultActionButton(
+                text = if (copied) "Copied" else "Copy",
+                onClick = onCopy,
+                highlighted = copied,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatusLabel(text: String, color: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(color.copy(alpha = 0.12f))
+            .border(1.dp, color.copy(alpha = 0.38f), RoundedCornerShape(999.dp))
+            .padding(horizontal = 9.dp, vertical = 5.dp)
+            .semantics {
+                if (text == "COPIED") liveRegion = LiveRegionMode.Polite
+            },
+    ) {
+        Text(
+            text,
+            color = color,
+            fontSize = 9.sp,
+            letterSpacing = 0.9.sp,
+            fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+@Composable
+private fun ResultActionButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    highlighted: Boolean = false,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = if (highlighted) Success.copy(alpha = 0.1f) else Color.Transparent,
+            contentColor = if (highlighted) Success else TextPrimary,
+        ),
+        border = BorderStroke(1.dp, if (highlighted) Success.copy(alpha = 0.5f) else Outline),
+        shape = RoundedCornerShape(13.dp),
+        modifier = modifier.heightIn(min = 48.dp),
+    ) {
+        Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun EditResultScreen(state: WorkflowState.EditingResult, actions: WorkflowActions) {
+    val optionNumber = state.results.options.indexOfFirst { it.id == state.optionId } + 1
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding()
+            .imePadding()
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+    ) {
+        val isLandscape = maxWidth > maxHeight
+        val focusRequester = remember { FocusRequester() }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        LaunchedEffect(state.optionId) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .widthIn(max = 720.dp)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+        ) {
+            ScreenHeader(
+                eyebrow = if (optionNumber > 0) "EDITING OPTION ${optionNumber.toString().padStart(2, '0')}" else "EDITING RESULT",
+                title = "Make every word yours",
+                onClose = actions.onClose,
+                compact = isLandscape,
+            )
+            Spacer(Modifier.height(if (isLandscape) 10.dp else 16.dp))
+            Text(
+                "The text below is exactly what Copy will use after you save.",
+                color = TextSecondary,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+            )
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                value = state.draftText,
+                onValueChange = {
+                    actions.onEditDraftChange(
+                        it.take(GenerationContractCodec.MAX_OPTION_CHARACTERS),
+                    )
+                },
+                label = { Text("Reply text") },
+                placeholder = { Text("Write the reply you want to copy") },
+                supportingText = {
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(
+                            if (state.draftText.isBlank()) "Reply text cannot be empty." else "Changes stay in this workflow.",
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text("${state.draftText.length}/${GenerationContractCodec.MAX_OPTION_CHARACTERS}")
+                    }
+                },
+                shape = CardShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = if (isLandscape) 165.dp else 310.dp)
+                    .focusRequester(focusRequester),
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                SecondaryButton(
+                    text = "Cancel",
+                    onClick = actions.onCancelEdit,
+                    modifier = Modifier.weight(1f),
+                )
+                PrimaryButton(
+                    text = "Save changes",
+                    onClick = actions.onSaveEdit,
+                    enabled = state.draftText.isNotBlank(),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun GenerationErrorScreen(
+    state: WorkflowState.GenerationError,
+    actions: WorkflowActions,
+) {
+    RecoveryScreen(
+        eyebrow = relayErrorEyebrow(state.code),
+        title = "The words didn't arrive",
+        message = state.message,
+        accent = Warning,
+        onClose = actions.onClose,
+    ) {
+        PrimaryButton(
+            text = "Try generation again",
+            onClick = actions.onRegenerate,
+            enabled = state.draft.demoConfigured && state.draft.sourceText.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(10.dp))
+        SecondaryButton(
+            text = "Back to text and settings",
+            onClick = actions.onBackToReview,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(10.dp))
+        TextButton(
+            onClick = actions.onNewCapture,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp),
+        ) {
+            Text("Start a new capture", color = TextSecondary, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+private fun toneDisplayName(tone: Tone): String = when (tone) {
+    Tone.NATURAL -> "Natural"
+    Tone.PROFESSIONAL -> "Professional"
+    Tone.FRIENDLY -> "Friendly"
+    Tone.WITTY -> "Witty"
+    Tone.CONCISE -> "Concise"
+}
+
+private fun relayErrorEyebrow(code: RelayFailureCode): String = when (code) {
+    RelayFailureCode.NETWORK_UNAVAILABLE -> "CHECK YOUR CONNECTION"
+    RelayFailureCode.NETWORK_TIMEOUT,
+    RelayFailureCode.PROVIDER_TIMEOUT -> "GENERATION TIMED OUT"
+    RelayFailureCode.UNAUTHORIZED,
+    RelayFailureCode.INVALID_CONFIGURATION -> "DEMO ACCESS NEEDED"
+    RelayFailureCode.RATE_LIMITED,
+    RelayFailureCode.DAILY_LIMIT_REACHED,
+    RelayFailureCode.PROVIDER_RATE_LIMIT -> "DEMO IS BUSY"
+    else -> "GENERATION PAUSED"
 }
 
 @Composable
@@ -673,12 +1478,20 @@ private fun PrivacyBadge(text: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun PrimaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun PrimaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = Violet,
             contentColor = Graphite,
+            disabledContainerColor = Outline.copy(alpha = 0.62f),
+            disabledContentColor = TextMuted,
         ),
         shape = ControlShape,
         modifier = modifier.heightIn(min = 54.dp),
