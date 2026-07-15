@@ -1,0 +1,7 @@
+lmcomment-api.grimnej.com {
+    encode zstd gzip
+    request_body {
+        max_size 32KB
+    }
+    reverse_proxy 172.18.0.1:8787
+}

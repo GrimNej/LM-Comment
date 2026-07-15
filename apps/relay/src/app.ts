@@ -114,6 +114,10 @@ export function buildApp(
     requestIdHeader: false,
     genReqId: () => randomUUID(),
     exposeHeadRoutes: false,
+    // Production traffic reaches this process only through the private
+    // Docker bridge used by the host's Caddy container. Trust RFC1918 proxy
+    // addresses so rate limits use the real client IP forwarded by Caddy.
+    trustProxy: config.NODE_ENV === 'production' ? 'uniquelocal' : false,
   });
 
   const metadata = new WeakMap<FastifyRequest, RequestMetadata>();

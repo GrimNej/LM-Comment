@@ -1,0 +1,53 @@
+[Unit]
+Description=LM-Comment Groq relay
+Documentation=https://github.com/GrimNej/LM-Comment
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+EnvironmentFile=/etc/lm-comment/relay.env
+WorkingDirectory=/opt/lm-comment/current
+ExecStart=/opt/lm-comment/runtime/node-v22.13.1-linux-x64/bin/node /opt/lm-comment/current/dist/server.js
+Restart=on-failure
+RestartSec=3s
+TimeoutStopSec=15s
+KillSignal=SIGTERM
+UMask=0077
+
+# The relay has no persistent state and needs only outbound HTTPS plus its
+# private bridge listener. Keep it isolated from the host and other projects.
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+
+# This VPS has 1 GiB RAM and other workloads. Bound the relay aggressively.
+MemoryHigh=160M
+MemoryMax=192M
+CPUQuota=50%
+TasksMax=64
+LimitNOFILE=1024
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=lm-comment-relay
+
+[Install]
+WantedBy=multi-user.target

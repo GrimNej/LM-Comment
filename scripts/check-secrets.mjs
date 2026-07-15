@@ -13,6 +13,7 @@ const failures = [];
 function walk(directory) {
   for (const entry of readdirSync(directory)) {
     if (ignoredDirectories.has(entry)) continue;
+    if (entry === '.env' || (entry.startsWith('.env.') && entry !== '.env.example')) continue;
     const absolute = path.join(directory, entry);
     if (statSync(absolute).isDirectory()) {
       walk(absolute);
