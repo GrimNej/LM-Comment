@@ -1,14 +1,14 @@
 # LM-Comment progress
 
-- Checkpoint date: 2026-07-15
+- Checkpoint date: 2026-07-16
 - Branch: `rebuild/lm-comment-hackathon`
-- Latest completed implementation commit: `d06e61c`
+- Latest completed implementation commit: `7ca8213`
 - Latest deployment commit: `c32ca14`
-- Current phase: H4 - native demo configuration and relay client
+- Current phase: H5 - results, editing, regeneration, and copy
 - Active implementation blocker: none
 - Physical-device acceptance: pending owner phone connection
 - Demo rehearsal count: 0 / 5
-- Resume from: implement the strict native relay contract and private demo configuration store
+- Resume from: connect reviewed OCR text to native generation and polished result cards
 
 ## Phase checklist
 
@@ -16,7 +16,7 @@
 - [x] H1 Bubble - implementation and compile/emulator smoke gate complete; final phone interaction pending
 - [x] H2 One-frame capture - implementation and unit gate complete; final phone MediaProjection acceptance pending
 - [x] H3 Crop/OCR - implementation and automated/API 36 offline gate complete; physical portrait/landscape acceptance pending
-- [ ] H4 Relay/Groq - local and remote relay are green; native client/configuration remains
+- [x] H4 Relay/Groq - private native configuration, strict client, live Groq route, and APK secret gate complete
 - [ ] H5 Results/copy - not implemented
 - [ ] H6 Product shell/polish - foundation exists; full product pass pending
 - [ ] H7 Hardening/rehearsal - not started
@@ -68,22 +68,27 @@
 - Relay listens only on Docker bridge `172.18.0.1:8787`; direct public port 8787 is blocked.
 - Existing Caddy received one validated hostname route through live reload; Captionman stayed HTTP 200 and no existing container restarted.
 - Deployment build cache removed; complete installed footprint is about 138 MiB.
+- Private synchronous native demo configuration with release HTTPS validation and token-safe status.
+- Strict golden-fixture JSON codec plus bounded, cancellable, no-redirect native HTTPS client.
+- Expo allowlists only the public relay URL and temporary demo token into judge builds; existing native settings are preserved.
+- Live Kotlin-to-production relay canary returns the exact requested count without printing content.
+- Commit: `7ca8213` (`feat(relay): add real Groq generation route`).
 
 ## Remaining work in mandatory order
 
-1. H4: add native private demo configuration validation/store, strict JSON codec, bounded cancellable relay client, fixture tests, and live mobile call.
-2. H5: finish review -> generating -> editable result cards -> regenerate/copy/new capture, with duplicate/cancellation guards and no auto-post.
-3. H6: finish the polished Expo Home, Setup, Demo, Diagnostics, and Settings routes in dark/light themes.
-4. H7: run final secret/security/static gates, API 36 full-flow repetition, priority-phone portrait/landscape workflows, release signing, and five rehearsals.
+1. H5: finish review -> generating -> editable result cards -> regenerate/copy/new capture, with duplicate/cancellation guards and no auto-post.
+2. H6: finish the polished Expo Home, Setup, Demo, Diagnostics, and Settings routes in dark/light themes.
+3. H7: run final secret/security/static gates, API 36 full-flow repetition, priority-phone portrait/landscape workflows, release signing, and five rehearsals.
 
 ## Evidence at this checkpoint
 
-- `pnpm quality`: PASS after H3 - scope, naming, secret scan, lint, typecheck, 18 relay tests, and relay production build.
-- Native `:lm-comment-android:testDebugUnitTest`: PASS - 30 tests.
-- API 36 x86_64 instrumentation with airplane mode: PASS - bundled offline OCR and secure direct-manual/Back behavior (2 tests).
-- Arm64 debug APK: PASS - 100,621,268 bytes (95.96 MiB); APK Signature Scheme v2 verified.
+- `pnpm quality`: PASS after H4 - scope, naming, expanded native secret scan, lint, typecheck, 18 relay tests, and relay production build.
+- Native `:lm-comment-android:testDebugUnitTest`: PASS - 63 tests (62 pass, one opt-in live skip); explicit live Kotlin canary PASS.
+- API 36 x86_64 instrumentation: PASS - private config persistence/safe status plus bundled offline OCR and secure direct-manual behavior (3 tests).
+- Arm64 debug APK: PASS - 100,654,144 bytes (95.99 MiB); APK Signature Scheme v2 verified.
 - Exact local Groq key and generic `gsk_` pattern scan of every decompressed APK entry: PASS.
 - H3 evidence: `artifacts/evidence/h3-crop-ocr-20260715.md`.
+- H4 evidence: `artifacts/evidence/h4-native-relay-20260715.md`.
 - Relay/VPS evidence: `artifacts/evidence/relay-deployment-20260715.md`.
 - Public HTTPS health, invalid-token sanitization, live Groq structured generation, relay/Caddy log scan, and blocked direct port: PASS.
 - Physical phone install/capture/crop/OCR evidence: PENDING - no ADB phone connected.
