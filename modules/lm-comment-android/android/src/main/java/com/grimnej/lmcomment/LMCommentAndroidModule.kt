@@ -10,9 +10,22 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.grimnej.lmcomment.bubble.BubbleAnchorStore
 import com.grimnej.lmcomment.bubble.BubbleOverlayService
+import com.grimnej.lmcomment.config.DemoConfigurationStore
+import com.grimnej.lmcomment.config.DemoConfigurationValidator
 import com.grimnej.lmcomment.workflow.CaptureWorkflowActivity
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import expo.modules.kotlin.records.Field
+import expo.modules.kotlin.records.Record
+import expo.modules.kotlin.records.Required
+
+internal data class DemoConfigurationInput(
+    @Field @Required val relayBaseUrl: String,
+    @Field @Required val demoToken: String,
+    @Field @Required val defaultTone: String,
+    @Field @Required val optionCount: Int,
+    @Field @Required val demoMode: Boolean,
+) : Record
 
 class LMCommentAndroidModule : Module() {
     override fun definition() = ModuleDefinition {
@@ -78,6 +91,37 @@ class LMCommentAndroidModule : Module() {
             } else {
                 context.stopService(Intent(context, BubbleOverlayService::class.java))
             }
+        }
+
+        AsyncFunction("configureDemo") { input: DemoConfigurationInput ->
+            val context = requireNotNull(appContext.reactContext)
+            val configuration = DemoConfigurationValidator.validate(
+                relayBaseUrl = input.relayBaseUrl,
+                demoToken = input.demoToken,
+                defaultTone = input.defaultTone,
+                optionCount = input.optionCount,
+                demoMode = input.demoMode,
+                isDebuggable = DemoConfigurationStore.isApplicationDebuggable(context),
+            )
+            DemoConfigurationStore(context).save(configuration)
+            Unit
+        }
+
+        AsyncFunction("getDemoConfigurationStatus") {
+            val context = requireNotNull(appContext.reactContext)
+            val status = DemoConfigurationStore(context).status()
+            mapOf(
+                "relayHostname" to status.relayHostname,
+                "isDemoTokenConfigured" to status.isDemoTokenConfigured,
+                "defaultTone" to status.defaultTone.wireValue,
+                "optionCount" to status.optionCount,
+                "demoMode" to status.demoMode,
+            )
+        }
+
+        AsyncFunction("resetDemoConfiguration") {
+            val context = requireNotNull(appContext.reactContext)
+            DemoConfigurationStore(context).clear()
         }
 
         AsyncFunction("resetBubblePosition") {

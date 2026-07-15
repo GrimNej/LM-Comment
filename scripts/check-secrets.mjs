@@ -2,7 +2,11 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const ignoredDirectories = new Set(['.git', 'node_modules', 'build', 'dist', '.expo', 'android', 'ios', 'artifacts']);
+const ignoredDirectories = new Set(['.git', 'node_modules', 'build', 'dist', '.expo', 'artifacts']);
+const ignoredGeneratedTrees = new Set([
+  path.join('apps', 'mobile', 'android'),
+  path.join('apps', 'mobile', 'ios'),
+]);
 const ignoredFiles = new Set(['LM_COMMENT_FINAL_HACKATHON_IMPLEMENTATION_BLUEPRINT.md']);
 const secretPatterns = [
   { label: 'Groq API key', pattern: /\bgsk_[A-Za-z0-9]{20,}\b/g },
@@ -15,6 +19,8 @@ function walk(directory) {
     if (ignoredDirectories.has(entry)) continue;
     if (entry === '.env' || (entry.startsWith('.env.') && entry !== '.env.example')) continue;
     const absolute = path.join(directory, entry);
+    const relative = path.relative(root, absolute);
+    if (ignoredGeneratedTrees.has(relative)) continue;
     if (statSync(absolute).isDirectory()) {
       walk(absolute);
       continue;
