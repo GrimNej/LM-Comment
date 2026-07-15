@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.grimnej.lmcomment.bubble.BubbleAnchorStore
 import com.grimnej.lmcomment.bubble.BubbleOverlayService
+import com.grimnej.lmcomment.workflow.CaptureWorkflowActivity
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -88,6 +89,25 @@ class LMCommentAndroidModule : Module() {
                         .setAction(BubbleOverlayService.ACTION_RESET_POSITION),
                 )
             }
+        }
+
+        AsyncFunction("openManualTextWorkflow") { sourceText: String? ->
+            val context = requireNotNull(appContext.reactContext)
+            if (BubbleOverlayService.isRunning) {
+                context.startService(
+                    Intent(context, BubbleOverlayService::class.java)
+                        .setAction(BubbleOverlayService.ACTION_LAUNCH_MANUAL)
+                        .putExtra(CaptureWorkflowActivity.EXTRA_INITIAL_TEXT, sourceText.orEmpty()),
+                )
+            } else {
+                context.startActivity(
+                    Intent(context, CaptureWorkflowActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putExtra(CaptureWorkflowActivity.EXTRA_MANUAL_ENTRY, true)
+                        .putExtra(CaptureWorkflowActivity.EXTRA_INITIAL_TEXT, sourceText.orEmpty()),
+                )
+            }
+            Unit
         }
 
         AsyncFunction("getSafeDiagnostics") {

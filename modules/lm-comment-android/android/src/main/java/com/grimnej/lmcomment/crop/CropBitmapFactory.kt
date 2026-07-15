@@ -14,15 +14,20 @@ object CropBitmapFactory {
             ?.takeUnless { it == Bitmap.Config.HARDWARE }
             ?: Bitmap.Config.ARGB_8888
         val output = Bitmap.createBitmap(crop.width, crop.height, outputConfig)
-        output.density = source.density
-        output.setHasAlpha(source.hasAlpha())
-
-        Canvas(output).drawBitmap(
-            source,
-            Rect(crop.left, crop.top, crop.right, crop.bottom),
-            Rect(0, 0, crop.width, crop.height),
-            Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
-        )
-        return output
+        var complete = false
+        try {
+            output.density = source.density
+            output.setHasAlpha(source.hasAlpha())
+            Canvas(output).drawBitmap(
+                source,
+                Rect(crop.left, crop.top, crop.right, crop.bottom),
+                Rect(0, 0, crop.width, crop.height),
+                Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
+            )
+            complete = true
+            return output
+        } finally {
+            if (!complete && !output.isRecycled) output.recycle()
+        }
     }
 }

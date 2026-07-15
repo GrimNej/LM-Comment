@@ -23,7 +23,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -68,7 +71,23 @@ fun CropEditor(
             .fillMaxSize()
             .background(CropBackdrop)
             .onSizeChanged { viewportSize = it }
-            .semantics { contentDescription = "Adjust the four corners around the text to extract" }
+            .semantics {
+                contentDescription =
+                    "Crop preview. Drag the corners, or use the crop actions below."
+                stateDescription =
+                    "${(selection.width * 100).roundToInt()} percent wide by " +
+                    "${(selection.height * 100).roundToInt()} percent tall"
+                customActions = listOf(
+                    CustomAccessibilityAction("Reset crop") {
+                        selectionChanged(NormalizedCropRect.Suggested)
+                        true
+                    },
+                    CustomAccessibilityAction("Use full screen") {
+                        selectionChanged(NormalizedCropRect.FullFrame)
+                        true
+                    },
+                )
+            }
             .pointerInput(transform, minimumCropSizePixels) {
                 val previewTransform = transform ?: return@pointerInput
                 var activeHandle: CropHandle? = null

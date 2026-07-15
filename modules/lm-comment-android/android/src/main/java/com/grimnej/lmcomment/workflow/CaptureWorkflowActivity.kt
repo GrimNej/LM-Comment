@@ -35,6 +35,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     private var serviceBound = false
     private var cleanupComplete = false
     private var consentLaunched = false
+    private var directManualEntry = false
 
     private val projectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -79,21 +80,59 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         workflowSessionId = intent.getStringExtra(BubbleOverlayService.EXTRA_WORKFLOW_SESSION_ID)
+        directManualEntry = intent.getBooleanExtra(EXTRA_MANUAL_ENTRY, false)
         consentLaunched = savedInstanceState?.getBoolean(STATE_CONSENT_LAUNCHED) == true
-        val restoredFrame = viewModel.state.value is WorkflowState.FrameReady
-        if (restoredFrame) enterSensitiveWorkflow() else configureCaptureCloak()
+        val restoredSensitiveWorkflow = viewModel.state.value.isSensitive
+        val unrecoverableCaptureRestoration =
+            savedInstanceState != null &&
+                !directManualEntry &&
+                !restoredSensitiveWorkflow
+        when {
+            restoredSensitiveWorkflow -> enterSensitiveWorkflow()
+            directManualEntry -> {
+                // Secure and opaque before manual source text reaches Compose.
+                enterSensitiveWorkflow()
+                viewModel.enterManualText(
+                    sourceText = intent.getStringExtra(EXTRA_INITIAL_TEXT).orEmpty(),
+                    directEntry = true,
+                )
+            }
+            else -> configureCaptureCloak()
+        }
         setContent {
-            WorkflowScreen(state = viewModel.state.value, onClose = ::finishWorkflow)
+            WorkflowScreen(
+                state = viewModel.state.value,
+                actions = WorkflowActions(
+                    onSelectionChange = viewModel::updateSelection,
+                    onResetSelection = viewModel::resetSelection,
+                    onUseFullFrame = viewModel::useFullFrame,
+                    onExtractText = { viewModel.extractText() },
+                    onExtractFullFrame = { viewModel.extractText(useFullFrame = true) },
+                    onTypeText = { viewModel.enterManualText() },
+                    onReviewedTextChange = viewModel::updateReviewedText,
+                    onBackToCrop = { viewModel.backToCrop() },
+                    onRetryOcr = { viewModel.extractText() },
+                    onClose = { finishWorkflow() },
+                ),
+            )
         }
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() = finishWorkflow()
+                override fun handleOnBackPressed() {
+                    if (!viewModel.handleBack()) finishWorkflow()
+                }
             },
         )
-        if (restoredFrame) {
+        if (unrecoverableCaptureRestoration) {
+            // MediaProjection consent/result data cannot be reconstructed after
+            // process or ViewModel loss. Close instead of leaving an idle cloak.
+            finishWorkflow(CaptureError.CAPTURE_FAILED)
+        } else if (restoredSensitiveWorkflow) {
             // The ViewModel owns the frame across a configuration change. The
             // secure/opaque window was restored before Compose could render it.
+        } else if (directManualEntry) {
+            // Direct manual entry never starts or binds the capture service.
         } else if (workflowSessionId == null) {
             finishWorkflow(CaptureError.CAPTURE_FAILED)
         } else {
@@ -113,7 +152,10 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         val incoming = intent.getStringExtra(BubbleOverlayService.EXTRA_WORKFLOW_SESSION_ID)
-        if (incoming != workflowSessionId) finishWorkflow(CaptureError.CAPTURE_FAILED)
+        val incomingManual = intent.getBooleanExtra(EXTRA_MANUAL_ENTRY, false)
+        if (incoming != workflowSessionId || incomingManual != directManualEntry) {
+            finishWorkflow(CaptureError.CAPTURE_FAILED)
+        }
     }
 
     private fun requestBubbleHide(sessionId: String) {
@@ -171,6 +213,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         window.setBackgroundDrawable(ColorDrawable(Color.rgb(9, 11, 16)))
         window.statusBarColor = Color.rgb(9, 11, 16)
         window.navigationBarColor = Color.rgb(9, 11, 16)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 
     private fun waitOneFrame(block: () -> Unit) {
@@ -188,7 +231,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
             Toast.makeText(this, errorMessage(it), Toast.LENGTH_SHORT).show()
         }
         releaseCaptureBinding(cancel = true)
-        viewModel.clearSensitiveState()
+        viewModel.prepareToClose()
         restoreBubble()
         finish()
         overridePendingTransition(0, 0)
@@ -232,7 +275,9 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         super.onDestroy()
     }
 
-    private companion object {
+    companion object {
+        const val EXTRA_MANUAL_ENTRY = "com.grimnej.lmcomment.extra.MANUAL_ENTRY"
+        const val EXTRA_INITIAL_TEXT = "com.grimnej.lmcomment.extra.INITIAL_TEXT"
         const val STATE_CONSENT_LAUNCHED = "consent_launched"
     }
 }

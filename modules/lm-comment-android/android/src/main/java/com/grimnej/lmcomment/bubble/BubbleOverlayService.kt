@@ -31,6 +31,7 @@ class BubbleOverlayService : Service() {
             ACTION_STOP -> stopBubble()
             ACTION_HIDE -> intent?.let(::hideForWorkflow)
             ACTION_RESTORE -> intent?.let(::restoreAfterWorkflow)
+            ACTION_LAUNCH_MANUAL -> intent?.let(::launchManualWorkflow)
             ACTION_RESET_POSITION -> bubbleWindow?.resetPosition()
             ACTION_START -> startBubble()
         }
@@ -67,6 +68,23 @@ class BubbleOverlayService : Service() {
             .putExtra(EXTRA_WORKFLOW_SESSION_ID, sessionId)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
         startActivity(intent)
+    }
+
+    private fun launchManualWorkflow(intent: Intent) {
+        if (!isRunning || activeWorkflowSessionId != null) return
+        val sessionId = UUID.randomUUID().toString()
+        activeWorkflowSessionId = sessionId
+        bubbleWindow?.hide()
+        startActivity(
+            Intent(this, CaptureWorkflowActivity::class.java)
+                .putExtra(EXTRA_WORKFLOW_SESSION_ID, sessionId)
+                .putExtra(CaptureWorkflowActivity.EXTRA_MANUAL_ENTRY, true)
+                .putExtra(
+                    CaptureWorkflowActivity.EXTRA_INITIAL_TEXT,
+                    intent.getStringExtra(CaptureWorkflowActivity.EXTRA_INITIAL_TEXT).orEmpty(),
+                )
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION),
+        )
     }
 
     private fun hideForWorkflow(intent: Intent) {
@@ -120,6 +138,7 @@ class BubbleOverlayService : Service() {
         const val ACTION_STOP = "com.grimnej.lmcomment.action.STOP_BUBBLE"
         const val ACTION_HIDE = "com.grimnej.lmcomment.action.HIDE_BUBBLE"
         const val ACTION_RESTORE = "com.grimnej.lmcomment.action.RESTORE_BUBBLE"
+        const val ACTION_LAUNCH_MANUAL = "com.grimnej.lmcomment.action.LAUNCH_MANUAL"
         const val ACTION_RESET_POSITION = "com.grimnej.lmcomment.action.RESET_BUBBLE_POSITION"
         const val EXTRA_WORKFLOW_SESSION_ID = "workflow_session_id"
         const val EXTRA_ACK_RECEIVER = "ack_receiver"
