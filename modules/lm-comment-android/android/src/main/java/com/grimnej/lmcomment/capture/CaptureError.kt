@@ -1,0 +1,11 @@
+package com.grimnej.lmcomment.capture
+
+enum class CaptureError {
+    PROJECTION_CANCELLED,
+    PROJECTION_STOPPED,
+    CAPTURE_TIMEOUT,
+    CAPTURE_GEOMETRY_CHANGED,
+    CAPTURE_BLANK_OR_PROTECTED,
+    CAPTURE_SERVICE_DISCONNECTED,
+    CAPTURE_FAILED,
+}

@@ -36,6 +36,7 @@ module.exports = function withLMCommentAndroid(config) {
         'android:name': 'com.grimnej.lmcomment.workflow.CaptureWorkflowActivity',
         'android:exported': 'false',
         'android:excludeFromRecents': 'true',
+        'android:configChanges': 'orientation|screenSize',
         'android:noHistory': 'false',
         'android:taskAffinity': '',
         'android:launchMode': 'singleTop',
