@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "id": "social",
+      "title": "Celebrate a personal win",
+      "category": "Social reaction",
+      "recommendedTone": "friendly",
+      "sourceText": "Synthetic demo post: I finished my first 10K this morning! It rained for most of the route, but the people cheering made every kilometre worth it. Still cannot believe I actually did it."
+    },
+    {
+      "id": "professional",
+      "title": "Answer a deadline request",
+      "category": "Professional reply",
+      "recommendedTone": "professional",
+      "sourceText": "Synthetic demo message: Hi — could you send the revised launch brief by Thursday afternoon? Please include the updated rollout dates and the two open risks so I can review everything before Friday morning."
+    },
+    {
+      "id": "technical",
+      "title": "Respond to a design tradeoff",
+      "category": "Technical discussion",
+      "recommendedTone": "concise",
+      "sourceText": "Synthetic demo thread: Caching OCR output might make repeated edits faster, but it also creates another lifecycle for sensitive text. I would keep the screenshot memory-only and optimize the crop pipeline before adding persistence."
+    }
+  ]
+}
