@@ -188,6 +188,13 @@ describe('POST /v1/generate', () => {
     expect(calls).toHaveLength(1);
   });
 
+  it('keeps the Fastify handler deadline outside the provider deadline', async () => {
+    const app = buildApp(config());
+    apps.push(app);
+
+    expect(Reflect.get(app.initialConfig, 'handlerTimeout')).toBe(25_000);
+  });
+
   it('does not retry provider rate-limit failures', async () => {
     const fake = provider(new RelayError('PROVIDER_RATE_LIMIT'));
     const app = buildApp(config(), { provider: fake });

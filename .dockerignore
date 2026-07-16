@@ -1,0 +1,15 @@
+# The relay image builds from the repository root so pnpm can use the
+# workspace lockfile. Send only the files needed to compile that package.
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!.npmrc
+!apps/
+!apps/relay/
+!apps/relay/Dockerfile
+!apps/relay/package.json
+!apps/relay/tsconfig.json
+!apps/relay/tsconfig.build.json
+!apps/relay/src/
+!apps/relay/src/**

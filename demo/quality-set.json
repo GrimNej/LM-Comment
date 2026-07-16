@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "evaluationStatus": "unscored",
+  "scenarios": [
+    {
+      "id": "natural-01",
+      "tone": "natural",
+      "optionCount": 2,
+      "sourceText": "Maya shared that she finished her first 10K in heavy rain and thanked the volunteers who stayed to cheer.",
+      "instruction": "Congratulate her without sounding exaggerated.",
+      "mustReference": ["first 10K", "rain"],
+      "mustNotInvent": "Do not invent a finish time or race location."
+    },
+    {
+      "id": "natural-02",
+      "tone": "natural",
+      "optionCount": 1,
+      "sourceText": "A teammate says the revised onboarding draft is ready and asks whether you can review it by Tuesday afternoon.",
+      "instruction": "Confirm that Tuesday afternoon works.",
+      "mustReference": ["Tuesday afternoon"],
+      "mustNotInvent": "Do not promise an earlier review."
+    },
+    {
+      "id": "natural-03",
+      "tone": "natural",
+      "optionCount": 3,
+      "sourceText": "A friend posted photos from a quiet weekend hike and said the fog made the trail feel completely different.",
+      "instruction": "Respond with genuine curiosity.",
+      "mustReference": ["fog", "trail"],
+      "mustNotInvent": "Do not name a trail or mountain."
+    },
+    {
+      "id": "natural-04",
+      "tone": "natural",
+      "optionCount": 2,
+      "sourceText": "The design note proposes keeping drafts only in memory so closing the workflow always clears the text.",
+      "instruction": "Agree while acknowledging the tradeoff.",
+      "mustReference": ["in memory", "closing"],
+      "mustNotInvent": "Do not claim a database exists."
+    },
+    {
+      "id": "natural-05",
+      "tone": "natural",
+      "optionCount": 1,
+      "sourceText": "A customer says the export worked after they restarted the app and thanks the support team for the quick response.",
+      "instruction": "Reply appreciatively and close the loop.",
+      "mustReference": ["restart", "worked"],
+      "mustNotInvent": "Do not offer a refund or coupon."
+    },
+    {
+      "id": "natural-06",
+      "tone": "natural",
+      "optionCount": 3,
+      "sourceText": "The community library is collecting used science books until Friday for its new after-school shelf.",
+      "instruction": "Encourage participation in a grounded way.",
+      "mustReference": ["science books", "Friday"],
+      "mustNotInvent": "Do not invent a drop-off address."
+    },
+    {
+      "id": "professional-01",
+      "tone": "professional",
+      "optionCount": 2,
+      "sourceText": "The project lead requests the final launch brief by Thursday at 3 PM and asks that the open analytics question be flagged.",
+      "instruction": "Confirm delivery and mention the open question.",
+      "mustReference": ["Thursday at 3 PM", "analytics"],
+      "mustNotInvent": "Do not say the analytics question is resolved."
+    },
+    {
+      "id": "professional-02",
+      "tone": "professional",
+      "optionCount": 1,
+      "sourceText": "A vendor moved tomorrow's integration call from 10 AM to 11:30 AM and kept the same meeting link.",
+      "instruction": "Acknowledge the change succinctly.",
+      "mustReference": ["11:30 AM", "same meeting link"],
+      "mustNotInvent": "Do not add attendees or an agenda."
+    },
+    {
+      "id": "professional-03",
+      "tone": "professional",
+      "optionCount": 3,
+      "sourceText": "The security review found no critical issues but asks for clearer documentation of token rotation before approval.",
+      "instruction": "Thank the reviewer and state the next action.",
+      "mustReference": ["token rotation", "documentation"],
+      "mustNotInvent": "Do not claim approval has been granted."
+    },
+    {
+      "id": "professional-04",
+      "tone": "professional",
+      "optionCount": 2,
+      "sourceText": "A candidate confirms they can attend the technical interview on Monday at 2 PM Nepal time.",
+      "instruction": "Confirm the appointment warmly but formally.",
+      "mustReference": ["Monday at 2 PM", "Nepal time"],
+      "mustNotInvent": "Do not add interview length or panel names."
+    },
+    {
+      "id": "professional-05",
+      "tone": "professional",
+      "optionCount": 1,
+      "sourceText": "The weekly report shows mobile crash-free sessions improved from 98.7 percent to 99.2 percent after the patch.",
+      "instruction": "Recognize the improvement and suggest continued monitoring.",
+      "mustReference": ["98.7 percent", "99.2 percent"],
+      "mustNotInvent": "Do not attribute the result to a specific engineer."
+    },
+    {
+      "id": "professional-06",
+      "tone": "professional",
+      "optionCount": 3,
+      "sourceText": "The organizer asks speakers to submit final slide decks as PDF files no later than August 8.",
+      "instruction": "Confirm the requirement and deadline.",
+      "mustReference": ["PDF", "August 8"],
+      "mustNotInvent": "Do not claim the slides are already submitted."
+    },
+    {
+      "id": "friendly-01",
+      "tone": "friendly",
+      "optionCount": 2,
+      "sourceText": "Sam says their rescue dog finally learned to wait calmly at the front door after three weeks of practice.",
+      "instruction": "Celebrate the small win.",
+      "mustReference": ["three weeks", "front door"],
+      "mustNotInvent": "Do not invent the dog's name or breed."
+    },
+    {
+      "id": "friendly-02",
+      "tone": "friendly",
+      "optionCount": 1,
+      "sourceText": "A classmate shares that the study notes you sent helped them understand recursion before today's quiz.",
+      "instruction": "Reply modestly and wish them well.",
+      "mustReference": ["recursion", "quiz"],
+      "mustNotInvent": "Do not claim to know their quiz result."
+    },
+    {
+      "id": "friendly-03",
+      "tone": "friendly",
+      "optionCount": 3,
+      "sourceText": "A neighbor invites you to a rooftop potluck on Saturday and asks everyone to bring a vegetarian dish.",
+      "instruction": "Accept the invitation with enthusiasm.",
+      "mustReference": ["Saturday", "vegetarian dish"],
+      "mustNotInvent": "Do not name the dish you will bring."
+    },
+    {
+      "id": "friendly-04",
+      "tone": "friendly",
+      "optionCount": 2,
+      "sourceText": "Leena posted that her tiny balcony tomatoes produced their first ripe fruit of the season.",
+      "instruction": "Share her excitement in one or two sentences.",
+      "mustReference": ["balcony tomatoes", "first ripe fruit"],
+      "mustNotInvent": "Do not invent the tomato variety."
+    },
+    {
+      "id": "friendly-05",
+      "tone": "friendly",
+      "optionCount": 1,
+      "sourceText": "A teammate apologizes for missing the stand-up because their internet connection failed during a storm.",
+      "instruction": "Reassure them and ask for an update when convenient.",
+      "mustReference": ["internet", "storm"],
+      "mustNotInvent": "Do not imply they missed other work."
+    },
+    {
+      "id": "friendly-06",
+      "tone": "friendly",
+      "optionCount": 3,
+      "sourceText": "The local cafe announces that its reading corner is reopening tomorrow after new shelves were installed.",
+      "instruction": "Respond as a happy regular customer.",
+      "mustReference": ["reading corner", "new shelves"],
+      "mustNotInvent": "Do not mention menu items or opening hours."
+    },
+    {
+      "id": "witty-01",
+      "tone": "witty",
+      "optionCount": 2,
+      "sourceText": "A developer says the bug disappeared immediately after they began screen-sharing it with the team.",
+      "instruction": "Make a light debugging joke without being dismissive.",
+      "mustReference": ["screen-sharing", "bug"],
+      "mustNotInvent": "Do not claim the bug is permanently fixed."
+    },
+    {
+      "id": "witty-02",
+      "tone": "witty",
+      "optionCount": 1,
+      "sourceText": "A friend baked sourdough that expanded far beyond the pan but says it still tasted great.",
+      "instruction": "Tease the dramatic rise kindly.",
+      "mustReference": ["pan", "tasted great"],
+      "mustNotInvent": "Do not invent ingredients."
+    },
+    {
+      "id": "witty-03",
+      "tone": "witty",
+      "optionCount": 3,
+      "sourceText": "The office printer worked all week and then jammed five minutes before the client presentation.",
+      "instruction": "Use restrained workplace humor.",
+      "mustReference": ["five minutes", "client presentation"],
+      "mustNotInvent": "Do not blame a person or printer model."
+    },
+    {
+      "id": "witty-04",
+      "tone": "witty",
+      "optionCount": 2,
+      "sourceText": "Nico says their cat ignored a new bed and chose the cardboard delivery box instead.",
+      "instruction": "Reply with a playful observation.",
+      "mustReference": ["new bed", "cardboard"],
+      "mustNotInvent": "Do not invent the cat's age or color."
+    },
+    {
+      "id": "witty-05",
+      "tone": "witty",
+      "optionCount": 1,
+      "sourceText": "A runner says their fitness watch celebrated a personal record while they were rushing through an airport.",
+      "instruction": "Make a quick joke and acknowledge the record.",
+      "mustReference": ["personal record", "airport"],
+      "mustNotInvent": "Do not invent a distance or pace."
+    },
+    {
+      "id": "witty-06",
+      "tone": "witty",
+      "optionCount": 3,
+      "sourceText": "The team renamed a confusing variable and suddenly half the code review comments became unnecessary.",
+      "instruction": "Praise clarity with gentle technical humor.",
+      "mustReference": ["variable", "code review"],
+      "mustNotInvent": "Do not claim behavior or performance changed."
+    },
+    {
+      "id": "concise-01",
+      "tone": "concise",
+      "optionCount": 2,
+      "sourceText": "The venue confirms the room is reserved for Wednesday from 4 PM to 6 PM and seats 24 people.",
+      "instruction": "Confirm receipt in one sentence.",
+      "mustReference": ["Wednesday", "24 people"],
+      "mustNotInvent": "Do not add catering or equipment details."
+    },
+    {
+      "id": "concise-02",
+      "tone": "concise",
+      "optionCount": 1,
+      "sourceText": "A maintainer asks contributors to rerun the Android tests after updating the Kotlin dependency.",
+      "instruction": "Acknowledge the request in under 20 words.",
+      "mustReference": ["Android tests", "Kotlin"],
+      "mustNotInvent": "Do not say the tests have already passed."
+    },
+    {
+      "id": "concise-03",
+      "tone": "concise",
+      "optionCount": 3,
+      "sourceText": "A friend asks whether dinner at 7:30 PM at the same restaurant still works for you.",
+      "instruction": "Confirm in a warm single sentence.",
+      "mustReference": ["7:30 PM", "same restaurant"],
+      "mustNotInvent": "Do not change the plan."
+    },
+    {
+      "id": "concise-04",
+      "tone": "concise",
+      "optionCount": 2,
+      "sourceText": "The incident update says service is restored and monitoring will continue for the next two hours.",
+      "instruction": "Acknowledge recovery and monitoring in under 25 words.",
+      "mustReference": ["restored", "two hours"],
+      "mustNotInvent": "Do not state a root cause."
+    },
+    {
+      "id": "concise-05",
+      "tone": "concise",
+      "optionCount": 1,
+      "sourceText": "A seller confirms the replacement cable shipped today and provides an estimated Friday delivery.",
+      "instruction": "Thank them briefly.",
+      "mustReference": ["replacement cable", "Friday"],
+      "mustNotInvent": "Do not mention tracking details."
+    },
+    {
+      "id": "concise-06",
+      "tone": "concise",
+      "optionCount": 3,
+      "sourceText": "The organizer says volunteer orientation starts at 9 AM sharp and asks everyone to arrive ten minutes early.",
+      "instruction": "Confirm the timing without filler.",
+      "mustReference": ["9 AM", "ten minutes early"],
+      "mustNotInvent": "Do not add a location."
+    }
+  ]
+}

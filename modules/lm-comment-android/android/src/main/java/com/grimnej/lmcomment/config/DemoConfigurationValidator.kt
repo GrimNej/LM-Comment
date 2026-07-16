@@ -68,7 +68,10 @@ object DemoConfigurationValidator {
         require(uri.port == -1 || uri.port in 1..65_535) { "Relay URL port is invalid." }
 
         val scheme = uri.scheme.lowercase()
-        val host = requireNotNull(uri.host).lowercase()
+        val host = requireNotNull(uri.host)
+            .lowercase()
+            .removePrefix("[")
+            .removeSuffix("]")
         require(isDebuggable || host !in developmentHosts) {
             "Release relay URL must not use a local development host."
         }

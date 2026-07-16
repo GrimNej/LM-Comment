@@ -3,6 +3,10 @@ import path from 'node:path';
 
 const root = process.cwd();
 const failures = [];
+function declaresPermission(xml, permission) {
+  return [...xml.matchAll(/<uses-permission\b[^>]*>/g)]
+    .some(([tag]) => tag.includes(permission) && !/tools:node=["']remove["']/.test(tag));
+}
 const requiredScripts = [
   'doctor', 'lint', 'typecheck', 'test', 'mobile:prebuild',
   'mobile:android:debug', 'mobile:android:release', 'relay:build',
@@ -52,9 +56,69 @@ if (existsSync(nativeManifest)) {
   }
   const forbiddenPermissions = ['BIND_ACCESSIBILITY_SERVICE', 'READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE', 'MANAGE_EXTERNAL_STORAGE'];
   for (const permission of forbiddenPermissions) {
-    if (xml.includes(permission)) failures.push(`Native manifest includes forbidden permission ${permission}`);
+    if (declaresPermission(xml, permission)) failures.push(`Native manifest includes forbidden permission ${permission}`);
   }
 }
+
+const generatedManifest = path.join(root, 'apps', 'mobile', 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+if (existsSync(generatedManifest)) {
+  const xml = readFileSync(generatedManifest, 'utf8');
+  const forbiddenPermissions = [
+    'BIND_ACCESSIBILITY_SERVICE',
+    'READ_EXTERNAL_STORAGE',
+    'WRITE_EXTERNAL_STORAGE',
+    'MANAGE_EXTERNAL_STORAGE',
+  ];
+  for (const permission of forbiddenPermissions) {
+    if (declaresPermission(xml, permission)) failures.push(`Generated manifest includes forbidden permission ${permission}`);
+  }
+}
+
+const forbiddenRouteNames = /^(?:account|accounts|admin|auth|focus|history|login|profile|provider|signup|stream)(?:[._-]|$)/i;
+const routeRoot = path.join(root, 'apps', 'mobile', 'src', 'app');
+if (existsSync(routeRoot)) {
+  for (const entry of readdirSync(routeRoot, { withFileTypes: true })) {
+    if (entry.isFile() && forbiddenRouteNames.test(entry.name)) {
+      failures.push(`Excluded mobile route exists: ${path.join('apps', 'mobile', 'src', 'app', entry.name)}`);
+    }
+  }
+}
+
+const sourceRules = [
+  { label: 'AccessibilityService use', pattern: /\bAccessibilityService\b/ },
+  { label: 'Accessibility service permission', pattern: /BIND_ACCESSIBILITY_SERVICE/ },
+  { label: 'direct Groq provider access', pattern: /api\.groq\.com|\bGROQ_API_KEY\b|\bgsk_/ },
+  { label: 'bitmap file encoding', pattern: /Bitmap\.CompressFormat|\.compress\s*\(/ },
+  { label: 'captured-image file output', pattern: /\bFileOutputStream\b|\bMediaStore\.Images\b|\bopenFileOutput\s*\(/ },
+  { label: 'database implementation', pattern: /\bRoomDatabase\b|\bSQLiteDatabase\b/ },
+  { label: 'streaming socket implementation', pattern: /\bWebSocket\b|\bEventSource\b/ },
+];
+const sourceRoots = [
+  path.join(root, 'apps', 'mobile', 'src'),
+  path.join(root, 'modules', 'lm-comment-android', 'src'),
+  path.join(root, 'modules', 'lm-comment-android', 'android', 'src', 'main'),
+];
+const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.kt', '.java', '.xml', '.gradle']);
+
+function inspectSource(directory) {
+  if (!existsSync(directory)) return;
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const absolute = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      inspectSource(absolute);
+      continue;
+    }
+    if (!sourceExtensions.has(path.extname(entry.name))) continue;
+    const content = readFileSync(absolute, 'utf8');
+    for (const rule of sourceRules) {
+      if (rule.pattern.test(content)) {
+        failures.push(`${path.relative(root, absolute)} includes excluded ${rule.label}`);
+      }
+    }
+  }
+}
+
+for (const directory of sourceRoots) inspectSource(directory);
 
 if (failures.length) {
   console.error(failures.join('\n'));

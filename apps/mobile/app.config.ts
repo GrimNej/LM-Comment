@@ -106,6 +106,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           },
         },
       ],
+      './plugins/with-api-safe-splash.cjs',
       [
         'expo-splash-screen',
         {

@@ -27,6 +27,7 @@ import { GroqCompletionProvider } from './groq-provider.js';
 import { DailyRequestCounter } from './rate-limit.js';
 
 const OVERALL_RELAY_TIMEOUT_MS = 20_000;
+const HANDLER_TIMEOUT_GRACE_MS = 5_000;
 
 type LogStream = { write(chunk: string): void };
 
@@ -86,6 +87,7 @@ export function buildApp(
   config: RelayConfig,
   dependencies: BuildAppDependencies = {},
 ): FastifyInstance {
+  const providerTimeoutMs = dependencies.overallTimeoutMs ?? OVERALL_RELAY_TIMEOUT_MS;
   const logger = config.NODE_ENV === 'test' && !dependencies.logStream
     ? false
     : {
@@ -108,7 +110,9 @@ export function buildApp(
   const app = Fastify({
     ajv: { customOptions: { removeAdditional: false } },
     bodyLimit: 32 * 1024,
-    handlerTimeout: OVERALL_RELAY_TIMEOUT_MS,
+    // Keep Fastify's outer timeout later than the provider deadline so the
+    // inner timer can abort the provider and return the stable public error.
+    handlerTimeout: providerTimeoutMs + HANDLER_TIMEOUT_GRACE_MS,
     logger,
     logController: new LogController({ disableRequestLogging: true }),
     requestIdHeader: false,
@@ -221,7 +225,7 @@ export function buildApp(
         config.MAX_COMPLETION_TOKENS,
         signal,
       ),
-      dependencies.overallTimeoutMs ?? OVERALL_RELAY_TIMEOUT_MS,
+      providerTimeoutMs,
     );
 
     return {

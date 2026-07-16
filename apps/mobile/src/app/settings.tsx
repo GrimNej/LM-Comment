@@ -130,9 +130,16 @@ export default function SettingsScreen() {
     setBusyAction('reset');
     try {
       await LMCommentAndroid.resetDemoConfiguration();
-      setAdvancedDirty(true);
+      setRelayBaseUrl(bundledConfiguration?.relayBaseUrl ?? '');
+      setDemoToken(bundledConfiguration?.demoToken ?? '');
+      setTone(bundledConfiguration?.defaultTone ?? 'natural');
+      setOptionCount(bundledConfiguration?.optionCount ?? 3);
+      setDemoMode(bundledConfiguration?.demoMode ?? true);
+      setAdvancedDirty(Boolean(bundledConfiguration));
       await refresh();
-      setNotice('Native demo configuration cleared. Save to restore the bundled judge defaults.');
+      setNotice(bundledConfiguration
+        ? 'Native demo configuration cleared. Save to restore the bundled judge defaults.'
+        : 'Native demo configuration cleared.');
     } catch {
       setError('The demo configuration could not be reset.');
     } finally {

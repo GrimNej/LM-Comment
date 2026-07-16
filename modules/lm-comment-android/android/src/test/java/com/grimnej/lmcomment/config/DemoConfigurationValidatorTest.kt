@@ -29,7 +29,7 @@ class DemoConfigurationValidatorTest {
 
     @Test
     fun `release configuration rejects local development hosts even with HTTPS`() {
-        listOf("localhost", "127.0.0.1", "10.0.2.2").forEach { host ->
+        listOf("localhost", "127.0.0.1", "[::1]", "10.0.2.2").forEach { host ->
             assertThrows(IllegalArgumentException::class.java) {
                 DemoConfigurationValidator.validate(
                     validConfiguration(relayBaseUrl = "https://$host:3000"),
@@ -41,7 +41,7 @@ class DemoConfigurationValidatorTest {
 
     @Test
     fun `debug cleartext is limited to explicit development hosts`() {
-        listOf("localhost", "127.0.0.1", "10.0.2.2").forEach { host ->
+        listOf("localhost", "127.0.0.1", "[::1]", "10.0.2.2").forEach { host ->
             val validated = DemoConfigurationValidator.validate(
                 validConfiguration(relayBaseUrl = "http://$host:3000"),
                 isDebuggable = true,
