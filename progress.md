@@ -2,13 +2,13 @@
 
 - Checkpoint date: 2026-07-16
 - Branch: `rebuild/lm-comment-hackathon`
-- Latest completed implementation commit: `f31ceac`
+- Latest completed implementation commit: `8873b0e`
 - Latest deployment commit: `c32ca14`
-- Current phase: H6 - product shell and polish
+- Current phase: H7 - hardening and rehearsal
 - Active implementation blocker: none
 - Physical-device acceptance: pending owner phone connection
 - Demo rehearsal count: 0 / 5
-- Resume from: finish the Expo Home, Setup, Demo, Diagnostics, and Settings routes
+- Resume from: finish release hardening and connect the owner's phone for physical acceptance
 
 ## Phase checklist
 
@@ -18,8 +18,8 @@
 - [x] H3 Crop/OCR - implementation and automated/API 36 offline gate complete; physical portrait/landscape acceptance pending
 - [x] H4 Relay/Groq - private native configuration, strict client, live Groq route, and APK secret gate complete
 - [x] H5 Results/copy - native generation, editing, regeneration, clipboard, and same-session recapture complete
-- [ ] H6 Product shell/polish - foundation exists; full product pass pending
-- [ ] H7 Hardening/rehearsal - not started
+- [x] H6 Product shell/polish - branded shell, complete routes, safe diagnostics, themes, and accessibility pass complete
+- [ ] H7 Hardening/rehearsal - automated/packaging gates in progress; physical-phone matrix and five rehearsals pending owner phone
 
 ## Completed implementation
 
@@ -84,24 +84,38 @@
 - Rotation preserves active generation/results while Close clears in-memory text, bitmaps, OCR, and network work.
 - Commit: `f31ceac` (`feat(results): add edit regenerate and copy`).
 
+### H6 product shell and polish
+
+- Branded graphite, violet, and cyan product system with new adaptive icon, monochrome icon, splash, favicon, shared tokens, and reusable controls.
+- Polished Home, Setup, Demo, Diagnostics, and Settings routes with light/dark themes and complete navigation.
+- Three synthetic judge fixtures enter the real secure native Manual Context, generation, editing, and explicit-copy workflow.
+- Safe native diagnostics expose only fixed metadata, an allowlisted stable error code, relay hostname/health, permission state, and debug-only resource counters.
+- Settings keep credentials in Android private preferences, protect advanced configuration behind a deliberate unlock, and preserve hidden relay overrides when ordinary writing defaults change.
+- Release URL policy rejects local hosts; debug HTTP is allowed only for an explicit local-development allowlist and never becomes a persisted capability.
+- Relay health has a four-second overall deadline and disconnects promptly on cancellation.
+- Light/dark screens and 200% Android font scale were visually inspected on API 36; controls remain readable, scrollable, and at least 48 dp.
+- Commit: `8873b0e` (`feat(shell): add judge-ready product experience`).
+
 ## Remaining work in mandatory order
 
-1. H6: finish the polished Expo Home, Setup, Demo, Diagnostics, and Settings routes in dark/light themes.
-2. H7: run final secret/security/static gates, API 36 full-flow repetition, priority-phone portrait/landscape workflows, release signing, and five rehearsals.
+1. H7: finish release-only backend/container hardening and final static/build/package scans.
+2. H7 owner gate: install on the priority phone, run portrait/landscape MediaProjection workflows, and complete five consecutive rehearsals.
 
 ## Evidence at this checkpoint
 
-- `pnpm quality`: PASS after H5 - scope, naming, expanded native secret scan, lint, typecheck, 18 relay tests, and relay production build.
-- Native `:lm-comment-android:testDebugUnitTest`: PASS - 73 tests (72 pass, one opt-in live skip); focused H5 workflow suite 16/16 PASS.
+- `pnpm quality`: PASS after H6 - scope, naming, expanded native secret scan, lint, typecheck, 18 relay tests, and relay production build.
+- Native `:lm-comment-android:testDebugUnitTest`: PASS - 84 tests (83 pass, one opt-in live skip), including H6 URL-policy, settings-preservation, bounded health, diagnostics, and stable-error regressions.
 - API 36 x86_64 instrumentation: PASS - private config persistence/safe status plus bundled offline OCR and secure direct-manual behavior (3 tests).
 - Arm64 debug APK: PASS - 102,691,686 bytes (97.93 MiB); APK Signature Scheme v2 verified.
 - Exact local Groq key and generic `gsk_` pattern scan of every decompressed APK entry: PASS.
 - H3 evidence: `artifacts/evidence/h3-crop-ocr-20260715.md`.
 - H4 evidence: `artifacts/evidence/h4-native-relay-20260715.md`.
 - H5 evidence: `artifacts/evidence/h5-results-workflow-20260716.md`.
+- H6 evidence: `artifacts/evidence/h6-product-shell-20260716.md`.
 - Relay/VPS evidence: `artifacts/evidence/relay-deployment-20260715.md`.
 - Public HTTPS health, invalid-token sanitization, live Groq structured generation, relay/Caddy log scan, and blocked direct port: PASS.
 - Physical phone install/capture/crop/OCR evidence: PENDING - no ADB phone connected.
+- Fresh H6 x86_64 release APK: PASS - 54,335,309 bytes, SHA-256 `196FD6CCF30A1791241086B3ED8A11CD1BF2A1F61EF932F6BE0F749523469847`, APK Signature Scheme v2 verified, installed on API 36.
 
 ## Known limitations
 
