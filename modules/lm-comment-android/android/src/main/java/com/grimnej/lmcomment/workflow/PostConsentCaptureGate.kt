@@ -3,6 +3,7 @@ package com.grimnej.lmcomment.workflow
 internal enum class CaptureGateAction {
     WAIT,
     REQUEST_COMMITTED_FRAME,
+    WAIT_FOR_SYSTEM_UI_QUIESCENCE,
     START_CAPTURE,
 }
 
@@ -21,6 +22,8 @@ internal class PostConsentCaptureGate(
     private var focused = false
     private var frameRequestInFlight = false
     private var committedFrames = 0
+    private var quiescenceInFlight = false
+    private var quiescenceSatisfied = false
     private var started = false
 
     init {
@@ -33,6 +36,8 @@ internal class PostConsentCaptureGate(
         grantAccepted = false
         frameRequestInFlight = false
         committedFrames = 0
+        quiescenceInFlight = false
+        quiescenceSatisfied = false
         started = false
     }
 
@@ -71,12 +76,23 @@ internal class PostConsentCaptureGate(
             committedFrames = 0
             return CaptureGateAction.WAIT
         }
-        committedFrames++
-        if (committedFrames >= requiredCommittedFrames) {
+        if (quiescenceSatisfied) {
             started = true
             epochActive = false
             return CaptureGateAction.START_CAPTURE
         }
+        committedFrames++
+        return evaluate()
+    }
+
+    fun onSystemUiQuiescent(): CaptureGateAction {
+        if (!quiescenceInFlight || !isReadyForFrames()) {
+            invalidateFrameSequence()
+            return CaptureGateAction.WAIT
+        }
+        quiescenceInFlight = false
+        quiescenceSatisfied = true
+        committedFrames = 0
         return evaluate()
     }
 
@@ -91,7 +107,13 @@ internal class PostConsentCaptureGate(
     }
 
     private fun evaluate(): CaptureGateAction {
-        if (!isReadyForFrames() || frameRequestInFlight) return CaptureGateAction.WAIT
+        if (!isReadyForFrames() || frameRequestInFlight || quiescenceInFlight) {
+            return CaptureGateAction.WAIT
+        }
+        if (!quiescenceSatisfied && committedFrames >= requiredCommittedFrames) {
+            quiescenceInFlight = true
+            return CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE
+        }
         frameRequestInFlight = true
         return CaptureGateAction.REQUEST_COMMITTED_FRAME
     }
@@ -102,5 +124,28 @@ internal class PostConsentCaptureGate(
     private fun invalidateFrameSequence() {
         frameRequestInFlight = false
         committedFrames = 0
+        quiescenceInFlight = false
+        quiescenceSatisfied = false
+    }
+}
+
+internal object PostConsentTiming {
+    private const val SYSTEM_ANIMATION_WINDOWS = 3L
+    private const val MAX_QUIESCENCE_MILLIS = 4_000L
+
+    fun quiescenceMillis(longAnimationMillis: Int, animatorDurationScale: Float): Long {
+        require(longAnimationMillis > 0)
+        val safeScale = animatorDurationScale
+            .takeIf { it.isFinite() }
+            ?.coerceAtLeast(1f)
+            ?: 1f
+        return (longAnimationMillis * SYSTEM_ANIMATION_WINDOWS * safeScale)
+            .toLong()
+            .coerceAtMost(MAX_QUIESCENCE_MILLIS)
+    }
+
+    fun readinessTimeoutMillis(quiescenceMillis: Long): Long {
+        require(quiescenceMillis > 0)
+        return quiescenceMillis + 4_000L
     }
 }

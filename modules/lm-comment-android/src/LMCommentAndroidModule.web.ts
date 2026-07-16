@@ -1,6 +1,7 @@
 import { NativeModule, registerWebModule } from 'expo';
 
 import type {
+  AppearanceMode,
   DemoConfiguration,
   DemoDefaults,
   DemoConfigurationStatus,
@@ -55,6 +56,8 @@ class LMCommentAndroidWebModule extends NativeModule<Record<never, never>> {
   }
   async resetDemoConfiguration() { /* Native private preferences do not exist on web. */ }
   async resetBubblePosition() { /* The overlay bubble does not exist on web. */ }
+  async getAppearanceMode(): Promise<AppearanceMode> { return 'system'; }
+  async setAppearanceMode(_mode: AppearanceMode) { /* Web follows the browser color scheme. */ }
   async openManualTextWorkflow(_sourceText?: string) { unsupported(); }
 }
 

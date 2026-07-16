@@ -2,6 +2,8 @@ export type BubbleStatus = 'stopped' | 'starting' | 'running' | 'stopping' | 'er
 
 export type Tone = 'natural' | 'professional' | 'friendly' | 'witty' | 'concise';
 
+export type AppearanceMode = 'system' | 'light' | 'dark';
+
 export type NativeReadiness = {
   contractVersion: number;
   overlayPermission: 'granted' | 'denied';

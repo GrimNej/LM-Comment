@@ -36,16 +36,20 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -68,23 +72,88 @@ import com.grimnej.lmcomment.relay.GenerationOption
 import com.grimnej.lmcomment.relay.RelayFailureCode
 import kotlin.math.roundToInt
 
-private val Paper = Color(0xFFF4F0E6)
-private val PaperRaised = Color(0xFFFFFDF7)
-private val PaperInset = Color(0xFFFAF7EE)
-private val Ink = Color(0xFF101411)
-private val InkSoft = Color(0xFF40473F)
-private val InkMuted = Color(0xFF646C63)
-private val Lime = Color(0xFFB9E84A)
-private val LimeWash = Color(0xFFE5EBCF)
-private val LimeInk = Color(0xFF465D0B)
-private val Terracotta = Color(0xFFE96D4C)
-private val TerracottaWash = Color(0xFFF3DDD4)
-private val TerracottaInk = Color(0xFFA6422D)
-private val Hairline = Color(0xFFB8B7AB)
-private val Success = Color(0xFF2F6B3A)
-private val SuccessWash = Color(0xFFDFEBDD)
-private val CardShape = RoundedCornerShape(12.dp)
-private val ControlShape = RoundedCornerShape(8.dp)
+private data class WorkflowVisuals(
+    val isDark: Boolean,
+    val paper: Color,
+    val paperRaised: Color,
+    val paperInset: Color,
+    val ink: Color,
+    val inkSoft: Color,
+    val inkMuted: Color,
+    val primary: Color,
+    val primaryWash: Color,
+    val primaryInk: Color,
+    val secondary: Color,
+    val secondaryWash: Color,
+    val secondaryInk: Color,
+    val hairline: Color,
+    val success: Color,
+    val successWash: Color,
+    val cardShape: RoundedCornerShape,
+    val controlShape: RoundedCornerShape,
+)
+
+private val LightWorkflowVisuals = WorkflowVisuals(
+    isDark = false,
+    paper = Color(0xFFF4F0E6),
+    paperRaised = Color(0xFFFFFDF7),
+    paperInset = Color(0xFFFAF7EE),
+    ink = Color(0xFF101411),
+    inkSoft = Color(0xFF40473F),
+    inkMuted = Color(0xFF646C63),
+    primary = Color(0xFFB9E84A),
+    primaryWash = Color(0xFFE5EBCF),
+    primaryInk = Color(0xFF465D0B),
+    secondary = Color(0xFFE96D4C),
+    secondaryWash = Color(0xFFF3DDD4),
+    secondaryInk = Color(0xFFA6422D),
+    hairline = Color(0xFFB8B7AB),
+    success = Color(0xFF2F6B3A),
+    successWash = Color(0xFFDFEBDD),
+    cardShape = RoundedCornerShape(12.dp),
+    controlShape = RoundedCornerShape(8.dp),
+)
+
+private val DarkWorkflowVisuals = WorkflowVisuals(
+    isDark = true,
+    paper = Color(0xFF090B10),
+    paperRaised = Color(0xFF151A25),
+    paperInset = Color(0xFF0E121A),
+    ink = Color(0xFFF7F8FC),
+    inkSoft = Color(0xFFADB6C8),
+    inkMuted = Color(0xFF7E899D),
+    primary = Color(0xFF9B8CFF),
+    primaryWash = Color(0xFF292646),
+    primaryInk = Color(0xFFB6ACFF),
+    secondary = Color(0xFF55E1D0),
+    secondaryWash = Color(0xFF173B3B),
+    secondaryInk = Color(0xFF77E9DC),
+    hairline = Color(0xFF313A4E),
+    success = Color(0xFF72E6A6),
+    successWash = Color(0xFF16382D),
+    cardShape = RoundedCornerShape(22.dp),
+    controlShape = RoundedCornerShape(15.dp),
+)
+
+private val LocalWorkflowVisuals = staticCompositionLocalOf { LightWorkflowVisuals }
+
+private val Paper: Color @Composable get() = LocalWorkflowVisuals.current.paper
+private val PaperRaised: Color @Composable get() = LocalWorkflowVisuals.current.paperRaised
+private val PaperInset: Color @Composable get() = LocalWorkflowVisuals.current.paperInset
+private val Ink: Color @Composable get() = LocalWorkflowVisuals.current.ink
+private val InkSoft: Color @Composable get() = LocalWorkflowVisuals.current.inkSoft
+private val InkMuted: Color @Composable get() = LocalWorkflowVisuals.current.inkMuted
+private val Lime: Color @Composable get() = LocalWorkflowVisuals.current.primary
+private val LimeWash: Color @Composable get() = LocalWorkflowVisuals.current.primaryWash
+private val LimeInk: Color @Composable get() = LocalWorkflowVisuals.current.primaryInk
+private val Terracotta: Color @Composable get() = LocalWorkflowVisuals.current.secondary
+private val TerracottaWash: Color @Composable get() = LocalWorkflowVisuals.current.secondaryWash
+private val TerracottaInk: Color @Composable get() = LocalWorkflowVisuals.current.secondaryInk
+private val Hairline: Color @Composable get() = LocalWorkflowVisuals.current.hairline
+private val Success: Color @Composable get() = LocalWorkflowVisuals.current.success
+private val SuccessWash: Color @Composable get() = LocalWorkflowVisuals.current.successWash
+private val CardShape: RoundedCornerShape @Composable get() = LocalWorkflowVisuals.current.cardShape
+private val ControlShape: RoundedCornerShape @Composable get() = LocalWorkflowVisuals.current.controlShape
 
 data class WorkflowActions(
     val onSelectionChange: (NormalizedCropRect) -> Unit,
@@ -114,11 +183,27 @@ data class WorkflowActions(
 )
 
 @Composable
-fun WorkflowScreen(state: WorkflowState, actions: WorkflowActions) {
+fun WorkflowScreen(state: WorkflowState, actions: WorkflowActions, darkTheme: Boolean = false) {
     if (state is WorkflowState.CaptureCloak) return
 
-    MaterialTheme(
-        colorScheme = lightColorScheme(
+    val visuals = if (darkTheme) DarkWorkflowVisuals else LightWorkflowVisuals
+    val colorScheme = if (darkTheme) {
+        darkColorScheme(
+            primary = visuals.primary,
+            secondary = visuals.secondary,
+            background = visuals.paper,
+            surface = visuals.paperRaised,
+            surfaceVariant = visuals.paperInset,
+            outline = visuals.hairline,
+            error = Color(0xFFFF7182),
+            onPrimary = visuals.paper,
+            onSecondary = visuals.paper,
+            onBackground = visuals.ink,
+            onSurface = visuals.ink,
+            onSurfaceVariant = visuals.inkSoft,
+        )
+    } else {
+        lightColorScheme(
             primary = Ink,
             secondary = TerracottaInk,
             background = Paper,
@@ -131,26 +216,29 @@ fun WorkflowScreen(state: WorkflowState, actions: WorkflowActions) {
             onBackground = Ink,
             onSurface = Ink,
             onSurfaceVariant = InkSoft,
-        ),
-    ) {
-        WorkflowBackdrop {
-            when (state) {
-                is WorkflowState.CaptureCloak -> Unit
-                is WorkflowState.Cropping -> CropScreen(state, actions)
-                is WorkflowState.RecognizingText -> RecognitionScreen(actions)
-                is WorkflowState.ReviewingText -> {
-                    if (state.emptyRecognition) {
-                        EmptyRecognitionScreen(actions)
-                    } else {
-                        ReviewScreen(state, actions)
+        )
+    }
+    CompositionLocalProvider(LocalWorkflowVisuals provides visuals) {
+        MaterialTheme(colorScheme = colorScheme) {
+            WorkflowBackdrop {
+                when (state) {
+                    is WorkflowState.CaptureCloak -> Unit
+                    is WorkflowState.Cropping -> CropScreen(state, actions)
+                    is WorkflowState.RecognizingText -> RecognitionScreen(actions)
+                    is WorkflowState.ReviewingText -> {
+                        if (state.emptyRecognition) {
+                            EmptyRecognitionScreen(actions)
+                        } else {
+                            ReviewScreen(state, actions)
+                        }
                     }
+                    is WorkflowState.OcrError -> OcrErrorScreen(state, actions)
+                    is WorkflowState.Generating -> GeneratingScreen(state, actions)
+                    is WorkflowState.ShowingResults -> ResultsScreen(state, actions)
+                    is WorkflowState.EditingResult -> EditResultScreen(state, actions)
+                    is WorkflowState.GenerationError -> GenerationErrorScreen(state, actions)
+                    is WorkflowState.Closing -> Unit
                 }
-                is WorkflowState.OcrError -> OcrErrorScreen(state, actions)
-                is WorkflowState.Generating -> GeneratingScreen(state, actions)
-                is WorkflowState.ShowingResults -> ResultsScreen(state, actions)
-                is WorkflowState.EditingResult -> EditResultScreen(state, actions)
-                is WorkflowState.GenerationError -> GenerationErrorScreen(state, actions)
-                is WorkflowState.Closing -> Unit
             }
         }
     }
@@ -158,17 +246,40 @@ fun WorkflowScreen(state: WorkflowState, actions: WorkflowActions) {
 
 @Composable
 private fun WorkflowBackdrop(content: @Composable () -> Unit) {
+    val visuals = LocalWorkflowVisuals.current
+    val background = if (visuals.isDark) {
+        Modifier.background(
+            Brush.linearGradient(
+                colors = listOf(visuals.paper, Color(0xFF0B1018), visuals.paperInset),
+            ),
+        )
+    } else {
+        Modifier.background(visuals.paper)
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Paper),
+            .then(background),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .background(Lime),
-        )
+        if (visuals.isDark) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0x269B8CFF), Color.Transparent),
+                        ),
+                    ),
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .background(Lime),
+            )
+        }
         content()
     }
 }
@@ -246,6 +357,7 @@ private fun CropViewport(
             bitmap = state.bitmap,
             selection = state.selection,
             onSelectionChange = actions.onSelectionChange,
+            darkTheme = LocalWorkflowVisuals.current.isDark,
         )
         PrivacyBadge(
             text = "Kept in memory",
@@ -1417,6 +1529,8 @@ private fun ScreenHeader(
 
 @Composable
 private fun BrandMark() {
+    val cornerColor = Ink
+    val signalColor = Lime
     Canvas(modifier = Modifier.size(44.dp)) {
         val left = size.width * 0.18f
         val right = size.width * 0.82f
@@ -1426,7 +1540,7 @@ private fun BrandMark() {
         val stroke = 2.5.dp.toPx()
 
         fun cornerLine(start: Offset, end: Offset) {
-            drawLine(Ink, start, end, strokeWidth = stroke, cap = StrokeCap.Round)
+            drawLine(cornerColor, start, end, strokeWidth = stroke, cap = StrokeCap.Round)
         }
 
         cornerLine(Offset(left, top), Offset(left + arm, top))
@@ -1437,7 +1551,7 @@ private fun BrandMark() {
         cornerLine(Offset(left, bottom), Offset(left, bottom - arm))
         cornerLine(Offset(right, bottom), Offset(right - arm, bottom))
         cornerLine(Offset(right, bottom), Offset(right, bottom - arm))
-        drawCircle(Lime, radius = size.width * 0.09f, center = center)
+        drawCircle(signalColor, radius = size.width * 0.09f, center = center)
     }
 }
 

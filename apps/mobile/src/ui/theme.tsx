@@ -1,9 +1,12 @@
 import {
   AccessibilityInfo,
+  Platform,
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
+import LMCommentAndroid, { type AppearanceMode } from '@lm-comment/android';
 import {
+  useCallback,
   createContext,
   type PropsWithChildren,
   useContext,
@@ -31,14 +34,19 @@ export type AppTheme = {
   radii: typeof radii;
   typography: typeof typography;
   motion: typeof motion;
+  appearanceMode: AppearanceMode;
+  isAppearanceReady: boolean;
+  setAppearanceMode: (mode: AppearanceMode) => Promise<void>;
 };
 
 const ThemeContext = createContext<AppTheme | null>(null);
 
 export function AppThemeProvider({ children }: PropsWithChildren) {
-  const colorScheme = useColorScheme();
+  const systemColorScheme = useColorScheme();
   const { fontScale } = useWindowDimensions();
   const [isReduceMotionEnabled, setReduceMotionEnabled] = useState(false);
+  const [appearanceMode, setAppearanceModeState] = useState<AppearanceMode>('system');
+  const [isAppearanceReady, setAppearanceReady] = useState(Platform.OS !== 'android');
 
   useEffect(() => {
     let isMounted = true;
@@ -55,18 +63,53 @@ export function AppThemeProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    let active = true;
+    void LMCommentAndroid.getAppearanceMode().then(
+      (mode) => {
+        if (active) setAppearanceModeState(mode);
+      },
+      () => {
+        if (active) setAppearanceModeState('system');
+      },
+    ).finally(() => {
+      if (active) setAppearanceReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const setAppearanceMode = useCallback(async (mode: AppearanceMode) => {
+    const previousMode = appearanceMode;
+    setAppearanceModeState(mode);
+    try {
+      if (Platform.OS === 'android') await LMCommentAndroid.setAppearanceMode(mode);
+    } catch (error) {
+      setAppearanceModeState(previousMode);
+      throw error;
+    }
+  }, [appearanceMode]);
+
+  const isDark = appearanceMode === 'dark'
+    || (appearanceMode === 'system' && systemColorScheme !== 'light');
+
   const theme = useMemo<AppTheme>(
     () => ({
-      colors: colorScheme === 'light' ? lightColors : darkColors,
-      isDark: colorScheme !== 'light',
+      colors: isDark ? darkColors : lightColors,
+      isDark,
       isReduceMotionEnabled,
       fontScale,
       spacing,
       radii,
       typography,
       motion,
+      appearanceMode,
+      isAppearanceReady,
+      setAppearanceMode,
     }),
-    [colorScheme, fontScale, isReduceMotionEnabled],
+    [appearanceMode, fontScale, isAppearanceReady, isDark, isReduceMotionEnabled, setAppearanceMode],
   );
 
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;

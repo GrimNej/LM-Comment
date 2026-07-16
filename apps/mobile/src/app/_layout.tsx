@@ -26,12 +26,12 @@ export default function RootLayout() {
 
 function AppShell() {
   const { phase } = useAppReadiness();
-  const { colors, isDark, isReduceMotionEnabled } = useAppTheme();
+  const { colors, isAppearanceReady, isDark, isReduceMotionEnabled } = useAppTheme();
 
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      {phase === 'booting' ? (
+      {phase === 'booting' || !isAppearanceReady ? (
         <LaunchGate />
       ) : (
         <Stack

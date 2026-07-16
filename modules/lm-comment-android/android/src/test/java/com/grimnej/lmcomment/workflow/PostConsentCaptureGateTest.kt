@@ -17,6 +17,8 @@ class PostConsentCaptureGateTest {
         assertEquals(CaptureGateAction.WAIT, gate.onResumed())
         assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onWindowFocusChanged(true))
         assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onSystemUiQuiescent())
         assertEquals(CaptureGateAction.START_CAPTURE, gate.onFrameCommitted())
         assertEquals(CaptureGateAction.WAIT, gate.onFrameCommitted())
     }
@@ -41,6 +43,8 @@ class PostConsentCaptureGateTest {
         assertEquals(CaptureGateAction.WAIT, gate.onFrameCommitted())
         assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onWindowFocusChanged(true))
         assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onSystemUiQuiescent())
         assertEquals(CaptureGateAction.START_CAPTURE, gate.onFrameCommitted())
     }
 
@@ -64,6 +68,8 @@ class PostConsentCaptureGateTest {
         gate.onWindowFocusChanged(true)
 
         assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onConsentAccepted())
+        assertEquals(CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onSystemUiQuiescent())
         assertEquals(CaptureGateAction.START_CAPTURE, gate.onFrameCommitted())
         assertEquals(CaptureGateAction.WAIT, gate.onWindowFocusChanged(true))
         assertEquals(CaptureGateAction.WAIT, gate.onConsentAccepted())
@@ -80,7 +86,31 @@ class PostConsentCaptureGateTest {
         gate.onResumed()
 
         assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onWindowFocusChanged(true))
+        assertEquals(CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onSystemUiQuiescent())
         assertEquals(CaptureGateAction.START_CAPTURE, gate.onFrameCommitted())
+    }
+
+    @Test
+    fun `focus loss during quiescence invalidates the full sequence`() {
+        val gate = readyGate()
+        assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE, gate.onFrameCommitted())
+
+        assertEquals(CaptureGateAction.WAIT, gate.onWindowFocusChanged(false))
+        assertEquals(CaptureGateAction.WAIT, gate.onSystemUiQuiescent())
+        assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onWindowFocusChanged(true))
+        assertEquals(CaptureGateAction.REQUEST_COMMITTED_FRAME, gate.onFrameCommitted())
+        assertEquals(CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE, gate.onFrameCommitted())
+    }
+
+    @Test
+    fun `system animation timing uses three scaled long-animation windows`() {
+        assertEquals(1_500L, PostConsentTiming.quiescenceMillis(500, 1f))
+        assertEquals(1_500L, PostConsentTiming.quiescenceMillis(500, 0f))
+        assertEquals(2_250L, PostConsentTiming.quiescenceMillis(500, 1.5f))
+        assertEquals(4_000L, PostConsentTiming.quiescenceMillis(500, 10f))
+        assertEquals(5_500L, PostConsentTiming.readinessTimeoutMillis(1_500L))
     }
 
     private fun readyGate(): PostConsentCaptureGate = PostConsentCaptureGate(requiredCommittedFrames = 2).apply {

@@ -24,7 +24,7 @@ class BubbleOverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        bubbleWindow = BubbleWindow(this, ::launchWorkflow)
+        bubbleWindow = BubbleWindow(this, ::launchWorkflow, ::stopBubble)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -34,6 +34,7 @@ class BubbleOverlayService : Service() {
             ACTION_RESTORE -> intent?.let(::restoreAfterWorkflow)
             ACTION_LAUNCH_MANUAL -> intent?.let(::launchManualWorkflow)
             ACTION_RESET_POSITION -> bubbleWindow?.resetPosition()
+            ACTION_APPEARANCE_CHANGED -> bubbleWindow?.refreshAppearance()
             ACTION_START -> startBubble()
         }
         if (!isRunning) stopSelf(startId)
@@ -165,6 +166,7 @@ class BubbleOverlayService : Service() {
         const val ACTION_RESTORE = "com.grimnej.lmcomment.action.RESTORE_BUBBLE"
         const val ACTION_LAUNCH_MANUAL = "com.grimnej.lmcomment.action.LAUNCH_MANUAL"
         const val ACTION_RESET_POSITION = "com.grimnej.lmcomment.action.RESET_BUBBLE_POSITION"
+        const val ACTION_APPEARANCE_CHANGED = "com.grimnej.lmcomment.action.APPEARANCE_CHANGED"
         const val EXTRA_WORKFLOW_SESSION_ID = "workflow_session_id"
         const val EXTRA_ACK_RECEIVER = "ack_receiver"
         const val RESULT_BUBBLE_HIDDEN = 1

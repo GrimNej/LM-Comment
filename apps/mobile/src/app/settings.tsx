@@ -1,4 +1,8 @@
-import LMCommentAndroid, { type DemoConfiguration, type Tone } from '@lm-comment/android';
+import LMCommentAndroid, {
+  type AppearanceMode,
+  type DemoConfiguration,
+  type Tone,
+} from '@lm-comment/android';
 import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
@@ -37,6 +41,11 @@ const TONES: readonly { value: Tone; label: string }[] = [
 ];
 
 const OPTION_COUNTS = [1, 2, 3] as const;
+const APPEARANCE_MODES: readonly { value: AppearanceMode; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 const ADVANCED_UNLOCK_TAPS = 7;
 
 export default function SettingsScreen() {
@@ -58,7 +67,9 @@ export default function SettingsScreen() {
   const [versionTaps, setVersionTaps] = useState(0);
   const [advancedUnlocked, setAdvancedUnlocked] = useState(false);
   const [advancedDirty, setAdvancedDirty] = useState(false);
-  const [busyAction, setBusyAction] = useState<'save' | 'reset' | 'position' | null>(null);
+  const [busyAction, setBusyAction] = useState<
+    'save' | 'reset' | 'position' | 'appearance' | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -147,6 +158,22 @@ export default function SettingsScreen() {
     }
   };
 
+  const changeAppearance = async (mode: AppearanceMode) => {
+    if (busyAction || mode === theme.appearanceMode) return;
+    setError(null);
+    setNotice(null);
+    setBusyAction('appearance');
+    try {
+      await theme.setAppearanceMode(mode);
+      const label = APPEARANCE_MODES.find((item) => item.value === mode)?.label ?? 'System';
+      setNotice(`${label} mode selected.`);
+    } catch {
+      setError('The appearance setting could not be saved.');
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
   const resetBubblePosition = async () => {
     setError(null);
     setNotice(null);
@@ -193,6 +220,29 @@ export default function SettingsScreen() {
           <Text style={[typography.small, { color: colors.success }]}>{notice}</Text>
         </View>
       ) : null}
+
+      <View style={{ gap: spacing.sm }}>
+        <SectionHeading
+          title="Appearance"
+          description="Light uses paper, ink, lime, and terracotta. Dark restores the graphite, violet, and cyan palette."
+        />
+        <SettingRow
+          label="Color mode"
+          description="System follows your phone automatically."
+          value={APPEARANCE_MODES.find((item) => item.value === theme.appearanceMode)?.label}
+        >
+          <View style={styles.wrapControls}>
+            {APPEARANCE_MODES.map((item) => (
+              <ChoiceButton
+                key={item.value}
+                label={item.label}
+                selected={theme.appearanceMode === item.value}
+                onPress={() => void changeAppearance(item.value)}
+              />
+            ))}
+          </View>
+        </SettingRow>
+      </View>
 
       <View style={{ gap: spacing.sm }}>
         <SectionHeading title="Writing defaults" />

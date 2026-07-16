@@ -1,6 +1,7 @@
 import { NativeModule, requireNativeModule } from 'expo';
 
 import type {
+  AppearanceMode,
   DemoConfiguration,
   DemoDefaults,
   DemoConfigurationStatus,
@@ -19,6 +20,8 @@ declare class LMCommentAndroidModule extends NativeModule<Record<never, never>> 
   getDemoConfigurationStatus(): Promise<DemoConfigurationStatus>;
   resetDemoConfiguration(): Promise<void>;
   resetBubblePosition(): Promise<void>;
+  getAppearanceMode(): Promise<AppearanceMode>;
+  setAppearanceMode(mode: AppearanceMode): Promise<void>;
   openManualTextWorkflow(sourceText?: string): Promise<void>;
   getSafeDiagnostics(): Promise<SafeDiagnostics>;
 }

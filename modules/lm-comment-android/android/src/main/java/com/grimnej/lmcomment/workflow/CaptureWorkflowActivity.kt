@@ -1,6 +1,7 @@
 package com.grimnej.lmcomment.workflow
 
 import android.app.Activity
+import android.animation.ValueAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ComponentName
@@ -34,6 +35,7 @@ import androidx.core.view.WindowCompat
 import com.grimnej.lmcomment.bubble.BubbleOverlayService
 import com.grimnej.lmcomment.capture.CaptureError
 import com.grimnej.lmcomment.capture.OneShotCaptureService
+import com.grimnej.lmcomment.config.AppearancePreferenceStore
 import com.grimnej.lmcomment.config.DemoConfigurationStore
 import com.grimnej.lmcomment.diagnostics.StableErrorStore
 
@@ -46,8 +48,18 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     private var consentLaunched = false
     private var directManualEntry = false
     private var newCaptureTransitionInProgress = false
+    private var darkTheme = false
     private val postConsentGate = PostConsentCaptureGate(requiredCommittedFrames = 2)
     private val captureReadinessHandler = Handler(Looper.getMainLooper())
+    private val postConsentQuiescenceMillis by lazy {
+        val longAnimationMillis = resources.getInteger(android.R.integer.config_longAnimTime)
+        val animatorScale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ValueAnimator.getDurationScale()
+        } else {
+            1f
+        }
+        PostConsentTiming.quiescenceMillis(longAnimationMillis, animatorScale)
+    }
     private var pendingProjectionGrant: PendingProjectionGrant? = null
     private var frameCommitGeneration = 0
     private val captureReadinessTimeout = Runnable {
@@ -69,7 +81,10 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
             data = requireNotNull(result.data),
         )
         captureReadinessHandler.removeCallbacks(captureReadinessTimeout)
-        captureReadinessHandler.postDelayed(captureReadinessTimeout, CAPTURE_READINESS_TIMEOUT_MS)
+        captureReadinessHandler.postDelayed(
+            captureReadinessTimeout,
+            PostConsentTiming.readinessTimeoutMillis(postConsentQuiescenceMillis),
+        )
         handleCaptureGateAction(postConsentGate.onConsentAccepted())
     }
 
@@ -99,6 +114,8 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         // Configuration is process-local private data supplied by the Expo shell.
         // Hand it directly to the workflow without ever logging the demo token.
         viewModel.setDemoConfiguration(DemoConfigurationStore(this).read())
+        darkTheme = AppearancePreferenceStore(this).read()
+            .resolvesToDark(resources.configuration.uiMode)
         workflowSessionId = intent.getStringExtra(BubbleOverlayService.EXTRA_WORKFLOW_SESSION_ID)
         directManualEntry = intent.getBooleanExtra(EXTRA_MANUAL_ENTRY, false)
         consentLaunched = savedInstanceState?.getBoolean(STATE_CONSENT_LAUNCHED) == true
@@ -127,6 +144,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
             }
             WorkflowScreen(
                 state = state,
+                darkTheme = darkTheme,
                 actions = WorkflowActions(
                     onSelectionChange = viewModel::updateSelection,
                     onResetSelection = viewModel::resetSelection,
@@ -251,8 +269,47 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         when (action) {
             CaptureGateAction.WAIT -> Unit
             CaptureGateAction.REQUEST_COMMITTED_FRAME -> requestCommittedCloakFrame()
+            CaptureGateAction.WAIT_FOR_SYSTEM_UI_QUIESCENCE -> waitForSystemUiQuiescence()
             CaptureGateAction.START_CAPTURE -> startPendingProjectionCapture()
         }
+    }
+
+    /**
+     * Window focus can return before SystemUI's consent surface has left the
+     * display compositor. Hold the one-use grant in memory across three of the
+     * device's configured long-animation windows, measured on Choreographer's
+     * frame clock, then require one final committed cloak frame.
+     */
+    private fun waitForSystemUiQuiescence() {
+        val decor = window.decorView
+        val generation = ++frameCommitGeneration
+        val requiredNanos = postConsentQuiescenceMillis * 1_000_000L
+        var firstFrameNanos = Long.MIN_VALUE
+        lateinit var callback: Choreographer.FrameCallback
+        callback = Choreographer.FrameCallback { frameTimeNanos ->
+            if (generation != frameCommitGeneration || isFinishing || isDestroyed) {
+                return@FrameCallback
+            }
+            if (!hasWindowFocus() ||
+                !decor.isAttachedToWindow ||
+                !decor.isShown ||
+                decor.visibility != View.VISIBLE ||
+                viewModel.state.value !is WorkflowState.CaptureCloak
+            ) {
+                if (!hasWindowFocus()) {
+                    handleCaptureGateAction(postConsentGate.onWindowFocusChanged(false))
+                }
+                return@FrameCallback
+            }
+            if (firstFrameNanos == Long.MIN_VALUE) firstFrameNanos = frameTimeNanos
+            if (frameTimeNanos - firstFrameNanos >= requiredNanos) {
+                handleCaptureGateAction(postConsentGate.onSystemUiQuiescent())
+            } else {
+                decor.invalidate()
+                Choreographer.getInstance().postFrameCallback(callback)
+            }
+        }
+        Choreographer.getInstance().postFrameCallback(callback)
     }
 
     private fun requestCommittedCloakFrame() {
@@ -494,7 +551,6 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         const val EXTRA_MANUAL_ENTRY = "com.grimnej.lmcomment.extra.MANUAL_ENTRY"
         const val EXTRA_INITIAL_TEXT = "com.grimnej.lmcomment.extra.INITIAL_TEXT"
         const val STATE_CONSENT_LAUNCHED = "consent_launched"
-        private const val CAPTURE_READINESS_TIMEOUT_MS = 5_000L
     }
 
     private data class PendingProjectionGrant(

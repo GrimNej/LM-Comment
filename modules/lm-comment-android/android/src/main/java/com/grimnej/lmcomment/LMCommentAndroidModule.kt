@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat
 import com.grimnej.lmcomment.bubble.BubbleAnchorStore
 import com.grimnej.lmcomment.bubble.BubbleOverlayService
 import com.grimnej.lmcomment.capture.CaptureResourceCounters
+import com.grimnej.lmcomment.config.AppearancePreference
+import com.grimnej.lmcomment.config.AppearancePreferenceStore
 import com.grimnej.lmcomment.config.DemoConfigurationStore
 import com.grimnej.lmcomment.config.DemoConfigurationValidator
 import com.grimnej.lmcomment.config.Tone
@@ -164,6 +166,25 @@ class LMCommentAndroidModule : Module() {
                         .setAction(BubbleOverlayService.ACTION_RESET_POSITION),
                 )
             }
+        }
+
+        AsyncFunction("getAppearanceMode") {
+            val context = requireNotNull(appContext.reactContext)
+            AppearancePreferenceStore(context).read().wireValue
+        }
+
+        AsyncFunction("setAppearanceMode") { mode: String ->
+            val context = requireNotNull(appContext.reactContext)
+            val preference = AppearancePreference.entries.singleOrNull { it.wireValue == mode }
+                ?: error("Appearance mode must be system, light, or dark.")
+            AppearancePreferenceStore(context).write(preference)
+            if (BubbleOverlayService.isRunning) {
+                context.startService(
+                    Intent(context, BubbleOverlayService::class.java)
+                        .setAction(BubbleOverlayService.ACTION_APPEARANCE_CHANGED),
+                )
+            }
+            Unit
         }
 
         AsyncFunction("openManualTextWorkflow") { sourceText: String? ->

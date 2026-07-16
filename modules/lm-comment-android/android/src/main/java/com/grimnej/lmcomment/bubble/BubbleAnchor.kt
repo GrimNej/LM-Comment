@@ -22,6 +22,49 @@ internal data class BubblePosition(
     val y: Int,
 )
 
+internal data class BubblePoint(
+    val x: Float,
+    val y: Float,
+)
+
+internal object BubbleDragMath {
+    fun clampedPosition(
+        x: Int,
+        y: Int,
+        bounds: BubbleBounds,
+        bubbleSize: Int,
+    ): BubblePosition = BubblePosition(
+        x = x.coerceIn(bounds.left, (bounds.right - bubbleSize).coerceAtLeast(bounds.left)),
+        y = y.coerceIn(bounds.top, (bounds.bottom - bubbleSize).coerceAtLeast(bounds.top)),
+    )
+
+    fun dismissTarget(
+        bounds: BubbleBounds,
+        targetRadius: Int,
+        bottomGap: Int,
+    ): BubblePoint {
+        val minimumY = bounds.top + targetRadius
+        val desiredY = bounds.bottom - bottomGap - targetRadius
+        return BubblePoint(
+            x = bounds.left + (bounds.right - bounds.left) / 2f,
+            y = desiredY.coerceAtLeast(minimumY).toFloat(),
+        )
+    }
+
+    fun isInsideDismissTarget(
+        position: BubblePosition,
+        bubbleSize: Int,
+        target: BubblePoint,
+        captureRadius: Int,
+    ): Boolean {
+        val centerX = position.x + bubbleSize / 2f
+        val centerY = position.y + bubbleSize / 2f
+        val dx = centerX - target.x
+        val dy = centerY - target.y
+        return dx * dx + dy * dy <= captureRadius.toFloat() * captureRadius
+    }
+}
+
 internal object BubbleAnchorMath {
     fun position(
         edge: BubbleEdge,
