@@ -7,7 +7,7 @@ Complete this only after the final APK and relay configuration are frozen. Any c
 - [ ] Install the final signed APK on the priority phone.
 - [ ] Confirm the phone model and Android version in the record below.
 - [ ] Grant notifications and **Display over other apps** access.
-- [ ] Confirm Home reports `READY` and Diagnostics reports healthy relay status without exposing the demo token.
+- [ ] Confirm Home reports `Ready to start` and Diagnostics reports healthy relay status without exposing the demo token.
 - [ ] Confirm the current demo token is active and the Groq spending limit is configured.
 - [ ] Save the APK, presentation script, synthetic fixture, and owner-recorded fallback video offline.
 - [ ] Record a short fallback video of the priority phone with a second camera; the secure workflow may appear black to Android's built-in recorder. Use only synthetic content and do not expose credentials.

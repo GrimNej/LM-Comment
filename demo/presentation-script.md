@@ -6,16 +6,16 @@ Target length: about three minutes. Use only synthetic content. Do not open Sett
 
 > LM-Comment helps you respond to anything visible on your Android screen without manually copying the context into another app.
 
-1. Open LM-Comment Home and briefly show the `READY` state and privacy message.
+1. Open LM-Comment Home and briefly show the `Ready to start` state and privacy message.
 2. Tap **Start bubble**, then return to the prepared synthetic post.
 3. Point out that the user stays in the original app.
 4. Tap the bubble and approve Android's full-display capture prompt.
 5. On the frozen frame, say: “The screenshot stays in app memory on this phone. It is never sent to the AI.”
 6. Crop the relevant words and tap **Extract text**.
-7. Review or edit the OCR result. Say: “OCR runs on-device, and only this reviewed text is sent when I choose Generate.”
+7. Review or edit the OCR result. Say: “OCR runs on-device. The screenshot is never sent. The relay receives the text and generation choices after I tap Generate.”
 8. Select **Witty** or **Professional**, keep three options, and tap **Generate 3 options**.
 9. Select one result, tap **Edit**, make a visible small change, and tap **Save changes**.
-10. Tap **Copy** and show the `COPIED` state.
+10. Tap **Copy** and show the `Copied` state.
 11. Tap **Close**, confirm that the bubble returns, then stop it from LM-Comment or its notification.
 
 Close with:

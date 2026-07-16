@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
-private val CropBackdrop = Color(0xFF05070B)
-private val OutsideSelection = Color(0xB805070B)
-private val SelectionOutline = Color(0xFF9B8CFF)
-private val HandleAccent = Color(0xFF55E1D0)
+private val CropBackdrop = Color(0xFF101411)
+private val OutsideSelection = Color(0xB8101411)
+private val SelectionOutline = Color(0xFFB9E84A)
+private val HandleAccent = Color(0xFFE96D4C)
 
 /**
  * Touch-owning crop viewport for a frozen, in-memory frame. Reset, full-frame,

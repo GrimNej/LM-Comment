@@ -1,77 +1,127 @@
-# LM-Comment
+<p align="center">
+  <img src="docs/assets/lm-comment-banner.png" alt="LM-Comment banner" width="100%" />
+</p>
 
-LM-Comment is a screen-aware Android writing assistant built for a focused
-hackathon demonstration. A user starts a floating bubble, approves one screen
-capture, crops the relevant words, reviews on-device OCR, chooses a tone, and
-copies an editable response generated through a small Groq-backed relay.
+<p align="center">
+  <img src="apps/mobile/assets/images/icon.png" alt="LM-Comment app icon" width="104" height="104" />
+</p>
 
-## What is deliberately different
+<h1 align="center">LM-Comment</h1>
 
-- The screenshot stays in Android memory and is never uploaded.
-- Bundled ML Kit OCR runs locally, including on a fresh offline installation.
-- Only text explicitly reviewed by the user reaches the relay.
-- The workflow never posts automatically and does not use an accessibility service.
-- The provider key exists only on the relay host.
+<p align="center">
+  Turn the words on your screen into a reply you can edit, copy, and send yourself.
+</p>
 
-## Workspace
+<p align="center">
+  <img alt="Android 8 or newer" src="https://img.shields.io/badge/Android-8%2B-101411?logo=android&logoColor=B9E84A" />
+  <img alt="Expo SDK 57" src="https://img.shields.io/badge/Expo-57-101411?logo=expo&logoColor=F4F0E6" />
+  <img alt="Kotlin for Android" src="https://img.shields.io/badge/Kotlin-Android-101411?logo=kotlin&logoColor=E96D4C" />
+  <img alt="Fastify" src="https://img.shields.io/badge/Fastify-relay-101411?logo=fastify&logoColor=F4F0E6" />
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/License-MIT-B9E84A?labelColor=101411" /></a>
+</p>
 
-- `apps/mobile` — Expo 57 / React Native product shell.
-- `modules/lm-comment-android` — native bubble, one-shot capture, crop, OCR,
-  generation, and result workflow.
-- `apps/relay` — Fastify relay with the server-side Groq integration.
-- `contracts` — shared JSON fixtures and transport schemas.
+LM-Comment is an Android writing tool. Tap its floating lens over any app, approve one screen capture, crop the useful part, review local OCR, and generate up to three editable responses. Nothing is posted for you.
 
-## Local prerequisites
+## How it works
 
-- Node 22.13.1 and pnpm 10.34.5.
-- Android Studio JBR 21, Android SDK 36, and NDK 27.1.12297006.
-- Docker for relay image verification.
+```mermaid
+flowchart LR
+    A[Tap the lens] --> B[Approve one capture]
+    B --> C[Crop in memory]
+    C --> D[Review local OCR]
+    D --> E[Send text and choices]
+    E --> F[Generate through relay]
+    F --> G[Edit and copy]
+```
 
-On Windows, set `JAVA_HOME` to Android Studio's `jbr` directory. The repository
-doctor reports the detected setup without changing it:
+- The captured frame stays in memory and is never written to storage or uploaded.
+- Bundled ML Kit OCR works without a network connection.
+- The screenshot is never sent. The relay receives reviewed text, the selected tone and option count, and any instruction you add.
+- The Groq key stays on the relay host and never enters the app or APK.
+- There are no accounts, databases, accessibility services, draft history, or automatic posting.
+
+## Product flow
+
+1. Start the compact floating lens.
+2. Open the content you want to answer.
+3. Tap the lens and approve Android's capture prompt.
+4. Crop the relevant area or use the full frame.
+5. Check the extracted text and make any edits.
+6. Pick a tone, add an optional instruction, and generate one to three options.
+7. Edit a result, copy it, and paste it where you choose.
+
+Three synthetic examples are built into the app, so the full workflow can be shown without opening personal content.
+
+## Architecture
+
+| Part | Responsibility |
+|---|---|
+| `apps/mobile` | Expo 57 product shell, setup, demo, diagnostics, and settings |
+| `modules/lm-comment-android` | Floating lens, one-shot MediaProjection, crop, bundled OCR, results, and clipboard flow |
+| `apps/relay` | Fastify service with validation, rate limits, stable errors, and the server-side Groq call |
+| `contracts` | Shared request, response, and fixture contracts |
+
+The Android workflow uses a normal native activity. Only the 60 dp lens is an overlay. Capture and lens services are separate foreground services with the Android service types required for their jobs.
+
+## Requirements
+
+- Node.js 22.13.1
+- pnpm 10.34.5
+- Android Studio JBR 21
+- Android SDK 36
+- Android NDK 27.1.12297006
+- Docker, only when building the relay image
+
+On Windows, point `JAVA_HOME` to Android Studio's `jbr` directory. Check the workstation without changing it:
 
 ```bash
 pnpm doctor
 ```
 
-## Build
+## Install and verify
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm check
-pnpm lint
-pnpm typecheck
-pnpm test
+pnpm quality
 pnpm mobile:prebuild
-pnpm mobile:android:debug
-pnpm mobile:android:release
-pnpm relay:build
 ```
 
-For a faster physical-phone build during development:
+Build an ARM64 release for a physical phone:
 
 ```powershell
 $env:LM_COMMENT_ANDROID_ARCH='arm64-v8a'
-pnpm mobile:android:debug
+pnpm mobile:android:release
 ```
 
-Generated APKs are written under
-`apps/mobile/android/app/build/outputs/apk/`. Android projects and binaries are
-generated artifacts and are intentionally ignored by Git.
+Generated Android projects and APKs live under `apps/mobile/android/` and are ignored by Git. The current Android release and its local evidence live under `artifacts/`.
 
-## Relay
+Run the native test suite from the generated Android project:
 
-Copy `.env.example` to `.env`, set a short-lived `DEMO_TOKEN` and a server-side
-`GROQ_API_KEY`, then run:
+```powershell
+cd apps/mobile/android
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+.\gradlew.bat :lm-comment-android:testDebugUnitTest
+```
+
+## Run the relay
+
+Copy `.env.example` to `.env`, then set a short-lived demo token and the server-side Groq key.
 
 ```bash
 pnpm relay:dev
 ```
 
-The selected model is `openai/gpt-oss-120b`. It replaces the blueprint's
-deprecated Llama model and remains relay configuration—not mobile code.
+The mobile app calls only the managed relay. The relay owns model selection, request limits, timeouts, structured output validation, and sanitized logging.
 
-## Scope authority
+## Demo and evidence
 
-The frozen scope is defined by `hackathon-release-contract.yaml`. The complete
-implementation authority is `LM_COMMENT_FINAL_HACKATHON_IMPLEMENTATION_BLUEPRINT.md`.
+- [Demo runbook](docs/DEMO_RUNBOOK.md)
+- [Test evidence](docs/TEST_EVIDENCE.md)
+- [Current checkpoint](progress.md)
+- [Post-hackathon roadmap](docs/POST_HACKATHON_ROADMAP.md)
+
+The release contract is defined in [`hackathon-release-contract.yaml`](hackathon-release-contract.yaml). The implementation blueprint is recorded in [`LM_COMMENT_FINAL_HACKATHON_IMPLEMENTATION_BLUEPRINT.md`](LM_COMMENT_FINAL_HACKATHON_IMPLEMENTATION_BLUEPRINT.md).
+
+## License
+
+LM-Comment is available under the [MIT License](LICENSE).

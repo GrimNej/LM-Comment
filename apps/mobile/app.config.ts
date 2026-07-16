@@ -82,7 +82,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       package: 'com.grimnej.lmcomment',
       versionCode: 1,
       adaptiveIcon: {
-        backgroundColor: '#090B10',
+        backgroundColor: '#101411',
         foregroundImage: './assets/images/android-icon-foreground.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
       },
@@ -110,11 +110,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       [
         'expo-splash-screen',
         {
-          backgroundColor: '#090B10',
+          backgroundColor: '#101411',
           image: './assets/images/splash-icon.png',
           imageWidth: 112,
           dark: {
-            backgroundColor: '#090B10',
+            backgroundColor: '#101411',
             image: './assets/images/splash-icon.png',
           },
         },

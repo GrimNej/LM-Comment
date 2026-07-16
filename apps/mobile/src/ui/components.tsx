@@ -110,7 +110,7 @@ function MotionPressable({
         accessibilityState={{ disabled: Boolean(disabled) }}
         disabled={disabled}
         onPress={onPress}
-        onPressIn={() => animate(0.985)}
+        onPressIn={() => animate(0.992)}
         onPressOut={() => animate(1)}
         style={({ pressed }) => [styles.pressableFill, pressed && styles.pressed]}
       >
@@ -125,46 +125,63 @@ export type AppMarkProps = {
   showWordmark?: boolean;
 };
 
+/** Four crop corners and a signal point form the product mark. */
 export function AppMark({ size = 54, showWordmark = false }: AppMarkProps) {
   const { colors } = useAppTheme();
   const frameSize = Math.max(size, 36);
-  const stroke = Math.max(2, Math.round(frameSize / 25));
+  const stroke = Math.max(2, Math.round(frameSize / 24));
+  const cornerSize = frameSize * 0.28;
+  const cornerColor = colors.textPrimary;
+  const sharedCorner = {
+    borderColor: cornerColor,
+    height: cornerSize,
+    width: cornerSize,
+  };
+
   return (
-    <View
-      accessibilityLabel="LM-Comment"
-      accessibilityRole="image"
-      style={styles.markRow}
-    >
-      <View
-        style={[
-          styles.markFrame,
-          {
-            borderColor: colors.primary,
-            borderRadius: frameSize * 0.3,
-            borderBottomRightRadius: frameSize * 0.1,
-            borderWidth: stroke,
-            height: frameSize,
-            width: frameSize,
-          },
-        ]}
-      >
+    <View accessibilityLabel="LM-Comment" accessibilityRole="image" style={styles.markRow}>
+      <View style={[styles.markFrame, { height: frameSize, width: frameSize }]}>
         <View
           style={[
-            styles.markLine,
-            {
-              backgroundColor: colors.secondary,
-              height: stroke,
-              width: frameSize * 0.42,
-            },
+            styles.markCorner,
+            styles.markTopLeft,
+            sharedCorner,
+            { borderLeftWidth: stroke, borderTopWidth: stroke },
           ]}
         />
         <View
           style={[
-            styles.markDot,
+            styles.markCorner,
+            styles.markTopRight,
+            sharedCorner,
+            { borderRightWidth: stroke, borderTopWidth: stroke },
+          ]}
+        />
+        <View
+          style={[
+            styles.markCorner,
+            styles.markBottomLeft,
+            sharedCorner,
+            { borderBottomWidth: stroke, borderLeftWidth: stroke },
+          ]}
+        />
+        <View
+          style={[
+            styles.markCorner,
+            styles.markBottomRight,
+            sharedCorner,
+            { borderBottomWidth: stroke, borderRightWidth: stroke },
+          ]}
+        />
+        <View
+          style={[
+            styles.markSignal,
             {
-              backgroundColor: colors.secondary,
-              height: frameSize * 0.14,
-              width: frameSize * 0.14,
+              backgroundColor: colors.signal,
+              height: frameSize * 0.18,
+              left: frameSize * 0.41,
+              top: frameSize * 0.41,
+              width: frameSize * 0.18,
             },
           ]}
         />
@@ -197,7 +214,12 @@ export function TopBar({ title, subtitle, onBack, right }: TopBarProps) {
             { backgroundColor: colors.surface, borderColor: colors.outline },
           ]}
         >
-          <Text style={[styles.backGlyph, { color: colors.textPrimary }]}>‹</Text>
+          <Text
+            maxFontSizeMultiplier={1.35}
+            style={[styles.backGlyph, { color: colors.textPrimary }]}
+          >
+            ←
+          </Text>
         </MotionPressable>
       ) : null}
       <View style={styles.topBarCopy}>
@@ -228,7 +250,10 @@ export function SectionHeading({ eyebrow, title, description, action }: SectionH
     <View style={styles.sectionHeadingRow}>
       <View style={styles.sectionHeadingCopy}>
         {eyebrow ? (
-          <Text style={[typography.eyebrow, { color: colors.secondary }]}>{eyebrow.toUpperCase()}</Text>
+          <View style={styles.eyebrowRow}>
+            <View style={[styles.eyebrowRule, { backgroundColor: colors.terracotta }]} />
+            <Text style={[typography.eyebrow, { color: colors.textMuted }]}>{eyebrow}</Text>
+          </View>
         ) : null}
         <Text
           style={[
@@ -250,7 +275,7 @@ export function SectionHeading({ eyebrow, title, description, action }: SectionH
   );
 }
 
-export type StatusTone = 'neutral' | 'primary' | 'cyan' | 'success' | 'warning' | 'danger';
+export type StatusTone = 'neutral' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
 
 export type StatusChipProps = {
   label: string;
@@ -266,7 +291,7 @@ export function StatusChip({ label, tone = 'neutral' }: StatusChipProps) {
       style={[styles.statusChip, { backgroundColor: palette.background, borderColor: palette.border }]}
     >
       <View style={[styles.chipDot, { backgroundColor: palette.foreground }]} />
-      <Text style={[typography.label, { color: palette.foreground }]}>{label}</Text>
+      <Text style={[typography.label, styles.statusLabel, { color: palette.foreground }]}>{label}</Text>
     </View>
   );
 }
@@ -286,36 +311,36 @@ export function StatusHero({ status, label, title, body, children }: StatusHeroP
   const tone: StatusTone = {
     ready: 'success',
     setup: 'warning',
-    active: 'cyan',
+    active: 'primary',
     unavailable: 'danger',
     checking: 'neutral',
   }[status] as StatusTone;
+
   return (
     <Animated.View
       style={[
         styles.hero,
         {
-          backgroundColor: colors.surfaceRaised,
+          backgroundColor: colors.inkSurface,
           borderColor: colors.outline,
           opacity: transitionOpacity,
-          shadowColor: colors.shadow,
         },
       ]}
     >
       <View
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
-        style={[styles.heroRail, { backgroundColor: colors.primary }]}
+        style={[styles.heroRule, { backgroundColor: colors.signal }]}
       />
       <View
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
-        style={[styles.heroCorner, { borderColor: colors.secondary }]}
+        style={[styles.heroMarker, { backgroundColor: colors.terracotta }]}
       />
       <StatusChip label={label} tone={tone} />
-      <Text style={[typography.display, styles.heroTitle, { color: colors.textPrimary }]}>{title}</Text>
+      <Text style={[typography.display, styles.heroTitle, { color: colors.onInk }]}>{title}</Text>
       {body ? (
-        <Text style={[typography.body, styles.heroBody, { color: colors.textSecondary }]}>{body}</Text>
+        <Text style={[typography.body, styles.heroBody, { color: colors.onInkMuted }]}>{body}</Text>
       ) : null}
       {children ? <View style={styles.heroActions}>{children}</View> : null}
     </Animated.View>
@@ -348,6 +373,8 @@ function ActionButton({
   const { colors, typography } = useAppTheme();
   const isDisabled = disabled || loading;
   const isPrimary = variant === 'primary';
+  const foreground = isPrimary ? colors.signalInk : colors.textPrimary;
+
   return (
     <MotionPressable
       accessibilityHint={accessibilityHint}
@@ -357,32 +384,18 @@ function ActionButton({
       style={[
         styles.actionButton,
         {
-          backgroundColor: isPrimary ? colors.primary : colors.surface,
-          borderColor: isPrimary ? colors.primary : colors.outline,
-          opacity: isDisabled ? 0.52 : 1,
+          backgroundColor: isPrimary ? colors.signal : colors.surface,
+          borderColor: isPrimary ? colors.signal : colors.outline,
+          opacity: isDisabled ? 0.5 : 1,
         },
         style,
       ]}
     >
       <View style={styles.buttonContent}>
-        {loading ? (
-          <ActivityIndicator
-            color={isPrimary ? colors.onPrimary : colors.primary}
-            size="small"
-          />
-        ) : null}
-        <Text
-          style={[
-            typography.label,
-            styles.buttonLabel,
-            { color: isPrimary ? colors.onPrimary : colors.textPrimary },
-          ]}
-        >
-          {loading ? `${label}…` : label}
+        {loading ? <ActivityIndicator color={foreground} size="small" /> : null}
+        <Text style={[typography.label, styles.buttonLabel, { color: foreground }]}>
+          {loading ? `${label}...` : label}
         </Text>
-        {!loading && isPrimary ? (
-          <Text accessibilityElementsHidden style={[styles.buttonArrow, { color: colors.onPrimary }]}>→</Text>
-        ) : null}
       </View>
     </MotionPressable>
   );
@@ -419,20 +432,40 @@ export function ReadinessCard({ label, status, detail, onPress }: ReadinessCardP
   const palette = statusPalette(colors, copy.tone);
   const content = (
     <Animated.View style={[styles.readinessContent, { opacity: transitionOpacity }]}>
-      <View style={[styles.readinessGlyph, { backgroundColor: palette.background }]}>
-        <Text style={[styles.readinessGlyphText, { color: palette.foreground }]}>{copy.glyph}</Text>
+      <View
+        style={[
+          styles.readinessGlyph,
+          { backgroundColor: palette.background, borderColor: palette.border },
+        ]}
+      >
+        <Text
+          maxFontSizeMultiplier={1.25}
+          style={[styles.readinessGlyphText, { color: palette.foreground }]}
+        >
+          {copy.glyph}
+        </Text>
       </View>
       <View style={styles.readinessCopy}>
-        <Text style={[typography.heading, { color: colors.textPrimary }]}>{label}</Text>
+        <View style={styles.readinessTitleRow}>
+          <Text style={[typography.heading, styles.readinessTitle, { color: colors.textPrimary }]}>
+            {label}
+          </Text>
+          <Text style={[typography.label, styles.readinessStatus, { color: palette.foreground }]}>
+            {copy.label}
+          </Text>
+        </View>
         <Text style={[typography.small, styles.readinessDetail, { color: colors.textSecondary }]}>
           {detail}
         </Text>
-        <Text style={[typography.label, styles.readinessStatus, { color: palette.foreground }]}>
-          {copy.label}
-        </Text>
       </View>
       {onPress ? (
-        <Text accessibilityElementsHidden style={[styles.rowArrow, { color: colors.textMuted }]}>›</Text>
+        <Text
+          accessibilityElementsHidden
+          maxFontSizeMultiplier={1.25}
+          style={[styles.rowArrow, { color: colors.textMuted }]}
+        >
+          ›
+        </Text>
       ) : null}
     </Animated.View>
   );
@@ -462,7 +495,7 @@ export type PrivacyBannerProps = {
 };
 
 export function PrivacyBanner({
-  text = 'Screenshots stay on this device. Only reviewed text is sent.',
+  text = 'The screenshot is never sent. Reviewed text and generation choices go to the relay.',
 }: PrivacyBannerProps) {
   const { colors, typography } = useAppTheme();
   return (
@@ -470,15 +503,15 @@ export function PrivacyBanner({
       accessibilityLabel={`Privacy. ${text}`}
       style={[
         styles.privacyBanner,
-        { backgroundColor: colors.secondarySoft, borderColor: colors.secondary },
+        { backgroundColor: colors.surface, borderColor: colors.outlineSoft },
       ]}
     >
-      <View style={[styles.privacyMark, { borderColor: colors.secondary }]}>
-        <View style={[styles.privacyMarkDot, { backgroundColor: colors.secondary }]} />
-      </View>
+      <View style={[styles.privacyRule, { backgroundColor: colors.signal }]} />
       <View style={styles.privacyCopy}>
-        <Text style={[typography.eyebrow, { color: colors.secondary }]}>PRIVATE BY DESIGN</Text>
-        <Text style={[typography.small, styles.privacyText, { color: colors.textPrimary }]}>{text}</Text>
+        <Text style={[typography.label, { color: colors.textPrimary }]}>Privacy note</Text>
+        <Text style={[typography.small, styles.privacyText, { color: colors.textSecondary }]}>
+          {text}
+        </Text>
       </View>
     </View>
   );
@@ -490,7 +523,7 @@ export type FixtureCardProps = {
   body: string;
   tags?: string[];
   onPress: () => void;
-  accent?: 'violet' | 'cyan' | 'warm';
+  accent?: 'lime' | 'terracotta' | 'warm';
 };
 
 export function FixtureCard({
@@ -499,14 +532,20 @@ export function FixtureCard({
   body,
   tags = [],
   onPress,
-  accent = 'violet',
+  accent = 'lime',
 }: FixtureCardProps) {
   const { colors, typography } = useAppTheme();
-  const accentColor = accent === 'cyan'
+  const accentColor = accent === 'terracotta'
+    ? colors.terracotta
+    : accent === 'warm'
+      ? colors.warning
+      : colors.signal;
+  const accentTextColor = accent === 'terracotta'
     ? colors.secondary
     : accent === 'warm'
       ? colors.warning
       : colors.primary;
+
   return (
     <MotionPressable
       accessibilityHint="Opens this synthetic example in Manual Text mode"
@@ -514,27 +553,32 @@ export function FixtureCard({
       onPress={onPress}
       style={[
         styles.fixtureCard,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.outlineSoft,
-          shadowColor: colors.shadow,
-        },
+        { backgroundColor: colors.surface, borderColor: colors.outlineSoft },
       ]}
     >
       <View style={[styles.fixtureAccent, { backgroundColor: accentColor }]} />
       <View style={styles.fixtureHeader}>
-        <Text style={[typography.eyebrow, styles.fixtureEyebrow, { color: accentColor }]}>
-          {eyebrow.toUpperCase()}
+        <Text style={[typography.eyebrow, styles.fixtureEyebrow, { color: accentTextColor }]}>
+          {eyebrow}
         </Text>
-        <Text accessibilityElementsHidden style={[styles.rowArrow, { color: colors.textMuted }]}>↗</Text>
+        <Text
+          accessibilityElementsHidden
+          maxFontSizeMultiplier={1.25}
+          style={[styles.rowArrow, { color: colors.textMuted }]}
+        >
+          ↗
+        </Text>
       </View>
       <Text style={[typography.heading, styles.fixtureTitle, { color: colors.textPrimary }]}>{title}</Text>
       <Text style={[typography.small, styles.fixtureBody, { color: colors.textSecondary }]}>{body}</Text>
       {tags.length ? (
         <View style={styles.tagRow}>
           {tags.map((tag) => (
-            <View key={tag} style={[styles.tag, { backgroundColor: colors.canvas }]}>
-              <Text style={[typography.label, { color: colors.textMuted }]}>{tag}</Text>
+            <View
+              key={tag}
+              style={[styles.tag, { backgroundColor: colors.canvas, borderColor: colors.outlineSoft }]}
+            >
+              <Text style={[typography.small, styles.tagText, { color: colors.textMuted }]}>{tag}</Text>
             </View>
           ))}
         </View>
@@ -587,7 +631,13 @@ export function SettingRow({
           </Text>
         ) : null}
         {onPress ? (
-          <Text accessibilityElementsHidden style={[styles.rowArrow, { color: colors.textMuted }]}>›</Text>
+          <Text
+            accessibilityElementsHidden
+            maxFontSizeMultiplier={1.25}
+            style={[styles.rowArrow, { color: colors.textMuted }]}
+          >
+            ›
+          </Text>
         ) : null}
       </View>
       {children ? <View style={styles.settingControl}>{children}</View> : null}
@@ -601,6 +651,7 @@ export function SettingRow({
       opacity: disabled ? 0.5 : 1,
     },
   ];
+
   return onPress ? (
     <MotionPressable
       accessibilityLabel={value ? `${label}, ${value}` : label}
@@ -659,7 +710,7 @@ export function EmptyState({ title, message, actionLabel, onAction }: EmptyState
   const { colors, typography } = useAppTheme();
   return (
     <View style={[styles.emptyState, { backgroundColor: colors.surface, borderColor: colors.outlineSoft }]}>
-      <AppMark size={44} />
+      <AppMark size={38} />
       <Text style={[typography.heading, styles.emptyTitle, { color: colors.textPrimary }]}>{title}</Text>
       <Text style={[typography.small, styles.emptyMessage, { color: colors.textSecondary }]}>{message}</Text>
       {actionLabel && onAction ? (
@@ -675,7 +726,7 @@ export type SkeletonProps = {
   radius?: number;
 };
 
-export function Skeleton({ width = '100%', height = 18, radius = 8 }: SkeletonProps) {
+export function Skeleton({ width = '100%', height = 18, radius = 4 }: SkeletonProps) {
   const { colors } = useAppTheme();
   return (
     <View
@@ -685,7 +736,7 @@ export function Skeleton({ width = '100%', height = 18, radius = 8 }: SkeletonPr
         height,
         borderRadius: radius,
         backgroundColor: colors.outlineSoft,
-        opacity: 0.72,
+        opacity: 0.78,
       }}
     />
   );
@@ -695,7 +746,7 @@ function statusPalette(colors: ReturnType<typeof useAppTheme>['colors'], tone: S
   switch (tone) {
     case 'primary':
       return { foreground: colors.primary, background: colors.primarySoft, border: colors.primary };
-    case 'cyan':
+    case 'secondary':
       return { foreground: colors.secondary, background: colors.secondarySoft, border: colors.secondary };
     case 'success':
       return { foreground: colors.success, background: colors.successSoft, border: colors.success };
@@ -713,7 +764,7 @@ function useStatusTransition(statusKey: string) {
   const [opacity] = useState(() => new Animated.Value(1));
   useEffect(() => {
     opacity.stopAnimation();
-    opacity.setValue(isReduceMotionEnabled ? 1 : 0.78);
+    opacity.setValue(isReduceMotionEnabled ? 1 : 0.82);
     Animated.timing(opacity, {
       toValue: 1,
       duration: isReduceMotionEnabled ? 0 : motion.transition,
@@ -728,71 +779,75 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   screenContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
     paddingBottom: 32,
+    paddingHorizontal: 18,
   },
   nonScrollingContent: { flex: 1 },
   pressableFill: { flex: 1 },
-  pressed: { opacity: 0.9 },
+  pressed: { opacity: 0.82 },
   markRow: { alignItems: 'center', flexDirection: 'row' },
-  markFrame: { alignItems: 'center', justifyContent: 'center' },
-  markLine: { borderRadius: 3, transform: [{ translateY: -4 }] },
-  markDot: { borderRadius: 99, position: 'absolute', bottom: '19%', right: '20%' },
-  wordmark: { fontSize: 19, fontWeight: '700', letterSpacing: -0.3, marginLeft: 12 },
-  topBar: { alignItems: 'center', flexDirection: 'row', minHeight: 72, paddingVertical: 10 },
+  markFrame: { position: 'relative' },
+  markCorner: { position: 'absolute' },
+  markTopLeft: { left: 0, top: 0 },
+  markTopRight: { right: 0, top: 0 },
+  markBottomLeft: { bottom: 0, left: 0 },
+  markBottomRight: { bottom: 0, right: 0 },
+  markSignal: {
+    borderRadius: 999,
+    position: 'absolute',
+  },
+  wordmark: { fontSize: 19, fontWeight: '800', letterSpacing: -0.45, marginLeft: 12 },
+  topBar: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    minHeight: 70,
+    paddingVertical: 11,
+  },
   backButton: {
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
     height: minimumTargetSize,
     marginRight: 14,
     width: minimumTargetSize,
   },
-  backGlyph: { fontSize: 35, fontWeight: '300', lineHeight: 43, textAlign: 'center' },
-  topBarCopy: { flex: 1, justifyContent: 'center' },
-  topBarSubtitle: { marginTop: 1 },
-  topBarRight: { marginLeft: 12, minHeight: minimumTargetSize, justifyContent: 'center' },
+  backGlyph: { fontSize: 23, fontWeight: '500', lineHeight: 46, textAlign: 'center' },
+  topBarCopy: { flex: 1, justifyContent: 'center', minHeight: minimumTargetSize },
+  topBarSubtitle: { marginTop: 2 },
+  topBarRight: { justifyContent: 'center', marginLeft: 12, minHeight: minimumTargetSize },
   sectionHeadingRow: { alignItems: 'flex-start', flexDirection: 'row' },
   sectionHeadingCopy: { flex: 1 },
-  sectionHeadingAfterEyebrow: { marginTop: 7 },
-  sectionDescription: { marginTop: 8 },
-  sectionAction: { marginLeft: 12, minHeight: minimumTargetSize, justifyContent: 'center' },
+  eyebrowRow: { alignItems: 'center', flexDirection: 'row' },
+  eyebrowRule: { height: 2, marginRight: 8, width: 18 },
+  sectionHeadingAfterEyebrow: { marginTop: 6 },
+  sectionDescription: { marginTop: 7, maxWidth: 600 },
+  sectionAction: { justifyContent: 'center', marginLeft: 12, minHeight: minimumTargetSize },
   statusChip: {
     alignItems: 'center',
     alignSelf: 'flex-start',
-    borderRadius: 999,
-    borderWidth: 1,
+    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
-    minHeight: 32,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
+    minHeight: 30,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
   },
-  chipDot: { borderRadius: 99, height: 7, marginRight: 7, width: 7 },
+  chipDot: { borderRadius: 999, height: 6, marginRight: 7, width: 6 },
+  statusLabel: { fontSize: 13, lineHeight: 18 },
   hero: {
-    borderRadius: 26,
+    borderRadius: 11,
     borderWidth: 1,
-    elevation: 6,
     overflow: 'hidden',
-    padding: 24,
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
+    paddingBottom: 23,
+    paddingHorizontal: 22,
+    paddingTop: 25,
   },
-  heroRail: { bottom: 0, left: 0, position: 'absolute', top: 0, width: 4 },
-  heroCorner: {
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
-    height: 52,
-    opacity: 0.5,
-    position: 'absolute',
-    right: 18,
-    top: 18,
-    width: 52,
-  },
-  heroTitle: { marginRight: 12, marginTop: 22 },
-  heroBody: { marginTop: 13, maxWidth: 560 },
-  heroActions: { gap: 12, marginTop: 24 },
+  heroRule: { height: 4, left: 0, position: 'absolute', top: 0, width: '38%' },
+  heroMarker: { height: 10, position: 'absolute', right: 18, top: 18, width: 10 },
+  heroTitle: { marginRight: 14, marginTop: 20, maxWidth: 620 },
+  heroBody: { marginTop: 11, maxWidth: 560 },
+  heroActions: { gap: 10, marginTop: 22 },
   actionButton: {
-    borderRadius: 14,
+    borderRadius: 7,
     borderWidth: 1,
     minHeight: minimumTargetSize,
     overflow: 'hidden',
@@ -802,83 +857,83 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     minHeight: minimumTargetSize,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
+    paddingHorizontal: 17,
+    paddingVertical: 11,
   },
   buttonLabel: { fontSize: 15, lineHeight: 21, textAlign: 'center' },
-  buttonArrow: { fontSize: 18, marginLeft: 9 },
-  readinessCard: { borderRadius: 18, borderWidth: 1, minHeight: 112, overflow: 'hidden' },
-  readinessContent: { alignItems: 'flex-start', flexDirection: 'row', padding: 18 },
+  readinessCard: { borderRadius: 7, borderWidth: 1, minHeight: 92, overflow: 'hidden' },
+  readinessContent: { alignItems: 'flex-start', flexDirection: 'row', padding: 15 },
   readinessGlyph: {
     alignItems: 'center',
-    borderRadius: 12,
-    height: 38,
-    justifyContent: 'center',
-    marginRight: 14,
-    width: 38,
-  },
-  readinessGlyphText: { fontSize: 18, fontWeight: '700', lineHeight: 22 },
-  readinessCopy: { flex: 1 },
-  readinessDetail: { marginTop: 3 },
-  readinessStatus: { marginTop: 7 },
-  rowArrow: { fontSize: 24, lineHeight: 28, marginLeft: 10 },
-  privacyBanner: {
-    alignItems: 'flex-start',
-    borderLeftWidth: 3,
-    borderRadius: 16,
-    flexDirection: 'row',
-    padding: 16,
-  },
-  privacyMark: {
-    alignItems: 'center',
-    borderRadius: 11,
-    borderWidth: 2,
+    borderRadius: 4,
+    borderWidth: StyleSheet.hairlineWidth,
     height: 34,
     justifyContent: 'center',
     marginRight: 13,
     width: 34,
   },
-  privacyMarkDot: { borderRadius: 99, height: 8, width: 8 },
-  privacyCopy: { flex: 1 },
-  privacyText: { marginTop: 4 },
-  fixtureCard: {
-    borderRadius: 20,
+  readinessGlyphText: { fontSize: 16, fontWeight: '700', lineHeight: 20 },
+  readinessCopy: { flex: 1 },
+  readinessTitleRow: { alignItems: 'flex-start', flexDirection: 'row', flexWrap: 'wrap' },
+  readinessTitle: { flexGrow: 1, flexShrink: 1, marginRight: 10 },
+  readinessDetail: { marginTop: 4 },
+  readinessStatus: { fontSize: 13, lineHeight: 18 },
+  rowArrow: { fontSize: 22, lineHeight: 26, marginLeft: 10 },
+  privacyBanner: {
+    alignItems: 'stretch',
+    borderRadius: 7,
     borderWidth: 1,
-    elevation: 2,
-    minHeight: 184,
+    flexDirection: 'row',
     overflow: 'hidden',
-    padding: 20,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
   },
-  fixtureAccent: { height: 3, left: 20, position: 'absolute', top: 0, width: 48 },
-  fixtureHeader: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  privacyRule: { width: 4 },
+  privacyCopy: { flex: 1, paddingHorizontal: 14, paddingVertical: 13 },
+  privacyText: { marginTop: 3 },
+  fixtureCard: {
+    borderRadius: 8,
+    borderWidth: 1,
+    minHeight: 174,
+    overflow: 'hidden',
+    padding: 18,
+  },
+  fixtureAccent: { bottom: 18, left: 0, position: 'absolute', top: 18, width: 3 },
+  fixtureHeader: { alignItems: 'flex-start', flexDirection: 'row', justifyContent: 'space-between' },
   fixtureEyebrow: { flex: 1 },
-  fixtureTitle: { marginTop: 15 },
-  fixtureBody: { marginTop: 8 },
-  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
-  tag: { borderRadius: 8, paddingHorizontal: 9, paddingVertical: 5 },
-  settingRow: { borderRadius: 16, borderWidth: 1, minHeight: 64, overflow: 'hidden' },
-  settingInner: { paddingHorizontal: 16, paddingVertical: 14 },
-  settingTopLine: { alignItems: 'center', flexDirection: 'row', minHeight: 36 },
+  fixtureTitle: { marginTop: 12 },
+  fixtureBody: { marginTop: 7 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 15 },
+  tag: {
+    borderRadius: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  tagText: { fontSize: 13, lineHeight: 18 },
+  settingRow: { borderRadius: 6, borderWidth: 1, minHeight: 64, overflow: 'hidden' },
+  settingInner: { paddingHorizontal: 15, paddingVertical: 13 },
+  settingTopLine: { alignItems: 'center', flexDirection: 'row', minHeight: 38 },
   settingCopy: { flex: 1 },
-  settingLabel: { fontWeight: '500' },
-  settingDescription: { marginTop: 2 },
+  settingLabel: { fontWeight: '600' },
+  settingDescription: { marginTop: 3 },
   settingValue: { flexShrink: 1, marginLeft: 12, maxWidth: '42%', textAlign: 'right' },
   settingControl: { marginTop: 12 },
   inlineError: {
     alignItems: 'center',
     borderLeftWidth: 3,
-    borderRadius: 14,
+    borderRadius: 5,
     flexDirection: 'row',
     padding: 14,
   },
   inlineErrorCopy: { flex: 1 },
-  inlineErrorMessage: { marginTop: 2 },
+  inlineErrorMessage: { marginTop: 3 },
   inlineRetry: { justifyContent: 'center', marginLeft: 12, minHeight: minimumTargetSize },
-  emptyState: { alignItems: 'center', borderRadius: 20, borderWidth: 1, padding: 26 },
-  emptyTitle: { marginTop: 18, textAlign: 'center' },
-  emptyMessage: { marginTop: 7, maxWidth: 360, textAlign: 'center' },
-  emptyAction: { alignSelf: 'stretch', marginTop: 20 },
+  emptyState: {
+    alignItems: 'flex-start',
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 22,
+  },
+  emptyTitle: { marginTop: 17 },
+  emptyMessage: { marginTop: 6, maxWidth: 380 },
+  emptyAction: { alignSelf: 'stretch', marginTop: 19 },
 });

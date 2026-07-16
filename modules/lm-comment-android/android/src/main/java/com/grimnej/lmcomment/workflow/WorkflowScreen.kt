@@ -1,6 +1,7 @@
 package com.grimnej.lmcomment.workflow
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,17 +36,18 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -66,19 +68,23 @@ import com.grimnej.lmcomment.relay.GenerationOption
 import com.grimnej.lmcomment.relay.RelayFailureCode
 import kotlin.math.roundToInt
 
-private val Graphite = Color(0xFF090B10)
-private val GraphiteRaised = Color(0xFF0E121A)
-private val Surface = Color(0xFF151A25)
-private val TextPrimary = Color(0xFFF7F8FC)
-private val TextSecondary = Color(0xFFADB6C8)
-private val TextMuted = Color(0xFF7E899D)
-private val Violet = Color(0xFF9B8CFF)
-private val Cyan = Color(0xFF55E1D0)
-private val Outline = Color(0xFF313A4E)
-private val Warning = Color(0xFFFFC978)
-private val Success = Color(0xFF72E6A6)
-private val CardShape = RoundedCornerShape(22.dp)
-private val ControlShape = RoundedCornerShape(15.dp)
+private val Paper = Color(0xFFF4F0E6)
+private val PaperRaised = Color(0xFFFFFDF7)
+private val PaperInset = Color(0xFFFAF7EE)
+private val Ink = Color(0xFF101411)
+private val InkSoft = Color(0xFF40473F)
+private val InkMuted = Color(0xFF646C63)
+private val Lime = Color(0xFFB9E84A)
+private val LimeWash = Color(0xFFE5EBCF)
+private val LimeInk = Color(0xFF465D0B)
+private val Terracotta = Color(0xFFE96D4C)
+private val TerracottaWash = Color(0xFFF3DDD4)
+private val TerracottaInk = Color(0xFFA6422D)
+private val Hairline = Color(0xFFB8B7AB)
+private val Success = Color(0xFF2F6B3A)
+private val SuccessWash = Color(0xFFDFEBDD)
+private val CardShape = RoundedCornerShape(12.dp)
+private val ControlShape = RoundedCornerShape(8.dp)
 
 data class WorkflowActions(
     val onSelectionChange: (NormalizedCropRect) -> Unit,
@@ -112,14 +118,19 @@ fun WorkflowScreen(state: WorkflowState, actions: WorkflowActions) {
     if (state is WorkflowState.CaptureCloak) return
 
     MaterialTheme(
-        colorScheme = darkColorScheme(
-            primary = Violet,
-            secondary = Cyan,
-            background = Graphite,
-            surface = Surface,
-            onPrimary = Graphite,
-            onBackground = TextPrimary,
-            onSurface = TextPrimary,
+        colorScheme = lightColorScheme(
+            primary = Ink,
+            secondary = TerracottaInk,
+            background = Paper,
+            surface = PaperRaised,
+            surfaceVariant = PaperInset,
+            outline = Hairline,
+            error = TerracottaInk,
+            onPrimary = Paper,
+            onSecondary = Paper,
+            onBackground = Ink,
+            onSurface = Ink,
+            onSurfaceVariant = InkSoft,
         ),
     ) {
         WorkflowBackdrop {
@@ -150,21 +161,13 @@ private fun WorkflowBackdrop(content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(Graphite, Color(0xFF0B1018), GraphiteRaised),
-                ),
-            ),
+            .background(Paper),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0x1F9B8CFF), Color.Transparent),
-                    ),
-                ),
+                .height(6.dp)
+                .background(Lime),
         )
         content()
     }
@@ -182,8 +185,7 @@ private fun CropScreen(state: WorkflowState.Cropping, actions: WorkflowActions) 
         val landscapeControlsWidth = minOf(300.dp, maxWidth * 0.38f)
         Column(Modifier.fillMaxSize()) {
             ScreenHeader(
-                eyebrow = "ON-DEVICE SELECTION",
-                title = "Frame the context",
+                title = "Select the text",
                 onClose = actions.onClose,
                 compact = isLandscape,
             )
@@ -238,7 +240,7 @@ private fun CropViewport(
         modifier = modifier
             .clip(CardShape)
             .background(Color.Black)
-            .border(1.dp, Outline, CardShape),
+            .border(1.dp, InkSoft, CardShape),
     ) {
         CropEditor(
             bitmap = state.bitmap,
@@ -246,7 +248,7 @@ private fun CropViewport(
             onSelectionChange = actions.onSelectionChange,
         )
         PrivacyBadge(
-            text = "MEMORY ONLY",
+            text = "Kept in memory",
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(12.dp),
@@ -264,8 +266,8 @@ private fun CropControls(
     Column(
         modifier = modifier
             .clip(CardShape)
-            .background(Surface.copy(alpha = 0.94f))
-            .border(1.dp, Outline, CardShape)
+            .background(PaperRaised)
+            .border(1.dp, Hairline, CardShape)
             .then(
                 if (landscape) Modifier.verticalScroll(rememberScrollState()) else Modifier,
             )
@@ -274,16 +276,16 @@ private fun CropControls(
     ) {
         Column {
             Text(
-                "DRAG THE FOUR CORNERS",
-                color = TextMuted,
-                fontSize = 10.sp,
-                letterSpacing = 1.3.sp,
-                fontWeight = FontWeight.Bold,
+                "Drag the corners",
+                color = InkMuted,
+                fontSize = 12.sp,
+                letterSpacing = 0.2.sp,
+                fontWeight = FontWeight.Medium,
             )
             Spacer(Modifier.height(5.dp))
             Text(
                 selectionLabel(selection),
-                color = TextPrimary,
+                color = Ink,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -309,7 +311,7 @@ private fun CropControls(
                     .fillMaxWidth()
                     .heightIn(min = 48.dp),
             ) {
-                Text("Type text instead", color = TextSecondary, fontWeight = FontWeight.SemiBold)
+                Text("Type text instead", color = InkSoft, fontWeight = FontWeight.SemiBold)
             }
             PrimaryButton(
                 text = "Extract text",
@@ -344,31 +346,31 @@ private fun RecognitionScreen(actions: WorkflowActions) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(92.dp)
-                    .clip(RoundedCornerShape(28.dp))
-                    .background(Color(0x149B8CFF))
-                    .border(1.dp, Color(0x559B8CFF), RoundedCornerShape(28.dp)),
+                    .size(82.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(PaperRaised)
+                    .border(1.dp, Hairline, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(42.dp),
-                    color = Cyan,
-                    trackColor = Outline,
+                    color = Terracotta,
+                    trackColor = PaperInset,
                     strokeWidth = 3.dp,
                 )
             }
             Spacer(Modifier.height(26.dp))
             Text(
-                "READING ON THIS DEVICE",
-                color = Cyan,
+                "Reading text on this device",
+                color = TerracottaInk,
                 fontSize = 11.sp,
-                letterSpacing = 1.5.sp,
-                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.3.sp,
+                fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(9.dp))
             Text(
-                "Finding the words",
-                color = TextPrimary,
+                "Reading your selection",
+                color = Ink,
                 fontSize = 29.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
@@ -376,7 +378,7 @@ private fun RecognitionScreen(actions: WorkflowActions) {
             Spacer(Modifier.height(9.dp))
             Text(
                 "The selected pixels stay on your phone.",
-                color = TextSecondary,
+                color = InkSoft,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.widthIn(max = 360.dp),
@@ -416,8 +418,7 @@ private fun ReviewScreen(state: WorkflowState.ReviewingText, actions: WorkflowAc
                 .verticalScroll(rememberScrollState()),
         ) {
             ScreenHeader(
-                eyebrow = if (state.manualEntry) "MANUAL CONTEXT" else "TEXT FOUND",
-                title = if (state.manualEntry) "Start with the context" else "Shape the reply",
+                title = if (state.manualEntry) "Add the text" else "Review the text",
                 onClose = actions.onClose,
                 compact = isLandscape,
             )
@@ -444,14 +445,14 @@ private fun ReviewScreen(state: WorkflowState.ReviewingText, actions: WorkflowAc
                             if (state.text.isBlank()) {
                                 "Add context before generating."
                             } else {
-                                "Only this text is sent when you tap Generate."
+                                "The screenshot is never sent. This text, the selected tone, and any instruction go to the relay when you tap Generate."
                             },
                             modifier = Modifier.weight(1f),
                         )
                         Text("${state.text.length}/${GenerationContractCodec.MAX_SOURCE_CHARACTERS}")
                     }
                 },
-                shape = CardShape,
+                shape = ControlShape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = if (isLandscape) 145.dp else 200.dp)
@@ -461,8 +462,8 @@ private fun ReviewScreen(state: WorkflowState.ReviewingText, actions: WorkflowAc
 
             SectionHeading(
                 step = "01",
-                title = "Choose a voice",
-                detail = "Set the feel of every option.",
+                title = "Choose a tone",
+                detail = "Sets the tone for each reply.",
             )
             Spacer(Modifier.height(11.dp))
             TonePicker(
@@ -473,8 +474,8 @@ private fun ReviewScreen(state: WorkflowState.ReviewingText, actions: WorkflowAc
             Spacer(Modifier.height(22.dp))
             SectionHeading(
                 step = "02",
-                title = "Add direction",
-                detail = "Optional — a detail, constraint, or point to include.",
+                title = "Add a note",
+                detail = "Optional: include a detail or constraint.",
             )
             Spacer(Modifier.height(11.dp))
             OutlinedTextField(
@@ -495,15 +496,15 @@ private fun ReviewScreen(state: WorkflowState.ReviewingText, actions: WorkflowAc
                 },
                 minLines = 2,
                 maxLines = 4,
-                shape = CardShape,
+                shape = ControlShape,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(Modifier.height(22.dp))
             SectionHeading(
                 step = "03",
-                title = "How many options?",
-                detail = "Keep it focused or compare a few approaches.",
+                title = "Choose the number of replies",
+                detail = "Generate one reply or compare up to three.",
             )
             Spacer(Modifier.height(11.dp))
             OptionCountSelector(
@@ -549,31 +550,31 @@ private fun ContextStatusRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(CardShape)
-            .background(Surface.copy(alpha = 0.94f))
-            .border(1.dp, Outline, CardShape)
+            .background(PaperRaised)
+            .border(1.dp, Hairline, CardShape)
             .padding(horizontal = 15.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             Modifier
                 .size(8.dp)
-                .clip(RoundedCornerShape(99.dp))
-                .background(Cyan),
+                .clip(RoundedCornerShape(2.dp))
+                .background(LimeInk),
         )
         Spacer(Modifier.width(9.dp))
         Text(
             when {
-                manualEntry -> "Your text is ready to shape"
-                blockCount == 1 -> "1 text block found on-device"
-                else -> "$blockCount text blocks found on-device"
+                manualEntry -> "Your text is ready"
+                blockCount == 1 -> "1 text block found on this device"
+                else -> "$blockCount text blocks found on this device"
             },
-            color = TextSecondary,
+            color = InkSoft,
             fontSize = 13.sp,
             modifier = Modifier.weight(1f),
         )
         Text(
-            "$characterCount chars",
-            color = TextMuted,
+            "$characterCount characters",
+            color = InkMuted,
             fontSize = 12.sp,
         )
     }
@@ -587,32 +588,32 @@ private fun SectionHeading(step: String, title: String, detail: String) {
     ) {
         Box(
             modifier = Modifier
-                .size(34.dp)
-                .clip(RoundedCornerShape(11.dp))
-                .background(Color(0x169B8CFF))
-                .border(1.dp, Color(0x449B8CFF), RoundedCornerShape(11.dp)),
+                .size(32.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(Lime)
+                .border(1.dp, Ink, RoundedCornerShape(5.dp)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 step,
-                color = Violet,
+                color = Ink,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 0.7.sp,
+                letterSpacing = 0.2.sp,
             )
         }
         Spacer(Modifier.width(11.dp))
         Column(Modifier.weight(1f)) {
             Text(
                 title,
-                color = TextPrimary,
+                color = Ink,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(2.dp))
             Text(
                 detail,
-                color = TextMuted,
+                color = InkMuted,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
             )
@@ -650,14 +651,14 @@ private fun ToneChip(tone: Tone, selected: Boolean, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = if (selected) Violet.copy(alpha = 0.18f) else Surface,
-            contentColor = if (selected) TextPrimary else TextSecondary,
+            containerColor = if (selected) Lime else PaperRaised,
+            contentColor = if (selected) Ink else InkSoft,
         ),
         border = BorderStroke(
             1.dp,
-            if (selected) Violet else Outline,
+            if (selected) Ink else Hairline,
         ),
-        shape = RoundedCornerShape(999.dp),
+        shape = ControlShape,
         modifier = Modifier
             .heightIn(min = 48.dp)
             .semantics { this.selected = selected },
@@ -666,8 +667,8 @@ private fun ToneChip(tone: Tone, selected: Boolean, onClick: () -> Unit) {
             Box(
                 Modifier
                     .size(7.dp)
-                    .clip(RoundedCornerShape(99.dp))
-                    .background(Cyan),
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(TerracottaInk),
             )
             Spacer(Modifier.width(8.dp))
         }
@@ -681,8 +682,8 @@ private fun OptionCountSelector(selected: Int, onSelected: (Int) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(ControlShape)
-            .background(Surface)
-            .border(1.dp, Outline, ControlShape)
+            .background(PaperRaised)
+            .border(1.dp, Hairline, ControlShape)
             .padding(4.dp)
             .selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -693,14 +694,14 @@ private fun OptionCountSelector(selected: Int, onSelected: (Int) -> Unit) {
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 48.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(5.dp))
                     .background(
-                        if (isSelected) Violet.copy(alpha = 0.2f) else Color.Transparent,
+                        if (isSelected) Lime else Color.Transparent,
                     )
                     .border(
                         width = 1.dp,
-                        color = if (isSelected) Violet.copy(alpha = 0.72f) else Color.Transparent,
-                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) Ink else Color.Transparent,
+                        shape = RoundedCornerShape(5.dp),
                     )
                     .selectable(
                         selected = isSelected,
@@ -712,13 +713,13 @@ private fun OptionCountSelector(selected: Int, onSelected: (Int) -> Unit) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         "$count",
-                        color = if (isSelected) TextPrimary else TextSecondary,
+                        color = if (isSelected) Ink else InkSoft,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
                         if (count == 1) "option" else "options",
-                        color = if (isSelected) Violet else TextMuted,
+                        color = if (isSelected) InkSoft else InkMuted,
                         fontSize = 10.sp,
                     )
                 }
@@ -733,14 +734,14 @@ private fun ConfigurationNotice() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(ControlShape)
-            .background(Warning.copy(alpha = 0.09f))
-            .border(1.dp, Warning.copy(alpha = 0.36f), ControlShape)
+            .background(TerracottaWash)
+            .border(1.dp, Terracotta, ControlShape)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             "!",
-            color = Warning,
+            color = TerracottaInk,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -748,14 +749,14 @@ private fun ConfigurationNotice() {
         Column(Modifier.weight(1f)) {
             Text(
                 "Demo access is not configured",
-                color = TextPrimary,
+                color = Ink,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(2.dp))
             Text(
                 "Return to setup in LM-Comment, then reopen this workflow.",
-                color = TextSecondary,
+                color = InkSoft,
                 fontSize = 12.sp,
                 lineHeight = 17.sp,
             )
@@ -779,8 +780,7 @@ private fun GeneratingScreen(state: WorkflowState.Generating, actions: WorkflowA
                 .fillMaxSize(),
         ) {
             ScreenHeader(
-                eyebrow = "SECURE GENERATION",
-                title = "Writing options…",
+                title = "Writing replies…",
                 onClose = actions.onClose,
                 compact = isLandscape,
             )
@@ -794,38 +794,38 @@ private fun GeneratingScreen(state: WorkflowState.Generating, actions: WorkflowA
             ) {
                 Box(
                     modifier = Modifier
-                        .size(if (isLandscape) 88.dp else 106.dp)
-                        .clip(RoundedCornerShape(32.dp))
-                        .background(Color(0x149B8CFF))
-                        .border(1.dp, Color(0x559B8CFF), RoundedCornerShape(32.dp)),
+                        .size(if (isLandscape) 80.dp else 96.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(PaperRaised)
+                        .border(1.dp, Hairline, RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(if (isLandscape) 42.dp else 48.dp),
-                        color = Cyan,
-                        trackColor = Outline,
+                        color = Terracotta,
+                        trackColor = PaperInset,
                         strokeWidth = 3.dp,
                     )
                     Box(
                         Modifier
                             .size(10.dp)
-                            .clip(RoundedCornerShape(99.dp))
-                            .background(Violet),
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(LimeInk),
                     )
                 }
                 Spacer(Modifier.height(if (isLandscape) 18.dp else 26.dp))
                 Text(
-                    "TURNING CONTEXT INTO LANGUAGE",
-                    color = Cyan,
+                    "Generating replies",
+                    color = TerracottaInk,
                     fontSize = 11.sp,
-                    letterSpacing = 1.45.sp,
-                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.3.sp,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Finding the right words",
-                    color = TextPrimary,
+                    "Writing your replies",
+                    color = Ink,
                     fontSize = if (isLandscape) 25.sp else 30.sp,
                     lineHeight = if (isLandscape) 29.sp else 35.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -834,8 +834,8 @@ private fun GeneratingScreen(state: WorkflowState.Generating, actions: WorkflowA
                 )
                 Spacer(Modifier.height(9.dp))
                 Text(
-                    "This usually takes a few seconds. You can cancel safely at any time.",
-                    color = TextSecondary,
+                    "This usually takes a few seconds. Tap Cancel generation to stop.",
+                    color = InkSoft,
                     fontSize = 15.sp,
                     lineHeight = 21.sp,
                     textAlign = TextAlign.Center,
@@ -864,37 +864,37 @@ private fun DraftSummaryCard(tone: Tone, optionCount: Int, sourceLength: Int) {
             .widthIn(max = 430.dp)
             .fillMaxWidth()
             .clip(CardShape)
-            .background(Surface.copy(alpha = 0.94f))
-            .border(1.dp, Outline, CardShape)
+            .background(PaperRaised)
+            .border(1.dp, Hairline, CardShape)
             .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
                 .size(38.dp)
-                .clip(RoundedCornerShape(13.dp))
-                .background(Cyan.copy(alpha = 0.1f))
-                .border(1.dp, Cyan.copy(alpha = 0.35f), RoundedCornerShape(13.dp)),
+                .clip(RoundedCornerShape(6.dp))
+                .background(TerracottaWash)
+                .border(1.dp, Terracotta, RoundedCornerShape(6.dp)),
             contentAlignment = Alignment.Center,
         ) {
-            Text("✦", color = Cyan, fontSize = 17.sp)
+            Text("✦", color = TerracottaInk, fontSize = 17.sp)
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(
                 "${toneDisplayName(tone)} · $optionCount ${if (optionCount == 1) "option" else "options"}",
-                color = TextPrimary,
+                color = Ink,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(Modifier.height(2.dp))
             Text(
                 "$sourceLength characters of context",
-                color = TextMuted,
+                color = InkMuted,
                 fontSize = 12.sp,
             )
         }
-        PrivacyBadge(text = "IN FLIGHT")
+        PrivacyBadge(text = "Text only")
     }
 }
 
@@ -914,8 +914,7 @@ private fun ResultsScreen(state: WorkflowState.ShowingResults, actions: Workflow
                 .fillMaxSize(),
         ) {
             ScreenHeader(
-                eyebrow = "${state.options.size} ${if (state.options.size == 1) "OPTION" else "OPTIONS"} READY",
-                title = "Pick what feels like you",
+                title = "Choose a reply",
                 onClose = actions.onClose,
                 compact = isLandscape,
             )
@@ -924,21 +923,21 @@ private fun ResultsScreen(state: WorkflowState.ShowingResults, actions: Workflow
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(ControlShape)
-                    .background(Cyan.copy(alpha = 0.07f))
-                    .border(1.dp, Cyan.copy(alpha = 0.24f), ControlShape)
+                    .background(LimeWash)
+                    .border(1.dp, LimeInk, ControlShape)
                     .padding(horizontal = 14.dp, vertical = 11.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
                     Modifier
                         .size(8.dp)
-                        .clip(RoundedCornerShape(99.dp))
-                        .background(Success),
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(LimeInk),
                 )
                 Spacer(Modifier.width(9.dp))
                 Text(
-                    "Tap a card to select it. Edit anything before copying.",
-                    color = TextSecondary,
+                    "Tap a reply to select it. You can edit it before copying.",
+                    color = InkSoft,
                     fontSize = 13.sp,
                     lineHeight = 18.sp,
                 )
@@ -989,7 +988,7 @@ private fun ResultsScreen(state: WorkflowState.ShowingResults, actions: Workflow
             ) {
                 Text(
                     "Back to text and settings",
-                    color = TextSecondary,
+                    color = InkSoft,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
@@ -1008,9 +1007,9 @@ private fun ResultCard(
     onCopy: () -> Unit,
 ) {
     val cardOutline = when {
-        copied -> Success.copy(alpha = 0.66f)
-        selected -> Violet
-        else -> Outline
+        copied -> Success
+        selected -> Ink
+        else -> Hairline
     }
     Column(
         modifier = Modifier
@@ -1018,12 +1017,12 @@ private fun ResultCard(
             .clip(CardShape)
             .background(
                 when {
-                    copied -> Success.copy(alpha = 0.055f)
-                    selected -> Violet.copy(alpha = 0.075f)
-                    else -> Surface.copy(alpha = 0.95f)
+                    copied -> SuccessWash
+                    selected -> LimeWash
+                    else -> PaperRaised
                 },
             )
-            .border(if (selected || copied) 1.5.dp else 1.dp, cardOutline, CardShape)
+            .border(1.dp, cardOutline, CardShape)
             .clickable(onClick = onSelect)
             .semantics { this.selected = selected }
             .padding(16.dp),
@@ -1035,41 +1034,41 @@ private fun ResultCard(
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .clip(RoundedCornerShape(11.dp))
-                    .background(if (selected) Violet.copy(alpha = 0.2f) else GraphiteRaised)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(if (selected) Lime else PaperInset)
                     .border(
                         1.dp,
-                        if (selected) Violet.copy(alpha = 0.6f) else Outline,
-                        RoundedCornerShape(11.dp),
+                        if (selected) Ink else Hairline,
+                        RoundedCornerShape(5.dp),
                     ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     "$number",
-                    color = if (selected) Violet else TextSecondary,
+                    color = if (selected) Ink else InkSoft,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
             Spacer(Modifier.width(10.dp))
             Text(
-                "OPTION ${number.toString().padStart(2, '0')}",
-                color = TextMuted,
+                "Reply $number",
+                color = InkMuted,
                 fontSize = 10.sp,
                 letterSpacing = 1.2.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f),
             )
             if (copied) {
-                StatusLabel(text = "COPIED", color = Success)
+                StatusLabel(text = "Copied", color = Success)
             } else if (selected) {
-                StatusLabel(text = "SELECTED", color = Violet)
+                StatusLabel(text = "Selected", color = LimeInk)
             }
         }
         Spacer(Modifier.height(13.dp))
         Text(
             option.text,
-            color = TextPrimary,
+            color = Ink,
             fontSize = 16.sp,
             lineHeight = 23.sp,
         )
@@ -1094,12 +1093,12 @@ private fun ResultCard(
 private fun StatusLabel(text: String, color: Color) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(999.dp))
-            .background(color.copy(alpha = 0.12f))
-            .border(1.dp, color.copy(alpha = 0.38f), RoundedCornerShape(999.dp))
+            .clip(RoundedCornerShape(5.dp))
+            .background(PaperRaised)
+            .border(1.dp, color, RoundedCornerShape(5.dp))
             .padding(horizontal = 9.dp, vertical = 5.dp)
             .semantics {
-                if (text == "COPIED") liveRegion = LiveRegionMode.Polite
+                if (text == "Copied") liveRegion = LiveRegionMode.Polite
             },
     ) {
         Text(
@@ -1122,11 +1121,11 @@ private fun ResultActionButton(
     OutlinedButton(
         onClick = onClick,
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = if (highlighted) Success.copy(alpha = 0.1f) else Color.Transparent,
-            contentColor = if (highlighted) Success else TextPrimary,
+            containerColor = if (highlighted) SuccessWash else PaperRaised,
+            contentColor = if (highlighted) Success else Ink,
         ),
-        border = BorderStroke(1.dp, if (highlighted) Success.copy(alpha = 0.5f) else Outline),
-        shape = RoundedCornerShape(13.dp),
+        border = BorderStroke(1.dp, if (highlighted) Success else Hairline),
+        shape = ControlShape,
         modifier = modifier.heightIn(min = 48.dp),
     ) {
         Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
@@ -1158,15 +1157,14 @@ private fun EditResultScreen(state: WorkflowState.EditingResult, actions: Workfl
                 .verticalScroll(rememberScrollState()),
         ) {
             ScreenHeader(
-                eyebrow = if (optionNumber > 0) "EDITING OPTION ${optionNumber.toString().padStart(2, '0')}" else "EDITING RESULT",
-                title = "Make every word yours",
+                title = if (optionNumber > 0) "Edit reply $optionNumber" else "Edit the reply",
                 onClose = actions.onClose,
                 compact = isLandscape,
             )
             Spacer(Modifier.height(if (isLandscape) 10.dp else 16.dp))
             Text(
-                "The text below is exactly what Copy will use after you save.",
-                color = TextSecondary,
+                "Copy uses the text shown here after you save.",
+                color = InkSoft,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
             )
@@ -1189,7 +1187,7 @@ private fun EditResultScreen(state: WorkflowState.EditingResult, actions: Workfl
                         Text("${state.draftText.length}/${GenerationContractCodec.MAX_OPTION_CHARACTERS}")
                     }
                 },
-                shape = CardShape,
+                shape = ControlShape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = if (isLandscape) 165.dp else 310.dp)
@@ -1222,10 +1220,9 @@ private fun GenerationErrorScreen(
     actions: WorkflowActions,
 ) {
     RecoveryScreen(
-        eyebrow = relayErrorEyebrow(state.code),
-        title = "The words didn't arrive",
+        title = relayErrorTitle(state.code),
         message = state.message,
-        accent = Warning,
+        accent = TerracottaInk,
         onClose = actions.onClose,
     ) {
         PrimaryButton(
@@ -1247,7 +1244,7 @@ private fun GenerationErrorScreen(
                 .fillMaxWidth()
                 .heightIn(min = 48.dp),
         ) {
-            Text("Start a new capture", color = TextSecondary, fontWeight = FontWeight.SemiBold)
+            Text("Start a new capture", color = InkSoft, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -1260,25 +1257,24 @@ private fun toneDisplayName(tone: Tone): String = when (tone) {
     Tone.CONCISE -> "Concise"
 }
 
-private fun relayErrorEyebrow(code: RelayFailureCode): String = when (code) {
-    RelayFailureCode.NETWORK_UNAVAILABLE -> "CHECK YOUR CONNECTION"
+private fun relayErrorTitle(code: RelayFailureCode): String = when (code) {
+    RelayFailureCode.NETWORK_UNAVAILABLE -> "Check your connection"
     RelayFailureCode.NETWORK_TIMEOUT,
-    RelayFailureCode.PROVIDER_TIMEOUT -> "GENERATION TIMED OUT"
+    RelayFailureCode.PROVIDER_TIMEOUT -> "Generation timed out"
     RelayFailureCode.UNAUTHORIZED,
-    RelayFailureCode.INVALID_CONFIGURATION -> "DEMO ACCESS NEEDED"
+    RelayFailureCode.INVALID_CONFIGURATION -> "Demo access needed"
     RelayFailureCode.RATE_LIMITED,
     RelayFailureCode.DAILY_LIMIT_REACHED,
-    RelayFailureCode.PROVIDER_RATE_LIMIT -> "DEMO IS BUSY"
-    else -> "GENERATION PAUSED"
+    RelayFailureCode.PROVIDER_RATE_LIMIT -> "Demo is busy"
+    else -> "Generation stopped"
 }
 
 @Composable
 private fun EmptyRecognitionScreen(actions: WorkflowActions) {
     RecoveryScreen(
-        eyebrow = "NOTHING READABLE YET",
-        title = "Let's try another angle",
-        message = "No readable text was found. Adjust the crop or enter the text manually.",
-        accent = Warning,
+        title = "No text found",
+        message = "Adjust the crop, use the full screen, or enter the text manually.",
+        accent = TerracottaInk,
         onClose = actions.onClose,
     ) {
         SecondaryButton(
@@ -1304,10 +1300,9 @@ private fun EmptyRecognitionScreen(actions: WorkflowActions) {
 @Composable
 private fun OcrErrorScreen(state: WorkflowState.OcrError, actions: WorkflowActions) {
     RecoveryScreen(
-        eyebrow = "ON-DEVICE OCR PAUSED",
-        title = "That read didn't finish",
+        title = "Text recognition stopped",
         message = state.message,
-        accent = Warning,
+        accent = TerracottaInk,
         onClose = actions.onClose,
     ) {
         PrimaryButton(
@@ -1333,7 +1328,6 @@ private fun OcrErrorScreen(state: WorkflowState.OcrError, actions: WorkflowActio
 
 @Composable
 private fun RecoveryScreen(
-    eyebrow: String,
     title: String,
     message: String,
     accent: Color,
@@ -1361,26 +1355,18 @@ private fun RecoveryScreen(
         ) {
             Box(
                 modifier = Modifier
-                    .size(58.dp)
-                    .clip(RoundedCornerShape(19.dp))
-                    .background(accent.copy(alpha = 0.12f))
-                    .border(1.dp, accent.copy(alpha = 0.42f), RoundedCornerShape(19.dp)),
+                    .size(54.dp)
+                    .clip(RoundedCornerShape(9.dp))
+                    .background(TerracottaWash)
+                    .border(1.dp, Terracotta, RoundedCornerShape(9.dp)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text("!", color = accent, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(22.dp))
             Text(
-                eyebrow,
-                color = accent,
-                fontSize = 11.sp,
-                letterSpacing = 1.4.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
                 title,
-                color = TextPrimary,
+                color = Ink,
                 fontSize = 30.sp,
                 lineHeight = 35.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -1389,7 +1375,7 @@ private fun RecoveryScreen(
             Spacer(Modifier.height(12.dp))
             Text(
                 message,
-                color = TextSecondary,
+                color = InkSoft,
                 fontSize = 16.sp,
                 lineHeight = 23.sp,
             )
@@ -1402,7 +1388,6 @@ private fun RecoveryScreen(
 
 @Composable
 private fun ScreenHeader(
-    eyebrow: String,
     title: String,
     onClose: () -> Unit,
     compact: Boolean,
@@ -1413,27 +1398,18 @@ private fun ScreenHeader(
     ) {
         BrandMark()
         Spacer(Modifier.width(13.dp))
-        Column(Modifier.weight(1f)) {
-            Text(
-                eyebrow,
-                color = Cyan,
-                fontSize = 11.sp,
-                letterSpacing = 1.35.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                title,
-                color = TextPrimary,
-                fontSize = if (compact) 22.sp else 26.sp,
-                lineHeight = if (compact) 25.sp else 30.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.semantics { heading() },
-            )
-        }
+        Text(
+            title,
+            color = Ink,
+            fontSize = if (compact) 22.sp else 26.sp,
+            lineHeight = if (compact) 25.sp else 30.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() },
+        )
         Spacer(Modifier.width(10.dp))
         CloseButton(onClose)
     }
@@ -1441,20 +1417,27 @@ private fun ScreenHeader(
 
 @Composable
 private fun BrandMark() {
-    Box(
-        modifier = Modifier
-            .size(46.dp)
-            .clip(RoundedCornerShape(15.dp))
-            .background(Color(0x129B8CFF))
-            .border(1.5.dp, Violet, RoundedCornerShape(15.dp)),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            Modifier
-                .size(10.dp)
-                .clip(RoundedCornerShape(99.dp))
-                .background(Cyan),
-        )
+    Canvas(modifier = Modifier.size(44.dp)) {
+        val left = size.width * 0.18f
+        val right = size.width * 0.82f
+        val top = size.height * 0.18f
+        val bottom = size.height * 0.82f
+        val arm = size.width * 0.24f
+        val stroke = 2.5.dp.toPx()
+
+        fun cornerLine(start: Offset, end: Offset) {
+            drawLine(Ink, start, end, strokeWidth = stroke, cap = StrokeCap.Round)
+        }
+
+        cornerLine(Offset(left, top), Offset(left + arm, top))
+        cornerLine(Offset(left, top), Offset(left, top + arm))
+        cornerLine(Offset(right, top), Offset(right - arm, top))
+        cornerLine(Offset(right, top), Offset(right, top + arm))
+        cornerLine(Offset(left, bottom), Offset(left + arm, bottom))
+        cornerLine(Offset(left, bottom), Offset(left, bottom - arm))
+        cornerLine(Offset(right, bottom), Offset(right - arm, bottom))
+        cornerLine(Offset(right, bottom), Offset(right, bottom - arm))
+        drawCircle(Lime, radius = size.width * 0.09f, center = center)
     }
 }
 
@@ -1462,17 +1445,17 @@ private fun BrandMark() {
 private fun PrivacyBadge(text: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(999.dp))
-            .background(Color(0xD9121720))
-            .border(1.dp, Color(0x6655E1D0), RoundedCornerShape(999.dp))
+            .clip(RoundedCornerShape(6.dp))
+            .background(Ink)
+            .border(1.dp, Lime, RoundedCornerShape(6.dp))
             .padding(horizontal = 10.dp, vertical = 6.dp),
     ) {
         Text(
             text,
-            color = Cyan,
+            color = Paper,
             fontSize = 10.sp,
-            letterSpacing = 1.1.sp,
-            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.2.sp,
+            fontWeight = FontWeight.SemiBold,
         )
     }
 }
@@ -1488,10 +1471,10 @@ private fun PrimaryButton(
         onClick = onClick,
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Violet,
-            contentColor = Graphite,
-            disabledContainerColor = Outline.copy(alpha = 0.62f),
-            disabledContentColor = TextMuted,
+            containerColor = Lime,
+            contentColor = Ink,
+            disabledContainerColor = PaperInset,
+            disabledContentColor = InkMuted,
         ),
         shape = ControlShape,
         modifier = modifier.heightIn(min = 54.dp),
@@ -1504,8 +1487,11 @@ private fun PrimaryButton(
 private fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     OutlinedButton(
         onClick = onClick,
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
-        border = BorderStroke(1.dp, Outline),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = PaperRaised,
+            contentColor = Ink,
+        ),
+        border = BorderStroke(1.dp, Hairline),
         shape = ControlShape,
         modifier = modifier.heightIn(min = 50.dp),
     ) {
@@ -1523,9 +1509,12 @@ private fun SecondaryButton(text: String, onClick: () -> Unit, modifier: Modifie
 private fun CloseButton(onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
-        border = BorderStroke(1.dp, Outline),
-        shape = RoundedCornerShape(999.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = PaperRaised,
+            contentColor = InkSoft,
+        ),
+        border = BorderStroke(1.dp, Hairline),
+        shape = ControlShape,
         modifier = Modifier.heightIn(min = 48.dp),
     ) {
         Text("Close", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)

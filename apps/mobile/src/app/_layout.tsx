@@ -53,16 +53,16 @@ function LaunchGate() {
       <View style={styles.launchBrand}>
         <AppMark showWordmark size={58} />
         <Text style={[typography.body, styles.launchPromise, { color: colors.textSecondary }]}>
-          Context becomes a response only after you review it.
+          Review the text before sending it for generation.
         </Text>
       </View>
       <View
         accessibilityLiveRegion="polite"
-        accessibilityLabel="Preparing the private demo configuration"
+        accessibilityLabel="Loading app settings"
         style={styles.launchStatus}
       >
         <ActivityIndicator color={colors.secondary} size="small" />
-        <Text style={[typography.label, { color: colors.textMuted }]}>PREPARING PRIVATE DEMO</Text>
+        <Text style={[typography.label, { color: colors.textMuted }]}>Loading settings</Text>
       </View>
     </Screen>
   );

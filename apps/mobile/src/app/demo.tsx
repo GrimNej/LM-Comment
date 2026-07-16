@@ -1,7 +1,7 @@
 import LMCommentAndroid, { type DemoConfigurationStatus } from '@lm-comment/android';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Platform, StyleSheet, Text, View, useColorScheme } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
 import { bootstrapDemoConfiguration } from '@/lib/demo-configuration';
 import {
@@ -12,6 +12,8 @@ import {
   SectionHeading,
   StatusHero,
   TopBar,
+  type AppColors,
+  useAppTheme,
 } from '@/ui';
 
 type DemoFixture = {
@@ -21,33 +23,33 @@ type DemoFixture = {
   body: string;
   tags: string[];
   sourceText: string;
-  accent: 'violet' | 'cyan' | 'warm';
+  accent: 'lime' | 'terracotta' | 'warm';
 };
 
 const DEMO_FIXTURES: readonly DemoFixture[] = [
   {
     id: 'social',
-    eyebrow: '01 · SOCIAL REACTION',
+    eyebrow: 'Sample 1: Social post',
     title: 'Celebrate a personal win',
     body: '“I finished my first 10K this morning… It rained, but the people cheering made every kilometre worth it.”',
     tags: ['Synthetic', 'Friendly'],
-    accent: 'violet',
+    accent: 'lime',
     sourceText:
       'Synthetic demo post: I finished my first 10K this morning! It rained for most of the route, but the people cheering made every kilometre worth it. Still cannot believe I actually did it.',
   },
   {
     id: 'professional',
-    eyebrow: '02 · PROFESSIONAL REPLY',
+    eyebrow: 'Sample 2: Work message',
     title: 'Answer a deadline request',
     body: '“Could you send the revised launch brief by Thursday afternoon, including the dates and open risks?”',
     tags: ['Synthetic', 'Professional'],
-    accent: 'cyan',
+    accent: 'terracotta',
     sourceText:
-      'Synthetic demo message: Hi — could you send the revised launch brief by Thursday afternoon? Please include the updated rollout dates and the two open risks so I can review everything before Friday morning.',
+      'Synthetic demo message: Hi, could you send the revised launch brief by Thursday afternoon? Please include the updated rollout dates and the two open risks so I can review everything before Friday morning.',
   },
   {
     id: 'technical',
-    eyebrow: '03 · TECHNICAL DISCUSSION',
+    eyebrow: 'Sample 3: Technical thread',
     title: 'Respond to a design tradeoff',
     body: '“Caching OCR might be faster, but it creates another lifecycle for sensitive text. Keep the screenshot memory-only.”',
     tags: ['Synthetic', 'Concise'],
@@ -69,8 +71,8 @@ async function relayIsReachable(): Promise<boolean> {
 
 export default function DemoScreen() {
   const router = useRouter();
-  const scheme = useColorScheme();
-  const styles = useMemo(() => createStyles(scheme === 'light'), [scheme]);
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [configuration, setConfiguration] = useState<DemoConfigurationStatus | null>(null);
   const [relayReady, setRelayReady] = useState<boolean | null>(null);
   const [opening, setOpening] = useState<DemoFixture['id'] | 'blank' | null>(null);
@@ -108,14 +110,14 @@ export default function DemoScreen() {
     if (opening) return;
     setMessage(null);
     if (!ready) {
-      setMessage('Finish Setup before opening the real generation workflow.');
+      setMessage('Finish setup before generating a reply.');
       return;
     }
     setOpening(id);
     try {
       await LMCommentAndroid.openManualTextWorkflow(sourceText);
     } catch {
-      setMessage('Manual Text could not open. Return to Setup and retry the readiness checks.');
+      setMessage("The text editor didn't open. Return to Setup and try again.");
     } finally {
       setOpening(null);
     }
@@ -124,40 +126,39 @@ export default function DemoScreen() {
   return (
     <Screen scroll contentContainerStyle={styles.screenContent}>
       <TopBar
-        title="Demo lab"
-        subtitle="Synthetic contexts · real workflow"
+        title="Samples"
+        subtitle="Fictional text to try"
         onBack={() => router.back()}
       />
 
       <StatusHero
         status={checking ? 'checking' : ready ? 'ready' : relayReady ? 'setup' : 'unavailable'}
-        label={ready ? 'REAL RELAY READY' : checking ? 'CHECKING DEMO' : 'SETUP NEEDED'}
-        title="Choose context. Keep control."
-        body="Each fixture opens the native Manual Text screen with safe sample content. Review it, choose a tone, then explicitly Generate and Copy."
+        label={ready ? 'Relay ready' : checking ? 'Checking connection' : 'Finish setup'}
+        title="Choose a sample"
+        body="Each sample opens as editable text. Review it, pick a tone, then tap Generate."
       />
 
       {message ? (
         <View style={styles.messageCard} accessibilityLiveRegion="polite">
-          <Text style={styles.messageTitle}>Demo needs attention</Text>
+          <Text style={styles.messageTitle}>Finish setup</Text>
           <Text style={styles.messageBody}>{message}</Text>
           <View style={styles.messageAction}>
-            <SecondaryButton label="Open Setup" onPress={() => router.push('/setup')} />
+            <SecondaryButton label="Open setup" onPress={() => router.push('/setup')} />
           </View>
         </View>
       ) : null}
 
-      <PrivacyBanner text="These examples are synthetic. Screenshots stay on-device; only reviewed text is sent." />
+      <PrivacyBanner text="These samples are fictional. Text and generation choices go to the relay after you tap Generate." />
 
       <SectionHeading
-        eyebrow="THREE JUDGE-READY PATHS"
-        title="Pick the conversation"
-        description="Nothing generates on tap. The fixture first opens an editable review screen."
+        title="Pick a scenario"
+        description="You can edit the sample before you generate anything."
       />
       <View style={styles.fixtureStack}>
         {DEMO_FIXTURES.map((fixture) => (
           <FixtureCard
             key={fixture.id}
-            eyebrow={opening === fixture.id ? 'OPENING MANUAL TEXT…' : fixture.eyebrow}
+            eyebrow={opening === fixture.id ? 'Opening text…' : fixture.eyebrow}
             title={fixture.title}
             body={fixture.body}
             tags={fixture.tags}
@@ -168,29 +169,28 @@ export default function DemoScreen() {
       </View>
 
       <SectionHeading
-        eyebrow="WHAT THE JUDGES WILL SEE"
-        title="One short, complete loop"
+        title="Review, generate, copy"
       />
       <View style={styles.journeyCard}>
         <JourneyStep
           styles={styles}
           number="1"
           title="Review"
-          body="The synthetic source text is editable before it leaves the phone."
+          body="Edit the sample before sending it."
         />
         <JourneyDivider styles={styles} />
         <JourneyStep
           styles={styles}
           number="2"
           title="Generate"
-          body="Choose a tone, optional direction, and exactly one to three options."
+          body="Choose a tone, add a note if needed, and request one to three replies."
         />
         <JourneyDivider styles={styles} />
         <JourneyStep
           styles={styles}
           number="3"
           title="Edit and copy"
-          body="Refine the visible result and copy it only with an explicit tap."
+          body="Edit a reply, then tap Copy."
         />
       </View>
 
@@ -204,7 +204,7 @@ export default function DemoScreen() {
         <SecondaryButton label="Back to Home" onPress={() => router.replace('/')} />
       </View>
       <Text style={styles.footerNote}>
-        No auto-posting. No screenshot upload. No account required.
+        Nothing is posted from LM-Comment.
       </Text>
     </Screen>
   );
@@ -240,30 +240,7 @@ function JourneyDivider({ styles }: { styles: RouteStyles }) {
   return <View style={styles.journeyDivider} />;
 }
 
-function createStyles(light: boolean) {
-  const colors = light
-    ? {
-        outline: '#D5DBE6',
-        primary: '#6557E8',
-        primarySoft: '#F0EEFF',
-        surface: '#FFFFFF',
-        textPrimary: '#121520',
-        textSecondary: '#4F586A',
-        textMuted: '#687386',
-        warning: '#9A5700',
-        warningSurface: '#FFF7E9',
-      }
-    : {
-        outline: '#30384A',
-        primary: '#8F83FF',
-        primarySoft: '#1E1B34',
-        surface: '#141822',
-        textPrimary: '#F5F7FB',
-        textSecondary: '#B7BFCE',
-        textMuted: '#8D97A8',
-        warning: '#FFB85C',
-        warningSurface: '#241C14',
-      };
+function createStyles(colors: AppColors) {
   return StyleSheet.create({
     screenContent: {
       gap: 28,
@@ -275,7 +252,7 @@ function createStyles(light: boolean) {
     messageCard: {
       backgroundColor: colors.warningSurface,
       borderColor: colors.warning,
-      borderRadius: 18,
+      borderRadius: 11,
       borderWidth: 1,
       marginTop: 14,
       padding: 16,
@@ -298,7 +275,7 @@ function createStyles(light: boolean) {
     journeyCard: {
       backgroundColor: colors.surface,
       borderColor: colors.outline,
-      borderRadius: 22,
+      borderRadius: 11,
       borderWidth: 1,
       padding: 17,
     },
@@ -311,7 +288,7 @@ function createStyles(light: boolean) {
       alignItems: 'center',
       backgroundColor: colors.primarySoft,
       borderColor: colors.primary,
-      borderRadius: 12,
+      borderRadius: 7,
       borderWidth: 1,
       height: 36,
       justifyContent: 'center',

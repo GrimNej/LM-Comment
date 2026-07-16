@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
+import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -53,24 +54,30 @@ class BubbleWindow(
     init {
         bubbleView.contentDescription = "Open LM-Comment capture workflow"
         bubbleView.elevation = context.dp(10).toFloat()
+        bubbleView.setOnClickListener { onTap() }
         bubbleView.setOnTouchListener(DragTouchListener())
     }
 
-    fun show() {
-        if (attached) return
+    fun show(): Boolean {
+        if (attached) return true
+        if (!Settings.canDrawOverlays(context)) return false
         bounds = safeBounds()
         val position = anchorStore.read().position(bounds, bubbleSize)
         layoutParams.x = position.x
         layoutParams.y = position.y
-        windowManager.addView(bubbleView, layoutParams)
-        attached = true
+        attached = runCatching {
+            windowManager.addView(bubbleView, layoutParams)
+        }.isSuccess
+        return attached
     }
 
-    fun hide() {
+    fun hide(): Boolean {
         snapAnimator?.cancel()
-        if (!attached) return
+        if (!attached && !bubbleView.isAttachedToWindow) return true
         runCatching { windowManager.removeViewImmediate(bubbleView) }
-        attached = false
+        val hidden = !bubbleView.isAttachedToWindow
+        attached = !hidden
+        return hidden
     }
 
     fun onConfigurationChanged(newConfig: Configuration) {
@@ -89,6 +96,8 @@ class BubbleWindow(
     }
 
     fun resetPosition() {
+        snapAnimator?.cancel()
+        snapAnimator = null
         anchorStore.reset()
         if (!attached) return
         val position = BubbleAnchor.DEFAULT.position(safeBounds(), bubbleSize)
@@ -119,7 +128,7 @@ class BubbleWindow(
                     (startY + (target.y - startY) * fraction).roundToInt(),
                 )
             }
-            doOnEnd { anchorStore.write(anchor) }
+            doOnCompleted { anchorStore.write(anchor) }
             start()
         }
     }
@@ -133,17 +142,27 @@ class BubbleWindow(
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val metrics = windowManager.currentWindowMetrics
             val insets = metrics.windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout(),
+                WindowInsets.Type.systemBars() or
+                    WindowInsets.Type.displayCutout() or
+                    WindowInsets.Type.systemGestures(),
             )
+            val margin = context.dp(8)
             Rect(
-                insets.left + context.dp(8),
-                insets.top + context.dp(8),
-                metrics.bounds.width() - insets.right - context.dp(8),
-                metrics.bounds.height() - insets.bottom - context.dp(8),
+                metrics.bounds.left + insets.left + margin,
+                metrics.bounds.top + insets.top + margin,
+                metrics.bounds.right - insets.right - margin,
+                metrics.bounds.bottom - insets.bottom - margin,
             )
         } else {
-            val metrics = context.resources.displayMetrics
-            Rect(context.dp(8), context.dp(32), metrics.widthPixels - context.dp(8), metrics.heightPixels - context.dp(32))
+            val visibleDisplay = Rect()
+            windowManager.defaultDisplay.getRectSize(visibleDisplay)
+            val margin = context.dp(8)
+            Rect(
+                visibleDisplay.left + margin,
+                visibleDisplay.top + margin,
+                visibleDisplay.right - margin,
+                visibleDisplay.bottom - margin,
+            )
         }
     }
 
@@ -177,8 +196,11 @@ class BubbleWindow(
 
                 MotionEvent.ACTION_UP -> {
                     view.animate().scaleX(1f).scaleY(1f).setDuration(120L).start()
-                    if (dragging) snapToEdge() else onTap()
-                    view.performClick()
+                    if (dragging) {
+                        snapToEdge()
+                    } else {
+                        view.performClick()
+                    }
                     return true
                 }
 
@@ -194,19 +216,21 @@ class BubbleWindow(
 }
 
 private class ContextLensBubbleView(context: Context) : View(context) {
-    private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(20, 24, 34) }
+    private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(16, 20, 17) }
     private val border = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.rgb(93, 107, 134)
+        color = Color.argb(112, 244, 240, 230)
         style = Paint.Style.STROKE
         strokeWidth = context.dp(1).toFloat()
     }
-    private val violet = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.rgb(143, 131, 255)
+    private val cornerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(244, 240, 230)
         style = Paint.Style.STROKE
         strokeWidth = context.dp(2).toFloat()
         strokeCap = Paint.Cap.ROUND
     }
-    private val cyan = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(80, 215, 197) }
+    private val signalPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(185, 232, 74)
+    }
 
     init {
         background = GradientDrawable().apply {
@@ -222,27 +246,40 @@ private class ContextLensBubbleView(context: Context) : View(context) {
         val center = width / 2f
         canvas.drawCircle(center, height / 2f, width * 0.46f, fill)
         canvas.drawCircle(center, height / 2f, width * 0.46f, border)
-        val left = width * 0.29f
-        val top = height * 0.29f
-        val right = width * 0.71f
-        val bottom = height * 0.69f
-        val arm = width * 0.12f
-        canvas.drawLine(left, top + arm, left, top, violet)
-        canvas.drawLine(left, top, left + arm, top, violet)
-        canvas.drawLine(right - arm, top, right, top, violet)
-        canvas.drawLine(right, top, right, top + arm, violet)
-        canvas.drawLine(left, bottom - arm, left, bottom, violet)
-        canvas.drawLine(left, bottom, left + arm, bottom, violet)
-        canvas.drawLine(right - arm, bottom, right, bottom, violet)
-        canvas.drawLine(right, bottom, right, bottom + arm * 1.45f, violet)
-        canvas.drawCircle(center, height * 0.49f, width * 0.075f, cyan)
+        BubbleGlyphGeometry.cornerMarks.forEach { mark ->
+            canvas.drawSegment(mark.horizontal)
+            canvas.drawSegment(mark.vertical)
+        }
+        canvas.drawCircle(center, height * 0.49f, width * 0.075f, signalPaint)
+    }
+
+    private fun Canvas.drawSegment(segment: NormalizedLineSegment) {
+        drawLine(
+            width * segment.startX,
+            height * segment.startY,
+            width * segment.endX,
+            height * segment.endY,
+            cornerPaint,
+        )
     }
 }
 
 private fun Context.dp(value: Int): Int = (value * resources.displayMetrics.density).roundToInt()
 
-private inline fun ValueAnimator.doOnEnd(crossinline block: () -> Unit) {
+private inline fun ValueAnimator.doOnCompleted(crossinline block: () -> Unit) {
     addListener(object : android.animation.AnimatorListenerAdapter() {
-        override fun onAnimationEnd(animation: android.animation.Animator) = block()
+        private var cancelled = false
+
+        override fun onAnimationStart(animation: android.animation.Animator) {
+            cancelled = false
+        }
+
+        override fun onAnimationCancel(animation: android.animation.Animator) {
+            cancelled = true
+        }
+
+        override fun onAnimationEnd(animation: android.animation.Animator) {
+            if (!cancelled) block()
+        }
     })
 }

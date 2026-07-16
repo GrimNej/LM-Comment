@@ -93,7 +93,7 @@ export default function SettingsScreen() {
       return;
     }
     if (advancedDirty && (!relayBaseUrl.trim() || demoToken.trim().length < 12)) {
-      setError('Enter a valid backend URL and demo token in Advanced settings.');
+      setError('Enter a valid backend URL and demo token in advanced settings.');
       return;
     }
 
@@ -116,7 +116,7 @@ export default function SettingsScreen() {
         await LMCommentAndroid.updateDemoDefaults(defaults);
       }
       await refresh();
-      setNotice('Demo settings saved to private Android storage.');
+      setNotice('Settings saved on this device.');
     } catch {
       setError('Settings were not saved. Check the HTTPS URL and demo token, then try again.');
     } finally {
@@ -138,8 +138,8 @@ export default function SettingsScreen() {
       setAdvancedDirty(Boolean(bundledConfiguration));
       await refresh();
       setNotice(bundledConfiguration
-        ? 'Native demo configuration cleared. Save to restore the bundled judge defaults.'
-        : 'Native demo configuration cleared.');
+        ? 'Demo settings cleared. Save to restore the bundled defaults.'
+        : 'Demo settings cleared.');
     } catch {
       setError('The demo configuration could not be reset.');
     } finally {
@@ -165,16 +165,15 @@ export default function SettingsScreen() {
     <Screen scroll contentContainerStyle={styles.screenContent}>
       <TopBar
         title="Settings"
-        subtitle="Hackathon demo controls"
+        subtitle="Writing and connection"
         onBack={() => router.back()}
       />
 
       <View style={{ gap: spacing.sm }}>
-        <Text style={[typography.eyebrow, { color: colors.secondary }]}>NATIVE-FIRST</Text>
-        <Text style={[typography.title, { color: colors.textPrimary }]}>Ready between screens.</Text>
+        <Text style={[typography.title, { color: colors.textPrimary }]}>Choose your defaults</Text>
         <Text style={[typography.body, { color: colors.textSecondary }]}>
-          These values live in Android private preferences, so the bubble workflow keeps working
-          while this screen is closed.
+          Android stores these settings in private app storage and applies them when you use the
+          bubble.
         </Text>
       </View>
 
@@ -223,7 +222,7 @@ export default function SettingsScreen() {
         </SettingRow>
         <SettingRow
           label="Demo mode"
-          description="Keeps the workflow ready for an uninterrupted judge session."
+          description="Saved with the current demo configuration."
           value={demoMode ? 'On' : 'Off'}
         >
           <Switch

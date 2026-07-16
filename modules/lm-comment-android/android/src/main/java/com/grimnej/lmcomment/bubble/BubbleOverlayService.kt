@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.ResultReceiver
+import android.provider.Settings
 import androidx.core.app.ServiceCompat
 import com.grimnej.lmcomment.LmCommentContract
 import com.grimnej.lmcomment.workflow.CaptureWorkflowActivity
@@ -35,12 +36,17 @@ class BubbleOverlayService : Service() {
             ACTION_RESET_POSITION -> bubbleWindow?.resetPosition()
             ACTION_START -> startBubble()
         }
+        if (!isRunning) stopSelf(startId)
         return START_NOT_STICKY
     }
 
     private fun startBubble() {
+        if (!Settings.canDrawOverlays(this)) {
+            if (isRunning) stopBubble() else stopSelf()
+            return
+        }
         if (isRunning) {
-            bubbleWindow?.show()
+            if (bubbleWindow?.show() != true) stopBubble()
             return
         }
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -54,8 +60,11 @@ class BubbleOverlayService : Service() {
             BubbleNotification.create(this),
             type,
         )
+        if (bubbleWindow?.show() != true) {
+            stopBubble()
+            return
+        }
         isRunning = true
-        bubbleWindow?.show()
         handler.removeCallbacks(hardStop)
         handler.postDelayed(hardStop, SESSION_HARD_LIMIT_MS)
     }
@@ -67,38 +76,54 @@ class BubbleOverlayService : Service() {
         val intent = Intent(this, CaptureWorkflowActivity::class.java)
             .putExtra(EXTRA_WORKFLOW_SESSION_ID, sessionId)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
-        startActivity(intent)
+        runCatching { startActivity(intent) }.onFailure {
+            activeWorkflowSessionId = null
+            if (isRunning && bubbleWindow?.show() != true) stopBubble()
+        }
     }
 
     private fun launchManualWorkflow(intent: Intent) {
         if (!isRunning || activeWorkflowSessionId != null) return
         val sessionId = UUID.randomUUID().toString()
         activeWorkflowSessionId = sessionId
-        bubbleWindow?.hide()
-        startActivity(
-            Intent(this, CaptureWorkflowActivity::class.java)
-                .putExtra(EXTRA_WORKFLOW_SESSION_ID, sessionId)
-                .putExtra(CaptureWorkflowActivity.EXTRA_MANUAL_ENTRY, true)
-                .putExtra(
-                    CaptureWorkflowActivity.EXTRA_INITIAL_TEXT,
-                    intent.getStringExtra(CaptureWorkflowActivity.EXTRA_INITIAL_TEXT).orEmpty(),
-                )
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION),
-        )
+        if (bubbleWindow?.hide() != true) {
+            activeWorkflowSessionId = null
+            stopBubble()
+            return
+        }
+        runCatching {
+            startActivity(
+                Intent(this, CaptureWorkflowActivity::class.java)
+                    .putExtra(EXTRA_WORKFLOW_SESSION_ID, sessionId)
+                    .putExtra(CaptureWorkflowActivity.EXTRA_MANUAL_ENTRY, true)
+                    .putExtra(
+                        CaptureWorkflowActivity.EXTRA_INITIAL_TEXT,
+                        intent.getStringExtra(CaptureWorkflowActivity.EXTRA_INITIAL_TEXT).orEmpty(),
+                    )
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION),
+            )
+        }.onFailure {
+            activeWorkflowSessionId = null
+            if (isRunning && bubbleWindow?.show() != true) stopBubble()
+        }
     }
 
     private fun hideForWorkflow(intent: Intent) {
         val sessionId = intent.getStringExtra(EXTRA_WORKFLOW_SESSION_ID)
         if (sessionId == null || sessionId != activeWorkflowSessionId) return
-        bubbleWindow?.hide()
-        intent.resultReceiver()?.send(RESULT_BUBBLE_HIDDEN, null)
+        val result = if (bubbleWindow?.hide() == true) {
+            RESULT_BUBBLE_HIDDEN
+        } else {
+            RESULT_BUBBLE_HIDE_FAILED
+        }
+        intent.resultReceiver()?.send(result, null)
     }
 
     private fun restoreAfterWorkflow(intent: Intent) {
         val sessionId = intent.getStringExtra(EXTRA_WORKFLOW_SESSION_ID)
         if (sessionId == null || sessionId != activeWorkflowSessionId) return
         activeWorkflowSessionId = null
-        if (isRunning) bubbleWindow?.show()
+        if (isRunning && bubbleWindow?.show() != true) stopBubble()
     }
 
     private fun stopBubble() {
@@ -143,6 +168,7 @@ class BubbleOverlayService : Service() {
         const val EXTRA_WORKFLOW_SESSION_ID = "workflow_session_id"
         const val EXTRA_ACK_RECEIVER = "ack_receiver"
         const val RESULT_BUBBLE_HIDDEN = 1
+        const val RESULT_BUBBLE_HIDE_FAILED = 2
         private const val SESSION_HARD_LIMIT_MS = 45L * 60L * 1000L
 
         @Volatile

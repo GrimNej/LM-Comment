@@ -13,7 +13,7 @@
       "title": "Answer a deadline request",
       "category": "Professional reply",
       "recommendedTone": "professional",
-      "sourceText": "Synthetic demo message: Hi — could you send the revised launch brief by Thursday afternoon? Please include the updated rollout dates and the two open risks so I can review everything before Friday morning."
+      "sourceText": "Synthetic demo message: Hi, could you send the revised launch brief by Thursday afternoon? Please include the updated rollout dates and the two open risks so I can review everything before Friday morning."
     },
     {
       "id": "technical",

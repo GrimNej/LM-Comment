@@ -75,7 +75,7 @@ export default function DiagnosticsScreen() {
     <Screen scroll contentContainerStyle={styles.screenContent}>
       <TopBar
         title="Diagnostics"
-        subtitle="Safe, content-free signals"
+        subtitle="App and capture status"
         onBack={() => router.back()}
       />
 
@@ -89,13 +89,10 @@ export default function DiagnosticsScreen() {
           },
         ]}
       >
-        <View style={styles.safetyHeader}>
-          <Text style={[typography.heading, { color: colors.textPrimary }]}>Safe by construction</Text>
-          <StatusChip label="No content" tone="success" />
-        </View>
+        <Text style={[typography.heading, { color: colors.textPrimary }]}>Diagnostics stay content-free</Text>
         <Text style={[typography.small, { color: colors.textSecondary }]}>
-          This screen cannot display tokens, OCR text, generated replies, request bodies, or
-          screenshots.
+          This screen shows app status and resource counts. It never includes tokens, OCR text,
+          generated replies, request bodies, or screenshots.
         </Text>
       </View>
 
@@ -166,7 +163,7 @@ export default function DiagnosticsScreen() {
             />
             <SettingRow
               label="Last stable error"
-              description="A fixed code only—never provider or user content."
+              description="A fixed code only, never provider or user content."
               value={diagnostics.lastStableErrorCode ?? 'None'}
             />
           </View>
@@ -184,7 +181,7 @@ export default function DiagnosticsScreen() {
             ) : (
               <SettingRow
                 label="Resource counters"
-                description="Available only in debuggable builds."
+                description="Available only in debug builds."
                 value="Hidden in release"
               />
             )}
@@ -244,11 +241,4 @@ function capitalize(value: string): string {
 const styles = StyleSheet.create({
   screenContent: { gap: 32, paddingBottom: 48 },
   safetyCard: { borderWidth: 1, padding: 18, gap: 10 },
-  safetyHeader: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
 });

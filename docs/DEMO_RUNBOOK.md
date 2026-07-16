@@ -14,7 +14,7 @@ This runbook is for the final direct-installed Android APK. The authoritative sp
 
 1. Restart the phone, disable battery saver, and enable Do Not Disturb.
 2. Confirm free storage, notification permission, and **Display over other apps** access.
-3. Open Home and confirm `READY`; use Diagnostics to confirm relay health.
+3. Open Home and confirm `Ready to start`; use Diagnostics to confirm relay health.
 4. Run one real synthetic fixture generation and one complete capture/OCR flow.
 5. Close the workflow, stop the bubble, clear the clipboard, and close unrelated apps.
 6. Keep the relay warm with a health check; do not redeploy or change settings.
@@ -22,7 +22,7 @@ This runbook is for the final direct-installed Android APK. The authoritative sp
 ## Immediately before presenting
 
 1. Put the prepared synthetic post on screen.
-2. Open LM-Comment Home, confirm `READY`, and start exactly one bubble.
+2. Open LM-Comment Home, confirm `Ready to start`, and start exactly one bubble.
 3. Keep the fallback fixture and offline video one gesture away.
 4. Do not update the APK, backend, model, token, or phone OS.
 

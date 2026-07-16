@@ -4,7 +4,7 @@ import LMCommentAndroid, {
 } from '@lm-comment/android';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState, Platform, StyleSheet, Text, View, useColorScheme } from 'react-native';
+import { AppState, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { bootstrapDemoConfiguration } from '@/lib/demo-configuration';
 import {
@@ -16,6 +16,8 @@ import {
   SectionHeading,
   StatusHero,
   TopBar,
+  type AppColors,
+  useAppTheme,
 } from '@/ui';
 
 type RelayState = 'checking' | 'ready' | 'unavailable';
@@ -32,8 +34,8 @@ async function checkRelay(): Promise<Exclude<RelayState, 'checking'>> {
 
 export default function SetupScreen() {
   const router = useRouter();
-  const scheme = useColorScheme();
-  const styles = useMemo(() => createStyles(scheme === 'light'), [scheme]);
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const refreshId = useRef(0);
   const [nativeReadiness, setNativeReadiness] = useState<NativeReadiness | null>(null);
   const [demoStatus, setDemoStatus] = useState<DemoConfigurationStatus | null>(null);
@@ -127,18 +129,18 @@ export default function SetupScreen() {
     <Screen scroll contentContainerStyle={styles.screenContent}>
       <TopBar
         title="Setup"
-        subtitle="One-time Android readiness"
+        subtitle="Permissions and connection"
         onBack={() => router.back()}
       />
 
       <StatusHero
         status={checking ? 'checking' : fullyReady ? 'ready' : relayState === 'unavailable' ? 'unavailable' : 'setup'}
-        label={fullyReady ? 'READY TO DEMO' : 'FOUR QUICK CHECKS'}
-        title={fullyReady ? 'Everything is connected.' : 'No account. No provider setup.'}
+        label={fullyReady ? 'Ready' : 'Finish setup'}
+        title={fullyReady ? "You're ready to start." : 'Complete the checks below.'}
         body={
           fullyReady
-            ? 'Return Home to start the bubble or open a synthetic text fixture.'
-            : 'LM-Comment only asks for the Android access required by the judge workflow.'
+            ? 'Go Home to start the bubble or try a sample.'
+            : 'Allow the bubble and notifications, then check the relay.'
         }
       >
         <PrimaryButton
@@ -157,19 +159,18 @@ export default function SetupScreen() {
       ) : null}
 
       <SectionHeading
-        eyebrow="THE COMPLETE SETUP"
-        title="Four checks, in order"
-        description="The first two are Android controls. Capture consent appears only when you actually capture."
+        title="Complete four checks"
+        description="Android asks to share the screen each time you tap the bubble."
       />
 
       <View style={styles.stepStack}>
         <View style={styles.stepGroup}>
           <ReadinessCard
-            label="1 · Display over apps"
+            label="1. Display over apps"
             status={!nativeReadiness ? 'checking' : overlayReady ? 'ready' : 'needed'}
             detail={
               overlayReady
-                ? 'Granted — the compact bubble can appear over another app.'
+                ? 'Allowed. The bubble can appear over another app.'
                 : 'Android uses this permission only for the compact bubble.'
             }
             onPress={!overlayReady ? () => void openOverlaySettings() : undefined}
@@ -186,11 +187,11 @@ export default function SetupScreen() {
 
         <View style={styles.stepGroup}>
           <ReadinessCard
-            label="2 · Foreground notification"
+            label="2. Foreground notification"
             status={!nativeReadiness ? 'checking' : notificationReady ? 'ready' : 'needed'}
             detail={
               notificationReady
-                ? 'Ready — Android can show the bubble service notification.'
+                ? 'Allowed. Android can show the bubble service notification.'
                 : 'Required on newer Android versions while the bubble is active.'
             }
             onPress={!notificationReady ? () => void requestNotifications() : undefined}
@@ -206,20 +207,20 @@ export default function SetupScreen() {
         </View>
 
         <ReadinessCard
-          label="3 · Screen-capture consent"
+          label="3. Screen-capture consent"
           status="ready"
-          detail="Nothing to grant now. Android asks each time you tap the bubble, before the one-shot capture."
+          detail="No setting is needed. Android asks each time you tap the bubble."
         />
 
         <View style={styles.stepGroup}>
           <ReadinessCard
-            label="4 · Demo backend"
+            label="4. Demo backend"
             status={relayState}
             detail={
               relayState === 'ready'
-                ? `Reachable${demoStatus?.relayHostname ? ` at ${demoStatus.relayHostname}` : ''}; demo access is ${tokenReady ? 'configured' : 'missing'}.`
+                ? `Reachable${demoStatus?.relayHostname ? ` at ${demoStatus.relayHostname}` : ''}. Demo token is ${tokenReady ? 'configured' : 'missing'}.`
                 : relayState === 'checking'
-                  ? 'Checking the safe health endpoint.'
+                  ? 'Checking relay health.'
                   : 'The phone cannot currently reach generation.'
             }
             onPress={relayState === 'unavailable' ? () => void retryRelay() : undefined}
@@ -236,20 +237,19 @@ export default function SetupScreen() {
 
       {!tokenReady && demoStatus ? (
         <View style={styles.messageCard}>
-          <Text style={styles.messageTitle}>Judge configuration is missing</Text>
+          <Text style={styles.messageTitle}>Demo token is missing</Text>
           <Text style={styles.messageBody}>
-            Reinstall the prepared judge build. This screen never asks for a provider key.
+            Reinstall the prepared build. This screen never asks for a Groq API key.
           </Text>
         </View>
       ) : null}
 
-      <PrivacyBanner text="Screenshots stay on this device. Only reviewed text is sent." />
+      <PrivacyBanner text="The screenshot stays in memory on your phone. Reviewed text and generation choices go to the relay." />
 
       <View style={styles.boundaryCard}>
-        <Text style={styles.boundaryEyebrow}>WHAT HAPPENS AT USE TIME</Text>
-        <Text style={styles.boundaryTitle}>Capture remains an explicit Android action.</Text>
+        <Text style={styles.boundaryTitle}>You approve every capture</Text>
         <Text style={styles.boundaryBody}>
-          Tap the bubble, approve the system capture prompt, crop on-device, and review the OCR text. Nothing is posted automatically.
+          Android asks before each capture. Crop and review happen on your phone, and nothing is posted automatically.
         </Text>
       </View>
 
@@ -258,26 +258,7 @@ export default function SetupScreen() {
   );
 }
 
-function createStyles(light: boolean) {
-  const colors = light
-    ? {
-        outline: '#D5DBE6',
-        surface: '#FFFFFF',
-        textPrimary: '#121520',
-        textSecondary: '#4F586A',
-        textMuted: '#687386',
-        warning: '#9A5700',
-        warningSurface: '#FFF7E9',
-      }
-    : {
-        outline: '#30384A',
-        surface: '#141822',
-        textPrimary: '#F5F7FB',
-        textSecondary: '#B7BFCE',
-        textMuted: '#8D97A8',
-        warning: '#FFB85C',
-        warningSurface: '#241C14',
-      };
+function createStyles(colors: AppColors) {
   return StyleSheet.create({
     screenContent: {
       gap: 28,
@@ -292,7 +273,7 @@ function createStyles(light: boolean) {
     messageCard: {
       backgroundColor: colors.warningSurface,
       borderColor: colors.warning,
-      borderRadius: 16,
+      borderRadius: 11,
       borderWidth: 1,
       marginTop: 14,
       padding: 16,
@@ -312,25 +293,17 @@ function createStyles(light: boolean) {
     boundaryCard: {
       backgroundColor: colors.surface,
       borderColor: colors.outline,
-      borderRadius: 20,
+      borderRadius: 11,
       borderWidth: 1,
       marginBottom: 16,
       marginTop: 4,
       padding: 18,
-    },
-    boundaryEyebrow: {
-      color: colors.textMuted,
-      fontSize: 11,
-      fontWeight: '700',
-      letterSpacing: 1.2,
-      lineHeight: 16,
     },
     boundaryTitle: {
       color: colors.textPrimary,
       fontSize: 18,
       fontWeight: '700',
       lineHeight: 24,
-      marginTop: 8,
     },
     boundaryBody: {
       color: colors.textSecondary,

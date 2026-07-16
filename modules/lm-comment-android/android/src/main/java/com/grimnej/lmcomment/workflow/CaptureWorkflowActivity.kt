@@ -15,10 +15,12 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.ResultReceiver
 import android.provider.Settings
 import android.view.Choreographer
 import android.view.HapticFeedbackConstants
+import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -44,24 +46,31 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     private var consentLaunched = false
     private var directManualEntry = false
     private var newCaptureTransitionInProgress = false
+    private val postConsentGate = PostConsentCaptureGate(requiredCommittedFrames = 2)
+    private val captureReadinessHandler = Handler(Looper.getMainLooper())
+    private var pendingProjectionGrant: PendingProjectionGrant? = null
+    private var frameCommitGeneration = 0
+    private val captureReadinessTimeout = Runnable {
+        if (pendingProjectionGrant != null && !isFinishing) {
+            finishWorkflow(CaptureError.CAPTURE_FAILED)
+        }
+    }
 
     private val projectionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
+            clearPendingProjectionGrant()
             finishWorkflow(CaptureError.PROJECTION_CANCELLED)
             return@registerForActivityResult
         }
-        waitOneFrame {
-            val sessionId = workflowSessionId ?: return@waitOneFrame finishWorkflow(CaptureError.CAPTURE_FAILED)
-            val serviceIntent = OneShotCaptureService.captureIntent(
-                this,
-                sessionId,
-                result.resultCode,
-                requireNotNull(result.data),
-            )
-            ContextCompat.startForegroundService(this, serviceIntent)
-        }
+        pendingProjectionGrant = PendingProjectionGrant(
+            resultCode = result.resultCode,
+            data = requireNotNull(result.data),
+        )
+        captureReadinessHandler.removeCallbacks(captureReadinessTimeout)
+        captureReadinessHandler.postDelayed(captureReadinessTimeout, CAPTURE_READINESS_TIMEOUT_MS)
+        handleCaptureGateAction(postConsentGate.onConsentAccepted())
     }
 
     private val captureConnection = object : ServiceConnection {
@@ -175,6 +184,23 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         super.onSaveInstanceState(outState)
     }
 
+    override fun onPostResume() {
+        super.onPostResume()
+        handleCaptureGateAction(postConsentGate.onResumed())
+    }
+
+    override fun onPause() {
+        frameCommitGeneration++
+        postConsentGate.onPaused()
+        super.onPause()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus) frameCommitGeneration++
+        handleCaptureGateAction(postConsentGate.onWindowFocusChanged(hasFocus))
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         val incoming = intent.getStringExtra(BubbleOverlayService.EXTRA_WORKFLOW_SESSION_ID)
@@ -187,8 +213,14 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     private fun requestBubbleHide(sessionId: String) {
         val receiver = object : ResultReceiver(Handler(mainLooper)) {
             override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
-                if (resultCode == BubbleOverlayService.RESULT_BUBBLE_HIDDEN && !isFinishing) {
-                    waitOneFrame(::launchProjectionConsent)
+                if (isFinishing) return
+                when (resultCode) {
+                    BubbleOverlayService.RESULT_BUBBLE_HIDDEN -> {
+                        waitOneFrame(::launchProjectionConsent)
+                    }
+                    BubbleOverlayService.RESULT_BUBBLE_HIDE_FAILED -> {
+                        finishWorkflow(CaptureError.CAPTURE_FAILED)
+                    }
                 }
             }
         }
@@ -203,6 +235,9 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     private fun launchProjectionConsent() {
         if (consentLaunched || isFinishing) return
         consentLaunched = true
+        pendingProjectionGrant = null
+        captureReadinessHandler.removeCallbacks(captureReadinessTimeout)
+        postConsentGate.onConsentLaunched()
         val manager = getSystemService(MediaProjectionManager::class.java)
         val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             manager.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay())
@@ -210,6 +245,74 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
             manager.createScreenCaptureIntent()
         }
         projectionLauncher.launch(intent)
+    }
+
+    private fun handleCaptureGateAction(action: CaptureGateAction) {
+        when (action) {
+            CaptureGateAction.WAIT -> Unit
+            CaptureGateAction.REQUEST_COMMITTED_FRAME -> requestCommittedCloakFrame()
+            CaptureGateAction.START_CAPTURE -> startPendingProjectionCapture()
+        }
+    }
+
+    private fun requestCommittedCloakFrame() {
+        val decor = window.decorView
+        val generation = ++frameCommitGeneration
+        val committed = Runnable {
+            if (generation != frameCommitGeneration || isFinishing || isDestroyed) return@Runnable
+            if (!hasWindowFocus() ||
+                !decor.isAttachedToWindow ||
+                !decor.isShown ||
+                decor.visibility != View.VISIBLE ||
+                viewModel.state.value !is WorkflowState.CaptureCloak
+            ) {
+                if (!hasWindowFocus()) {
+                    handleCaptureGateAction(postConsentGate.onWindowFocusChanged(false))
+                }
+                return@Runnable
+            }
+            handleCaptureGateAction(postConsentGate.onFrameCommitted())
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && decor.isHardwareAccelerated) {
+            val observer = decor.viewTreeObserver
+            if (!observer.isAlive) return
+            observer.registerFrameCommitCallback {
+                decor.post(committed)
+            }
+            decor.invalidate()
+        } else {
+            // API 26-28 has no frame-commit callback. A post-focus vsync is the
+            // closest measurable fallback and never relies on milliseconds.
+            Choreographer.getInstance().postFrameCallback { committed.run() }
+        }
+    }
+
+    private fun startPendingProjectionCapture() {
+        val grant = pendingProjectionGrant
+            ?: return finishWorkflow(CaptureError.CAPTURE_FAILED)
+        val sessionId = workflowSessionId
+            ?: return finishWorkflow(CaptureError.CAPTURE_FAILED)
+        if (viewModel.state.value !is WorkflowState.CaptureCloak || !hasWindowFocus()) {
+            return finishWorkflow(CaptureError.CAPTURE_FAILED)
+        }
+        pendingProjectionGrant = null
+        captureReadinessHandler.removeCallbacks(captureReadinessTimeout)
+        frameCommitGeneration++
+        val serviceIntent = OneShotCaptureService.captureIntent(
+            this,
+            sessionId,
+            grant.resultCode,
+            grant.data,
+        )
+        ContextCompat.startForegroundService(this, serviceIntent)
+    }
+
+    private fun clearPendingProjectionGrant() {
+        pendingProjectionGrant = null
+        captureReadinessHandler.removeCallbacks(captureReadinessTimeout)
+        frameCommitGeneration++
+        postConsentGate.cancel()
     }
 
     override fun onFrameReady(sessionId: String) {
@@ -237,9 +340,10 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
 
     private fun enterSensitiveWorkflow() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        window.setBackgroundDrawable(ColorDrawable(Color.rgb(9, 11, 16)))
-        window.statusBarColor = Color.rgb(9, 11, 16)
-        window.navigationBarColor = Color.rgb(9, 11, 16)
+        val brandInk = Color.rgb(16, 20, 17)
+        window.setBackgroundDrawable(ColorDrawable(brandInk))
+        window.statusBarColor = brandInk
+        window.navigationBarColor = brandInk
         WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 
@@ -335,6 +439,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     private fun finishWorkflow(error: CaptureError? = null) {
         if (cleanupComplete) return
         cleanupComplete = true
+        clearPendingProjectionGrant()
         error?.let {
             StableErrorStore(this).record(it.name)
             Toast.makeText(this, errorMessage(it), Toast.LENGTH_SHORT).show()
@@ -379,6 +484,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
     }
 
     override fun onDestroy() {
+        clearPendingProjectionGrant()
         if (isFinishing && !cleanupComplete) finishWorkflow()
         if (!isFinishing) releaseCaptureBinding(cancel = false)
         super.onDestroy()
@@ -388,5 +494,11 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         const val EXTRA_MANUAL_ENTRY = "com.grimnej.lmcomment.extra.MANUAL_ENTRY"
         const val EXTRA_INITIAL_TEXT = "com.grimnej.lmcomment.extra.INITIAL_TEXT"
         const val STATE_CONSENT_LAUNCHED = "consent_launched"
+        private const val CAPTURE_READINESS_TIMEOUT_MS = 5_000L
     }
+
+    private data class PendingProjectionGrant(
+        val resultCode: Int,
+        val data: Intent,
+    )
 }

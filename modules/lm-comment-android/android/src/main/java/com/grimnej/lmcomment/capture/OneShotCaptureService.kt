@@ -69,6 +69,7 @@ class OneShotCaptureService : Service() {
     private var geometryGeneration = 0
     private var resizeAttempts = 0
     private var blankFrames = 0
+    private val compositorWarmupGate = CompositorWarmupGate()
     private var terminal = AtomicBoolean(false)
     private val captureTimeout = Runnable { fail(CaptureError.CAPTURE_TIMEOUT) }
     private val resultTimeout = Runnable { recyclePendingBitmap() }
@@ -119,6 +120,7 @@ class OneShotCaptureService : Service() {
         geometryGeneration = 0
         resizeAttempts = 0
         blankFrames = 0
+        compositorWarmupGate.reset()
         val owned = CaptureSessionResources()
         captureResources = owned
         try {
@@ -218,6 +220,12 @@ class OneShotCaptureService : Service() {
                 return@setOnImageAvailableListener
             }
             owned.image = image
+            if (!compositorWarmupGate.shouldConvertNextFrame()) {
+                image.close()
+                CaptureResourceCounters.activeImage.decrementAndGet()
+                owned.image = null
+                return@setOnImageAvailableListener
+            }
             try {
                 val bitmap = FrameConverter.toBitmap(image, expected.width, expected.height)
                 image.close()

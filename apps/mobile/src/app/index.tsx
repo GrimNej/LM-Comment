@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from 'react-native';
 
 import { bootstrapDemoConfiguration } from '@/lib/demo-configuration';
@@ -25,6 +24,8 @@ import {
   SectionHeading,
   StatusHero,
   TopBar,
+  type AppColors,
+  useAppTheme,
 } from '@/ui';
 
 type RelayState = 'checking' | 'ready' | 'unavailable';
@@ -36,30 +37,30 @@ type Fixture = {
   body: string;
   tags: string[];
   sourceText: string;
-  accent: 'violet' | 'cyan' | 'warm';
+  accent: 'lime' | 'terracotta' | 'warm';
 };
 
 const FIXTURES: readonly Fixture[] = [
   {
-    eyebrow: 'SOCIAL REACTION',
+    eyebrow: 'Social post',
     title: 'Celebrate a personal win',
     body: 'A warm post about finishing a first 10K in difficult weather.',
     tags: ['Friendly', 'Social'],
-    accent: 'violet',
+    accent: 'lime',
     sourceText:
       'Synthetic demo post: I finished my first 10K this morning! It rained for most of the route, but the people cheering made every kilometre worth it. Still cannot believe I actually did it.',
   },
   {
-    eyebrow: 'PROFESSIONAL REPLY',
+    eyebrow: 'Work message',
     title: 'Answer a deadline request',
     body: 'A teammate asks for a revised launch brief before Thursday.',
     tags: ['Professional', 'Work'],
-    accent: 'cyan',
+    accent: 'terracotta',
     sourceText:
-      'Synthetic demo message: Hi — could you send the revised launch brief by Thursday afternoon? Please include the updated rollout dates and the two open risks so I can review everything before Friday morning.',
+      'Synthetic demo message: Hi, could you send the revised launch brief by Thursday afternoon? Please include the updated rollout dates and the two open risks so I can review everything before Friday morning.',
   },
   {
-    eyebrow: 'TECHNICAL DISCUSSION',
+    eyebrow: 'Technical thread',
     title: 'Respond to a design tradeoff',
     body: 'A concise engineering discussion about privacy and caching.',
     tags: ['Concise', 'Technical'],
@@ -81,8 +82,8 @@ async function getRelayState(): Promise<Exclude<RelayState, 'checking'>> {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const scheme = useColorScheme();
-  const styles = useMemo(() => createStyles(scheme === 'light'), [scheme]);
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const refreshId = useRef(0);
   const [nativeReadiness, setNativeReadiness] = useState<NativeReadiness | null>(null);
   const [demoStatus, setDemoStatus] = useState<DemoConfigurationStatus | null>(null);
@@ -139,18 +140,18 @@ export default function HomeScreen() {
   })();
 
   const heroLabel = {
-    active: 'BUBBLE ACTIVE',
-    checking: 'CHECKING READINESS',
-    ready: 'READY',
-    setup: 'SETUP NEEDED',
-    unavailable: 'RELAY UNAVAILABLE',
+    active: 'Bubble active',
+    checking: 'Checking setup',
+    ready: 'Ready to start',
+    setup: 'Finish setup',
+    unavailable: 'Relay offline',
   }[heroState];
   const heroBody = {
-    active: 'The compact bubble is available over other apps. Tap it when context appears.',
-    checking: 'Confirming the local workflow and demo relay.',
-    ready: 'Everything is connected. Start the bubble or try the workflow with safe sample text.',
-    setup: 'A couple of Android permissions are still waiting. Setup takes about a minute.',
-    unavailable: 'On-device capture is ready, but generation cannot reach the demo relay right now.',
+    active: 'Open a post or message, then tap the bubble.',
+    checking: 'Checking permissions and the relay connection.',
+    ready: 'Start the bubble or try a sample below.',
+    setup: 'Allow the missing Android permissions before you start.',
+    unavailable: "Capture still works, but the relay can't generate replies right now.",
   }[heroState];
 
   const toggleBubble = useCallback(async () => {
@@ -207,7 +208,7 @@ export default function HomeScreen() {
       <StatusHero
         status={heroState}
         label={heroLabel}
-        title="Turn what is on your screen into a response worth posting."
+        title="Write a reply from text on your screen."
         body={heroBody}
       >
         <View style={styles.heroActions}>
@@ -238,12 +239,11 @@ export default function HomeScreen() {
         </View>
       ) : null}
 
-      <PrivacyBanner text="Screenshots stay on this device. Only reviewed text is sent." />
+      <PrivacyBanner text="The screenshot stays in memory on your phone. Reviewed text and generation choices go to the relay." />
 
       <SectionHeading
-        eyebrow="SYSTEM CHECK"
-        title="Ready when every signal is clear"
-        description="Tap a missing item to finish setup. No account is required."
+        title="Check permissions and connection"
+        description="Tap a missing item to finish setup."
       />
       <View style={styles.cardStack}>
         <ReadinessCard
@@ -272,15 +272,14 @@ export default function HomeScreen() {
         <ReadinessCard
           label="Demo token"
           status={!demoStatus ? 'checking' : tokenReady ? 'ready' : 'needed'}
-          detail={tokenReady ? 'Judge access configured privately' : 'Demo access needs configuration'}
+          detail={tokenReady ? 'Demo token configured' : 'Demo token missing'}
           onPress={!tokenReady ? () => router.push('/setup') : undefined}
         />
       </View>
 
       <SectionHeading
-        eyebrow="REAL WORKFLOW · SYNTHETIC TEXT"
-        title="See the idea in under a minute"
-        description="Each sample opens Manual Text, then uses the same relay, editing, and copy flow as capture."
+        title="Try a sample reply"
+        description="Each sample opens editable text and uses the same generation and copy steps as capture."
       />
       <View style={styles.cardStack}>
         {FIXTURES.map((fixture) => (
@@ -297,32 +296,19 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.footerActions}>
-        <SecondaryButton label="Open demo guide" onPress={() => router.push('/demo')} />
+        <SecondaryButton label="Browse samples" onPress={() => router.push('/demo')} />
         <SecondaryButton label="Review setup" onPress={() => router.push('/setup')} />
         <SecondaryButton label="Diagnostics" onPress={() => router.push('/diagnostics')} />
         <SecondaryButton label="Settings" onPress={() => router.push('/settings')} />
       </View>
       <Text style={styles.footerNote}>
-        LM-Comment never posts for you. Copy is always an explicit action.
+        LM-Comment never posts a reply. Tap Copy when you want to use one.
       </Text>
     </Screen>
   );
 }
 
-function createStyles(light: boolean) {
-  const colors = light
-    ? {
-        danger: '#B72942',
-        dangerSurface: '#FFF1F3',
-        textPrimary: '#121520',
-        textSecondary: '#4F586A',
-      }
-    : {
-        danger: '#FF7182',
-        dangerSurface: '#26151D',
-        textPrimary: '#F5F7FB',
-        textSecondary: '#B7BFCE',
-      };
+function createStyles(colors: AppColors) {
   return StyleSheet.create({
     screenContent: {
       gap: 28,
@@ -337,7 +323,7 @@ function createStyles(light: boolean) {
     errorCard: {
       backgroundColor: colors.dangerSurface,
       borderColor: colors.danger,
-      borderRadius: 16,
+      borderRadius: 11,
       borderWidth: 1,
       marginTop: 14,
       padding: 16,

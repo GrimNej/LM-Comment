@@ -10,11 +10,25 @@ enum class BubbleEdge {
     RIGHT,
 }
 
-data class BubbleAnchor(
-    val edge: BubbleEdge,
-    val verticalFraction: Float,
-) {
-    fun position(bounds: Rect, bubbleSize: Int): Point {
+internal data class BubbleBounds(
+    val left: Int,
+    val top: Int,
+    val right: Int,
+    val bottom: Int,
+)
+
+internal data class BubblePosition(
+    val x: Int,
+    val y: Int,
+)
+
+internal object BubbleAnchorMath {
+    fun position(
+        edge: BubbleEdge,
+        verticalFraction: Float,
+        bounds: BubbleBounds,
+        bubbleSize: Int,
+    ): BubblePosition {
         val minY = bounds.top
         val maxY = (bounds.bottom - bubbleSize).coerceAtLeast(minY)
         val y = (minY + (maxY - minY) * verticalFraction.coerceIn(0f, 1f)).roundToInt()
@@ -23,17 +37,47 @@ data class BubbleAnchor(
         } else {
             (bounds.right - bubbleSize).coerceAtLeast(bounds.left)
         }
-        return Point(x, y)
+        return BubblePosition(x, y)
+    }
+
+    fun fromPosition(
+        x: Int,
+        y: Int,
+        bounds: BubbleBounds,
+        bubbleSize: Int,
+    ): Pair<BubbleEdge, Float> {
+        val center = bounds.left + (bounds.right - bounds.left) / 2
+        val edge = if (x + bubbleSize / 2 < center) BubbleEdge.LEFT else BubbleEdge.RIGHT
+        val available = (bounds.bottom - bounds.top - bubbleSize).coerceAtLeast(1)
+        val fraction = ((y - bounds.top).toFloat() / available).coerceIn(0f, 1f)
+        return edge to fraction
+    }
+}
+
+data class BubbleAnchor(
+    val edge: BubbleEdge,
+    val verticalFraction: Float,
+) {
+    fun position(bounds: Rect, bubbleSize: Int): Point {
+        val position = BubbleAnchorMath.position(
+            edge = edge,
+            verticalFraction = verticalFraction,
+            bounds = BubbleBounds(bounds.left, bounds.top, bounds.right, bounds.bottom),
+            bubbleSize = bubbleSize,
+        )
+        return Point(position.x, position.y)
     }
 
     companion object {
         val DEFAULT = BubbleAnchor(BubbleEdge.RIGHT, 0.42f)
 
         fun fromPosition(x: Int, y: Int, bounds: Rect, bubbleSize: Int): BubbleAnchor {
-            val center = bounds.left + bounds.width() / 2
-            val edge = if (x + bubbleSize / 2 < center) BubbleEdge.LEFT else BubbleEdge.RIGHT
-            val available = (bounds.height() - bubbleSize).coerceAtLeast(1)
-            val fraction = ((y - bounds.top).toFloat() / available).coerceIn(0f, 1f)
+            val (edge, fraction) = BubbleAnchorMath.fromPosition(
+                x = x,
+                y = y,
+                bounds = BubbleBounds(bounds.left, bounds.top, bounds.right, bounds.bottom),
+                bubbleSize = bubbleSize,
+            )
             return BubbleAnchor(edge, fraction)
         }
     }

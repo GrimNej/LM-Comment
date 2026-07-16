@@ -2,7 +2,7 @@
   "name": "lm-comment",
   "version": "0.1.0",
   "private": true,
-  "description": "A screen-aware Android writing assistant built for a hackathon demo.",
+  "description": "An Android writing assistant that turns screen context into editable replies.",
   "license": "MIT",
   "packageManager": "pnpm@10.34.5",
   "engines": {
@@ -16,9 +16,10 @@
     "test": "pnpm -r --if-present test",
     "check:scope": "node scripts/check-scope.mjs",
     "check:naming": "node scripts/check-naming.mjs",
+    "check:copy": "node scripts/check-copy-style.mjs",
     "check:secrets": "node scripts/check-secrets.mjs",
     "check:quality-set": "node scripts/validate-quality-set.mjs",
-    "check": "pnpm check:scope && pnpm check:naming && pnpm check:secrets && pnpm check:quality-set",
+    "check": "pnpm check:scope && pnpm check:naming && pnpm check:copy && pnpm check:secrets && pnpm check:quality-set",
     "quality": "pnpm check && pnpm lint && pnpm typecheck && pnpm test && pnpm relay:build",
     "mobile:prebuild": "pnpm --filter @lm-comment/mobile prebuild",
     "mobile:android:debug": "node scripts/android-build.mjs debug",
@@ -27,6 +28,7 @@
     "relay:build": "pnpm --filter @lm-comment/relay build",
     "relay:start": "pnpm --filter @lm-comment/relay start",
     "relay:canary": "pnpm --filter @lm-comment/relay canary",
-    "collect:evidence": "node scripts/collect-evidence.mjs"
+    "collect:evidence": "node scripts/collect-evidence.mjs",
+    "brand:generate": "node scripts/generate-brand-assets.mjs"
   }
 }

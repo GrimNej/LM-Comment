@@ -1,7 +1,7 @@
 # LM‑Comment
-## Final Hackathon Implementation Blueprint — Revision 5
+## Final Hackathon Implementation Blueprint: Revision 5
 
-> **Status:** Final implementation handoff — green for complete H0–H7 execution  
+> **Status:** Final implementation handoff, green for complete H0–H7 execution
 > **Purpose:** Build a polished, reliable Android hackathon demonstration  
 > **Legacy repository:** `https://github.com/GrimNej/Peek-A-Comment`  
 > **New product name:** **LM‑Comment**  
@@ -22,7 +22,7 @@ This revision deliberately removes those systems.
 
 The hackathon build has one job:
 
-> **Let a user summon a floating bubble over another Android app, capture one approved frame, crop relevant text, run OCR on-device, generate useful comment options through a real Groq-backed relay, edit one option, and copy it—all in a polished flow that can be demonstrated repeatedly.**
+> **Let a user summon a floating bubble over another Android app, capture one approved frame, crop relevant text, run OCR on-device, generate useful comment options through a real Groq-backed relay, edit one option, and copy it in a polished flow that can be demonstrated repeatedly.**
 
 The implementation is successful when that exact journey works five times consecutively in a signed APK without terminal intervention, app restarts, configuration edits, or manual debugging.
 
@@ -297,7 +297,7 @@ The demonstration should communicate three innovations:
 
 ## 2.4 Feature priorities
 
-### P0 — must work in the demonstration
+### P0: must work in the demonstration
 
 - Start and stop bubble.
 - Bubble drag.
@@ -323,7 +323,7 @@ The demonstration should communicate three innovations:
 - Signed APK.
 - Five complete rehearsals.
 
-### P1 — implement only after all P0 gates pass
+### P1: implement only after all P0 gates pass
 
 - Quick Settings tile.
 - One lightweight style profile.
@@ -333,7 +333,7 @@ The demonstration should communicate three innovations:
 - Haptic refinements.
 - Share intent for selected text.
 
-### P2 — post-hackathon
+### P2: post-hackathon
 
 - Public Play distribution.
 - Direct BYOK.
@@ -943,7 +943,7 @@ Each commit must be independently buildable for its completed layer.
 
 # 8. Phase plan
 
-# H0 — Repository and signed APK skeleton
+# H0: Repository and signed APK skeleton
 
 ## Goal
 
@@ -999,7 +999,7 @@ pnpm relay:build
 
 ---
 
-# H1 — Bubble technical vertical slice
+# H1: Bubble technical vertical slice
 
 ## Goal
 
@@ -1069,7 +1069,7 @@ Exactly one bubble exists, and the signed release-like APK passes the test seque
 ---
 
 
-# H2 — Transparent one-frame MediaProjection foreground service
+# H2: Transparent one-frame MediaProjection foreground service
 
 ## Goal
 
@@ -1459,7 +1459,7 @@ Repeat 20 approved captures and 20 consent cancellations.
 
 No H3 work begins until this is green.
 
-# H3 — Crop, bundled OCR, and text review
+# H3: Crop, bundled OCR, and text review
 
 ## Goal
 
@@ -1585,7 +1585,7 @@ OCR must work without a model download.
 
 ---
 
-# H4 — Real Fastify relay and Groq
+# H4: Real Fastify relay and Groq
 
 ## Goal
 
@@ -1874,7 +1874,7 @@ Tests:
 
 ---
 
-# H5 — Results, editing, regeneration, and copy
+# H5: Results, editing, regeneration, and copy
 
 ## Goal
 
@@ -1990,7 +1990,7 @@ On workflow close:
 
 ---
 
-# H6 — Expo product shell and visual polish
+# H6: Expo product shell and visual polish
 
 ## Goal
 
@@ -2237,7 +2237,7 @@ Do not spend the hackathon building a complex accessibility crop framework after
 
 ---
 
-# H7 — Hardening and demonstration rehearsal
+# H7: Hardening and demonstration rehearsal
 
 ## Goal
 
@@ -3014,7 +3014,7 @@ Any code or configuration change after rehearsal 5 resets the count for the affe
 
 > LM‑Comment helps you respond to anything visible on your Android screen without manually copying the context into another app.
 
-### Step 1 — Start
+### Step 1: Start
 
 Open LM‑Comment.
 
@@ -3024,13 +3024,13 @@ Show:
 - privacy message;
 - Start bubble.
 
-### Step 2 — Context
+### Step 2: Context
 
 Open a synthetic social post or safe public test content.
 
 Point out that the user remains in the original app.
 
-### Step 3 — Capture
+### Step 3: Capture
 
 Tap bubble.
 
@@ -3042,7 +3042,7 @@ Mention:
 
 > The screenshot stays on the phone. It is not sent to the AI.
 
-### Step 4 — Crop and OCR
+### Step 4: Crop and OCR
 
 Crop relevant text.
 
@@ -3054,7 +3054,7 @@ Mention:
 
 > OCR runs on-device, and I can verify exactly what the model will receive.
 
-### Step 5 — Generate
+### Step 5: Generate
 
 Choose Witty or Professional.
 
@@ -3064,7 +3064,7 @@ Mention:
 
 > Only this reviewed text and my instruction go through our small relay to Groq.
 
-### Step 6 — Human control
+### Step 6: Human control
 
 Edit one option.
 
@@ -3074,7 +3074,7 @@ Close.
 
 Show bubble returns.
 
-### Step 7 — Stop
+### Step 7: Stop
 
 Stop the bubble from notification or app.
 
@@ -3293,7 +3293,7 @@ A phase cannot be skipped.
 
 A later phase cannot be used to hide a broken earlier phase.
 
-The final implementation should feel complete because its scope is controlled—not feel incomplete because it attempted to build every future feature at once.
+The final implementation should feel complete because its scope is controlled, not feel incomplete because it attempted to build every future feature at once.
 
 ## Final acceptance statement
 

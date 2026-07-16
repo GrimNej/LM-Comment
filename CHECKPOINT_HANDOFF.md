@@ -1,4 +1,4 @@
-# LM-Comment checkpoint handoff — 2026-07-15
+# LM-Comment checkpoint handoff: 2026-07-15
 
 This is a deliberately clean stop point created under the owner's 30-minute cutoff.
 
@@ -29,7 +29,7 @@ The latest checkpoint APK is generated at:
 apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-It builds and verifies, but it is a developer checkpoint—not the judge APK. Crop/OCR/results are not wired yet.
+It builds and verifies, but it is a developer checkpoint, not the judge APK. Crop/OCR/results are not wired yet.
 
 ## Credential setup
 
