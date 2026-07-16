@@ -15,4 +15,18 @@ const response = await fetch(new URL('/v1/generate', baseUrl), {
   }),
 });
 if (!response.ok) throw new Error(`Canary failed with ${response.status}.`);
-console.log(JSON.stringify(await response.json(), null, 2));
+const body: unknown = await response.json();
+if (!body || typeof body !== 'object') throw new Error('Canary returned an invalid body.');
+const options = Reflect.get(body, 'options');
+if (!Array.isArray(options) || options.length !== 1) {
+  throw new Error('Canary returned the wrong option count.');
+}
+const option = options[0];
+if (!option || typeof option !== 'object'
+  || typeof Reflect.get(option, 'id') !== 'string'
+  || typeof Reflect.get(option, 'text') !== 'string'
+  || Reflect.get(option, 'text').length < 1
+  || Reflect.get(option, 'text').length > 700) {
+  throw new Error('Canary returned an invalid option.');
+}
+console.log('Relay canary passed with one valid option; content intentionally omitted.');
