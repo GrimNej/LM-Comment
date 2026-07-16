@@ -28,23 +28,26 @@ Supporting reports:
 
 ## Final automated release record
 
-The H7 source and relay hardening gates below were rerun after visual/capture regression commit `1d3c780`. The relay deployment remains at `d0910d5` because no relay code changed. The refreshed arm64 distribution artifact is frozen and inspected. A failed or unrun gate remains `PENDING` or `FAIL`.
+The H7 source and relay hardening gates below were rerun after interaction/theme regression commit `ab2a671`. The relay deployment remains at `d0910d5` because no relay code changed. The refreshed arm64 distribution artifact is frozen and inspected. A failed or unrun gate remains `PENDING` or `FAIL`.
 
 | Gate | Command/check | Final result |
 |---|---|---|
 | Workspace quality | `pnpm quality` | PASS: scope, naming, repository copy style, secret and 30-case quality-set validators; lint; typecheck; 19 relay tests; relay build |
-| Native unit suite | from `apps/mobile/android`: `.\gradlew.bat :lm-comment-android:testDebugUnitTest` | PASS: 98 total across 16 suites, zero failures, zero errors, one intentional opt-in live-test skip |
+| Native unit suite | from `apps/mobile/android`: `.\gradlew.bat :lm-comment-android:testDebugUnitTest` | PASS: 106 total across 17 suites, zero failures, zero errors, one intentional opt-in live-test skip |
 | Clean native generation | `pnpm mobile:prebuild` | PASS: clean prebuild; API-33-only splash attribute removed by the durable Expo config plugin |
-| API 36 instrumentation | x86_64 connected Android tests | PASS: 3 / 3 |
+| API 36 instrumentation | x86_64 connected Android tests | PASS: 4 / 4 |
 | Android lint | from `apps/mobile/android`: `.\gradlew.bat :app:lintRelease -PreactNativeArchitectures=x86_64 -x :react-native-worklets:lintAnalyzeRelease -x :react-native-reanimated:lintAnalyzeRelease` | PASS: app and LM-Comment module release lint; only the two named upstream analyzers were excluded after they crashed internally |
 | Debug APK | x86_64 `pnpm mobile:android:debug` | PASS |
-| Arm64 release APK | set `LM_COMMENT_ANDROID_ARCH=arm64-v8a`; `pnpm mobile:android:release` | PASS: 53,163,818-byte signed artifact; SHA-256 `3BC5DBCC9409460167AA85E0622E2A1E673E4C66EC4FCB418DCA3DA81B95018D` |
+| Arm64 release APK | set `LM_COMMENT_ANDROID_ARCH=arm64-v8a`; `pnpm mobile:android:release` | PASS: 53,184,298-byte signed artifact; SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970` |
 | Relay container | build `apps/relay/Dockerfile` and record image digest | PASS: `sha256:bffd7ac6e0762a19fe3ac65b2439a7d745e3dd3bebfb5f128fb66830f82201c1`; 57,563,877 bytes; Node 22.13.1; non-root UID 1000; healthy ephemeral run |
 | Relay health | public `/healthz` plus authenticated synthetic canary | PASS: public HTTPS health and content-free authenticated Groq canary; VPS `current` points to `d0910d5` and the service is active |
 | VPS isolation and safety | current release, free storage, source/log secret scans | PASS: immutable 23 MiB release, approximately 20 GB free, unrelated services preserved, final source/log scans clean |
 | APK inspection | package/name/version, certificate, manifests, provider-key scan, install | PARTIAL: package `com.grimnej.lmcomment`, name `LM-Comment`, version `0.1.0`, arm64-only ABI, v2/v3 dedicated release signature, 16 KiB alignment, manifest and every-entry provider scan pass; final arm64 install requires the owner phone |
 | Screenshot/log safety | no screenshot persistence; no request/OCR content in logs | PARTIAL: source policy, APK entry scan, and deployed relay log scans pass; owner-phone post-workflow residue check remains pending |
-| Runtime route smoke | API 36 x86_64 release install plus UI hierarchy | PASS: Home, Samples, and secure native manual workflow launched with the new copy and controls; no screenshot was taken or stored |
+| Runtime route smoke | API 36 x86_64 release install plus UI hierarchy | PASS: Home and native workflow launched; no screenshot was taken or stored |
+| Appearance runtime | Settings UI hierarchy, switch, force-stop, relaunch | PASS: System/Light/Dark exposed; Light and Dark switch immediately; Dark persisted after relaunch |
+| Bubble edge/dismiss runtime | overlay window and service state before/after input gestures | PASS: overlay reached exact x=0; dropping into the bottom X removed the overlay window and foreground service |
+| Consent-overlay regression | full-frame in-memory capture, bundled OCR, review-field assertion | PASS on API 36 emulator: 433 characters of underlying content recognized; consent title, mode, and Share button text absent |
 
 The lint result is intentionally scoped precisely: the application and first-party native module passed. `react-native-worklets` and `react-native-reanimated` release analyzers were excluded because their upstream Android lint tasks crashed (`react-native-reanimated` reported a missing `KaModule`), not because of an application lint finding.
 
@@ -55,11 +58,11 @@ Final artifact details:
 - APK Signature Schemes v2 and v3 verify; `zipalign -c -P 16 -v 4` passes.
 - The exact local Groq key, generic `gsk_`, `GROQ_API_KEY`, and `api.groq.com` each have zero matches across every decompressed APK entry.
 - The APK contains zero `.env` entries and zero screenshot-like image entries.
-- The x86_64 release variant clean-installed and launched on the API 36 emulator. Home, Samples, and the secure native manual workflow passed content-only UI-hierarchy smoke checks. The frozen arm64 artifact cannot run on that x86_64 emulator and therefore remains pending clean installation on the owner's arm64 phone.
+- The x86_64 release variant clean-installed and launched on the API 36 emulator. Theme persistence, exact-edge overlay placement, drag-to-dismiss, and consent-to-OCR passed content/state-only checks. The frozen arm64 artifact cannot run on that x86_64 emulator and therefore remains pending installation on the owner's arm64 phone.
 
 ## Owner phone gate
 
-The owner's Nothing A001 was not visible to ADB at this checkpoint. The following are not satisfied by emulator evidence and must remain pending until the owner performs and records them on that phone.
+The owner's Nothing A001 was not visible to ADB at this checkpoint. At the owner's request, the extended tests below were skipped so the signed APK could be delivered immediately. They remain pending owner tests, not failures.
 
 | Test | Required | Status |
 |---|---:|---|

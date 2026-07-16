@@ -2,13 +2,13 @@
 
 - Checkpoint date: 2026-07-16
 - Branch: `rebuild/lm-comment-hackathon`
-- Latest completed implementation commit: `1d3c780`
+- Latest completed implementation commit: `ab2a671`
 - Latest deployment commit: `d0910d5`
 - Current phase: H7 - hardening and rehearsal
 - Active implementation blocker: none
-- Physical-device acceptance: pending reconnection of the owner's Nothing A001
+- Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
-- Resume from: reconnect the Nothing A001, install the new signed APK, and verify the consent-dialog and visual regressions before the remaining acceptance matrix
+- Resume from: install the new signed APK on the Nothing A001 and verify capture, edge drag, drag-to-dismiss, and both appearance modes
 
 ## Phase checklist
 
@@ -21,21 +21,20 @@
 - [x] H6 Product shell/polish - branded shell, complete routes, safe diagnostics, themes, and accessibility pass complete
 - [ ] H7 Hardening/rehearsal - automated/packaging gates in progress; physical-phone matrix and five rehearsals pending owner phone
 
-## Visual and capture regression checkpoint
+## Bubble, capture, and theme regression checkpoint
 
-- Commit: `1d3c780` (`fix(android): harden capture and refresh product design`).
-- Bubble behavior: all four lens corners now face inward; geometry is unit-tested; safe bounds include system insets; failed overlay removal is never acknowledged as hidden; activity-launch failures clear the workflow session; accessibility activation now triggers the same click path as touch.
-- Capture behavior: MediaProjection waits for focus/resume recovery and two committed CaptureCloak frames, then discards one bounded raw compositor buffer before converting the accepted frame. Consent result data remains memory-only and is cleared on every terminal path.
-- Product design: the Expo shell and native workflow now share paper, ink, signal-lime, and terracotta tokens; the crop editor, bubble, launcher icon, splash, monochrome icon, and native header use the same four-corner lens mark. Purple/cyan gradients, glass effects, oversized pills, stacked promotional labels, all-caps product copy, and em dashes were removed.
-- Repository presentation: `README.md` now includes the generated banner, app icon, badges, architecture, privacy boundaries, build instructions, evidence links, and MIT license link. The generated banner is `docs/assets/lm-comment-banner.png`.
-- Copy enforcement: `scripts/check-copy-style.mjs` is part of `pnpm check` and rejects em dashes across tracked product/source documentation plus canned promotional phrases and quoted all-caps labels in product copy. Rules and research are recorded in `docs/COPY_STYLE.md`.
-- Files changed: `README.md`; `CHECKPOINT_HANDOFF.md`; the implementation blueprint punctuation; `apps/mobile/app.config.ts`; `apps/mobile/assets/brand/*`; `apps/mobile/assets/images/*`; all six Expo route files; `apps/mobile/src/ui/{tokens,components}.tsx`; demo fixtures/scripts/checklist; `docs/{COPY_STYLE,DEMO_RUNBOOK}.md`; `docs/assets/lm-comment-banner.png`; native bubble, capture, crop, and workflow Kotlin sources; four new native unit-test files; `package.json`; and `scripts/{check-copy-style,generate-brand-assets}.mjs`.
-- Exact automated tests: `pnpm quality` passed; clean `pnpm mobile:prebuild` passed; 16 native suites passed with 98 tests, 0 failures, 0 errors, and 1 intentional live-test skip; API 36 instrumentation passed 3 / 3; scoped release lint passed; x86_64 release clean-installed and launched; Home, Samples, and the secure native manual workflow passed UI-hierarchy smoke checks without taking screenshots.
-- Final artifact: `artifacts/release/LM-Comment-0.1.0-hackathon-arm64.apk`, 53,163,818 bytes, SHA-256 `3BC5DBCC9409460167AA85E0622E2A1E673E4C66EC4FCB418DCA3DA81B95018D`, arm64-v8a only, v2/v3 signed with certificate SHA-256 `9570D71820DFCA41BA25C8717CEACF2B77A3C867227056F992DD6CB12E080731`, and 16 KiB aligned.
-- APK evidence: package/name/version/SDK/ABI, service separation, `noHistory=false`, manifest restrictions, and provider-boundary scans passed. The APK contains zero provider-secret hits, zero `.env` entries, and zero screenshot-like image entries.
-- Evidence paths: `docs/TEST_EVIDENCE.md` and ignored local report `artifacts/evidence/h7-visual-capture-regression-20260716.md`.
-- Next phase: H7 physical verification on the Nothing A001, followed by the remaining stress matrix and five rehearsals.
-- Known limitation: automated checks cannot prove what the owner sees in the MediaProjection crop. Physical confirmation that the consent dialog is absent, the bubble artwork is correct, and the redesigned screens look right remains pending because the phone is not currently connected.
+- Commit: `ab2a671` (`fix(android): stabilize capture and bubble interactions`).
+- Behavior completed: the bubble reaches the real left or right display edge, expands only while held, shows a bottom-center dismiss target, gives haptic feedback on target entry, and stops its foreground service when dropped into the target.
+- Capture completed: after MediaProjection consent, capture now requires resumed focus, committed cloak frames, three device-configured long-animation windows on the frame clock, and one final committed cloak frame before the one-shot service starts. The grant remains memory-only.
+- Appearance completed: Settings now offers System, Light, and Dark. Light keeps the paper, ink, lime, and terracotta design; Dark restores graphite, violet, and cyan across the Expo shell, native workflow, crop editor, and bubble.
+- Files changed: Expo layout, Settings, theme, and token files; native bridge types; bubble anchor/window/service; appearance preference storage; capture gate/activity; crop/workflow visuals; and corresponding JVM/instrumentation tests.
+- Exact tests: `pnpm quality` passed; clean `pnpm mobile:prebuild` passed; native JVM tests passed 106 total with 0 failures, 0 errors, and 1 intentional live skip; Android 16 instrumentation passed 4 / 4; scoped release lint passed; ARM64 and x86_64 release builds passed.
+- Runtime evidence: Android 16 x86_64 release launch passed; System/Light/Dark switching passed; Dark persisted after force-stop/relaunch; the bubble window reached exact x=0; drag-to-dismiss removed both overlay and service; in-memory full-frame OCR recognized 433 characters of underlying content and contained none of the consent title, mode, or Share button text. No screenshot was taken or stored for this check.
+- Final artifact: `artifacts/release/LM-Comment-0.1.0-hackathon-arm64.apk`, 53,184,298 bytes, SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970`, arm64-v8a only, v2/v3 signed with certificate SHA-256 `9570D71820DFCA41BA25C8717CEACF2B77A3C867227056F992DD6CB12E080731`, and 16 KiB aligned.
+- APK evidence: package/name/version/SDK/ABI, separate overlay and capture services, `noHistory=false`, alignment, signature, and provider-boundary scans passed. There are zero provider-key, provider-endpoint, `.env` entry, and screenshot-like image entry hits.
+- Evidence paths: `docs/TEST_EVIDENCE.md` and ignored local report `artifacts/evidence/h7-bubble-capture-theme-regression-20260716.md`.
+- Tests intentionally skipped at owner request: the 20-run phone capture matrix, cancellation/recovery matrix, rotations, lock cycles, permission revocation, five judge rehearsals, and visual inspection on the Nothing A001.
+- Next phase and limitation: owner acceptance on the Nothing A001. Emulator evidence passes, but the OEM-specific consent animation and physical appearance are not claimed until the owner tests this APK.
 
 ## Completed implementation
 
@@ -48,7 +47,7 @@
 ### H1
 
 - Idempotent `specialUse` foreground bubble service.
-- Custom Context Lens bubble with four tested inward-facing corner marks, drag, snap, inset-safe bounds, persisted position, reset, notification Open/Stop, and accessible click activation.
+- Custom Context Lens bubble with four tested inward-facing corner marks, true edge snap, persisted position, single-window drag mode, bottom-center drop-to-dismiss target, haptic arming, reset, notification Open/Stop, and accessible click activation.
 - Session IDs, synchronous hide/restore acknowledgement, and 45-minute hard stop.
 - Bubble-owned direct-manual session prevents overlapping capture/manual sessions and restores exactly once.
 - Capture proceeds only after a verified overlay removal; failed activity launches clear the active session and restore or stop the bubble cleanly.
@@ -57,7 +56,7 @@
 
 - Transparent capture-cloak activity and explicit secure/opaque transition before frame publication.
 - Fresh MediaProjection consent per tap, dedicated one-shot foreground capture service, one virtual display, one accepted full-display frame.
-- Post-consent capture waits for resumed focus plus two committed transparent-cloak frames and skips one raw compositor buffer, preventing the Android consent surface from becoming the accepted crop frame.
+- Post-consent capture waits for resumed focus, committed transparent-cloak frames, device-configured SystemUI quiescence measured on the frame clock, one final committed cloak frame, and one skipped raw compositor buffer before accepting the frame.
 - Two-million-pixel hard allocation bound, resize handling, stable terminal errors, timeouts, and blank/protected-frame detection.
 - Scoped projection/display/reader/image/bitmap cleanup and debug counters.
 - Rotation does not recreate the workflow activity (`orientation|screenSize`); process restoration closes safely instead of exposing or hanging a stale workflow.
@@ -105,7 +104,7 @@
 ### H6 product shell and polish
 
 - Editorial paper, ink, signal-lime, and terracotta product system with a unified four-corner lens across the bubble, native workflow, adaptive icon, monochrome icon, splash, favicon, shared tokens, and reusable controls.
-- Polished Home, Setup, Demo, Diagnostics, and Settings routes with light/dark themes and complete navigation.
+- Polished Home, Setup, Demo, Diagnostics, and Settings routes with persisted System/Light/Dark selection and complete navigation. Light uses paper/ink/lime/terracotta; Dark restores graphite/violet/cyan.
 - Three synthetic judge fixtures enter the real secure native Manual Context, generation, editing, and explicit-copy workflow.
 - Safe native diagnostics expose only fixed metadata, an allowlisted stable error code, relay hostname/health, permission state, and debug-only resource counters.
 - Settings keep credentials in Android private preferences, protect advanced configuration behind a deliberate unlock, and preserve hidden relay overrides when ordinary writing defaults change.
@@ -114,7 +113,7 @@
 - Light/dark screens and 200% Android font scale were visually inspected on API 36; controls remain readable, scrollable, and at least 48 dp.
 - Professional root README with generated banner, logo, badges, architecture, privacy boundaries, build instructions, evidence links, and license.
 - Sentence-case, action-first product copy plus a repeatable repository copy-style check; no em dashes remain in tracked source or documentation.
-- Commits: `8873b0e` and redesign/fix commit `1d3c780`.
+- Commits: `8873b0e`, redesign/fix commit `1d3c780`, and interaction/theme fix `ab2a671`.
 
 ### H7 release hardening and package freeze
 
@@ -126,7 +125,7 @@
 - Judge fixtures, presentation script, rehearsal checklist, demo runbook, test-evidence record, and post-hackathon roadmap are present.
 - Content-free live canary verifies response structure and count without printing generated content.
 - Oracle deployment now points atomically to immutable release `d0910d5`; its installed release is about 23 MiB, the host retains about 20 GB free, and unrelated services were left untouched.
-- The refreshed phone distribution is frozen as a 53,163,818-byte arm64-only APK with a dedicated 3,072-bit hackathon release certificate, verified v2/v3 signatures, 16 KiB alignment, and SHA-256 `3BC5DBCC9409460167AA85E0622E2A1E673E4C66EC4FCB418DCA3DA81B95018D`.
+- The refreshed phone distribution is frozen as a 53,184,298-byte arm64-only APK with a dedicated 3,072-bit hackathon release certificate, verified v2/v3 signatures, 16 KiB alignment, and SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970`.
 - Final APK inspection confirms the required package/name/version, separate bubble and capture services, `noHistory=false`, no debuggable/cleartext/Accessibility/dev-launcher manifest surface, no screenshot-like image entries, and no provider key or direct Groq endpoint.
 - H7 files changed: relay/container (`.dockerignore`, `apps/relay/Dockerfile`, `apps/relay/src/app.ts`, relay tests and canary); mobile/native configuration (`apps/mobile/app.config.ts`, safe-splash plugin, Settings, demo-configuration validator and tests); release gates/data (`package.json`, scope and quality validators, quality set/evaluation); and judge documentation (`apps/mobile/README.md`, demo fixtures/script/checklist, `docs/DEMO_RUNBOOK.md`, `docs/POST_HACKATHON_ROADMAP.md`, `docs/TEST_EVIDENCE.md`, and this checkpoint).
 - Commits: `291914e` (`chore(release): harden hackathon delivery`), `e7eb66a` (`docs(demo): add judge runbook and rehearsal kit`), and `d0910d5` (`chore(relay): keep live canary content-free`).
@@ -140,12 +139,12 @@
 ## Evidence at this checkpoint
 
 - `pnpm quality`: PASS after H7 source hardening - scope, naming, secrets, 30-case quality-set validation, lint, typecheck, 19 relay tests, and relay production build.
-- Native `:lm-comment-android:testDebugUnitTest`: PASS - 98 tests across 16 suites, zero failures, zero errors, and one intentional opt-in live skip.
+- Native `:lm-comment-android:testDebugUnitTest`: PASS - 106 tests across 17 suites, zero failures, zero errors, and one intentional opt-in live skip.
 - Clean `pnpm mobile:prebuild`: PASS; the durable Expo config plugin removes the incompatible API-33-only splash attribute from generated base styles.
-- API 36 x86_64 instrumentation: PASS - 3 / 3 tests covering private configuration, bundled offline OCR, and secure direct-manual behavior.
+- API 36 x86_64 instrumentation: PASS - 4 / 4 tests covering private configuration, private appearance persistence, bundled offline OCR, and secure direct-manual behavior.
 - H7 x86_64 debug APK build: PASS.
 - H7 x86_64 release APK clean install and launch on the API 36 emulator: PASS.
-- Final refreshed arm64 release build: PASS - 53,163,818 bytes, SHA-256 `3BC5DBCC9409460167AA85E0622E2A1E673E4C66EC4FCB418DCA3DA81B95018D`, `arm64-v8a` only.
+- Final refreshed arm64 release build: PASS - 53,184,298 bytes, SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970`, `arm64-v8a` only.
 - Dedicated release signing: PASS - APK Signature Schemes v2/v3, 3,072-bit RSA certificate SHA-256 `9570D71820DFCA41BA25C8717CEACF2B77A3C867227056F992DD6CB12E080731`, and 16 KiB zip alignment verified.
 - Final APK inspection: PASS - package/name/version/SDK/launcher, service separation, `noHistory=false`, forbidden manifest surfaces, screenshot-like entry names, exact Groq key, generic `gsk_`, `GROQ_API_KEY`, and direct Groq endpoint checks.
 - Release lint: PASS for the app and first-party native module with `react-native-worklets` and `react-native-reanimated` release analyzers explicitly excluded after those upstream analyzer tasks crashed internally; no first-party lint finding is hidden by this exception.
@@ -161,7 +160,10 @@
 - H7 tracked automated-release evidence: `docs/TEST_EVIDENCE.md`.
 - Relay/VPS evidence: `artifacts/evidence/relay-deployment-20260715.md`.
 - Public HTTPS health, invalid-token sanitization, live Groq structured generation, relay/Caddy log scan, and blocked direct port: PASS.
-- Physical phone install/capture/crop/OCR evidence: PENDING - the Nothing A001 is not currently visible to ADB.
+- Android 16 emulator capture-to-OCR evidence: PASS - underlying content recognized; consent dialog title/mode/button absent from OCR; no screenshot persisted.
+- Bubble runtime evidence: PASS on Android 16 emulator - exact x=0 edge placement and drag-to-dismiss service/window teardown.
+- Appearance runtime evidence: PASS on Android 16 emulator - System/Light/Dark controls, immediate switching, and Dark persistence across force-stop/relaunch.
+- Physical phone install/capture/crop/OCR evidence: PENDING - intentionally left to the owner's Nothing A001 test.
 - Fresh H6 x86_64 release APK: PASS - 54,335,309 bytes, SHA-256 `196FD6CCF30A1791241086B3ED8A11CD1BF2A1F61EF932F6BE0F749523469847`, APK Signature Scheme v2 verified, installed on API 36.
 - Final refreshed arm64 release APK, signature/hash, manifest/ABI and provider-boundary inspection: PASS. Clean arm64 install remains PENDING on the owner's phone because the available emulator is x86_64.
 - H7 owner-phone stress matrix, five rehearsals, external fallback video, and Groq dashboard spending-limit confirmation: PENDING.
