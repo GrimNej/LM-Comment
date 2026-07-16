@@ -203,6 +203,31 @@ class RelayClientTest {
     }
 
     @Test
+    fun `validated development HTTP loopback reaches generation endpoint`() = runBlocking {
+        val connection = FakeHttpsConnection(
+            status = 200,
+            successBody = fixture("valid-response.json"),
+        )
+        var openedUrl: URL? = null
+        val client = RelayClient(
+            relayBaseUrl = "http://10.0.2.2:8787/",
+            demoToken = "abcdefghijklmnop",
+            allowDevelopmentHttp = true,
+            timeouts = RelayTimeouts(),
+            ioDispatcher = Dispatchers.IO,
+            connectionFactory = { url ->
+                openedUrl = url
+                connection
+            },
+        )
+
+        val result = client.generate(validRequest())
+
+        assertEquals(2, result.options.size)
+        assertEquals("http://10.0.2.2:8787/v1/generate", openedUrl.toString())
+    }
+
+    @Test
     fun `token containing a control character is rejected before connection`() = runBlocking {
         var opened = false
         val connection = FakeHttpsConnection()

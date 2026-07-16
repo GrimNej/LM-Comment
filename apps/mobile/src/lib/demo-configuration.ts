@@ -14,7 +14,7 @@ export type DemoBootstrapState =
 const TONES = new Set<Tone>(['natural', 'professional', 'friendly', 'witty', 'concise']);
 let pendingBootstrap: Promise<DemoBootstrapState> | null = null;
 
-function bundledConfiguration(): DemoConfiguration | null {
+export function getBundledDemoConfiguration(): DemoConfiguration | null {
   const value = Constants.expoConfig?.extra?.lmCommentDemo;
   if (!value || typeof value !== 'object') return null;
 
@@ -50,7 +50,7 @@ function bundledConfiguration(): DemoConfiguration | null {
 
 async function runBootstrap(): Promise<DemoBootstrapState> {
   if (Platform.OS !== 'android') return 'unavailable';
-  const configuration = bundledConfiguration();
+  const configuration = getBundledDemoConfiguration();
   if (!configuration) return 'not-bundled';
 
   const status = await LMCommentAndroid.getDemoConfigurationStatus();

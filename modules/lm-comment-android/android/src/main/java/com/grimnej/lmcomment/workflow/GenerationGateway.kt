@@ -19,5 +19,6 @@ internal object RelayGenerationGateway : GenerationGateway {
     ): GenerationResponse = RelayClient(
         relayBaseUrl = configuration.relayBaseUrl,
         demoToken = configuration.demoToken,
+        allowDevelopmentHttp = configuration.allowDevelopmentHttp,
     ).generate(request)
 }

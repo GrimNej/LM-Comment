@@ -26,12 +26,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.grimnej.lmcomment.bubble.BubbleOverlayService
 import com.grimnej.lmcomment.capture.CaptureError
 import com.grimnej.lmcomment.capture.OneShotCaptureService
 import com.grimnej.lmcomment.config.DemoConfigurationStore
+import com.grimnej.lmcomment.diagnostics.StableErrorStore
 
 class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Listener {
     private val viewModel by viewModels<WorkflowViewModel>()
@@ -109,8 +111,13 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
             else -> configureCaptureCloak()
         }
         setContent {
+            val state = viewModel.state.value
+            val generationErrorCode = (state as? WorkflowState.GenerationError)?.code?.name
+            LaunchedEffect(generationErrorCode) {
+                generationErrorCode?.let { StableErrorStore(this@CaptureWorkflowActivity).record(it) }
+            }
             WorkflowScreen(
-                state = viewModel.state.value,
+                state = state,
                 actions = WorkflowActions(
                     onSelectionChange = viewModel::updateSelection,
                     onResetSelection = viewModel::resetSelection,
@@ -329,8 +336,7 @@ class CaptureWorkflowActivity : ComponentActivity(), OneShotCaptureService.Liste
         if (cleanupComplete) return
         cleanupComplete = true
         error?.let {
-            getSharedPreferences("lmcomment_diagnostics", MODE_PRIVATE)
-                .edit().putString("last_error", it.name).apply()
+            StableErrorStore(this).record(it.name)
             Toast.makeText(this, errorMessage(it), Toast.LENGTH_SHORT).show()
         }
         releaseCaptureBinding(cancel = true)

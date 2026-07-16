@@ -7,6 +7,7 @@ const MOBILE_ENV_ALLOWLIST = [
   'EXPO_PUBLIC_RELAY_BASE_URL',
   'EXPO_PUBLIC_DEMO_TOKEN',
 ] as const;
+const DEVELOPMENT_RELAY_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]', '10.0.2.2']);
 
 type MobileEnvironmentName = (typeof MOBILE_ENV_ALLOWLIST)[number];
 
@@ -38,6 +39,7 @@ function assertJudgeDefaults(relayBaseUrl: string, demoToken: string): void {
   if (
     relayUrl.protocol !== 'https:'
     || !relayUrl.hostname
+    || DEVELOPMENT_RELAY_HOSTS.has(relayUrl.hostname.toLowerCase())
     || relayUrl.username
     || relayUrl.password
     || relayUrl.search

@@ -20,6 +20,8 @@ data class DemoConfiguration(
     val defaultTone: Tone,
     val optionCount: Int,
     val demoMode: Boolean,
+    /** Derived by validation; never persisted or accepted from the JavaScript bridge. */
+    val allowDevelopmentHttp: Boolean = false,
 )
 
 data class DemoConfigurationStatus(

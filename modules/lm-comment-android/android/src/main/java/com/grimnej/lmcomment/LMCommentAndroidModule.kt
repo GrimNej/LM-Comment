@@ -10,9 +10,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.grimnej.lmcomment.bubble.BubbleAnchorStore
 import com.grimnej.lmcomment.bubble.BubbleOverlayService
+import com.grimnej.lmcomment.capture.CaptureResourceCounters
 import com.grimnej.lmcomment.config.DemoConfigurationStore
 import com.grimnej.lmcomment.config.DemoConfigurationValidator
+import com.grimnej.lmcomment.config.Tone
+import com.grimnej.lmcomment.diagnostics.RelayHealthProbe
+import com.grimnej.lmcomment.diagnostics.SafeDiagnosticsPolicy
+import com.grimnej.lmcomment.diagnostics.SafeDiagnosticsSnapshot
+import com.grimnej.lmcomment.diagnostics.StableErrorStore
 import com.grimnej.lmcomment.workflow.CaptureWorkflowActivity
+import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.records.Field
@@ -22,6 +29,12 @@ import expo.modules.kotlin.records.Required
 internal data class DemoConfigurationInput(
     @Field @Required val relayBaseUrl: String,
     @Field @Required val demoToken: String,
+    @Field @Required val defaultTone: String,
+    @Field @Required val optionCount: Int,
+    @Field @Required val demoMode: Boolean,
+) : Record
+
+internal data class DemoDefaultsInput(
     @Field @Required val defaultTone: String,
     @Field @Required val optionCount: Int,
     @Field @Required val demoMode: Boolean,
@@ -107,6 +120,24 @@ class LMCommentAndroidModule : Module() {
             Unit
         }
 
+        AsyncFunction("updateDemoDefaults") { input: DemoDefaultsInput ->
+            val context = requireNotNull(appContext.reactContext)
+            val store = DemoConfigurationStore(context)
+            val existing = requireNotNull(store.read()) {
+                "Demo configuration must exist before updating writing defaults."
+            }
+            val configuration = DemoConfigurationValidator.validate(
+                existing.copy(
+                    defaultTone = Tone.fromWireValue(input.defaultTone),
+                    optionCount = input.optionCount,
+                    demoMode = input.demoMode,
+                ),
+                isDebuggable = DemoConfigurationStore.isApplicationDebuggable(context),
+            )
+            store.save(configuration)
+            Unit
+        }
+
         AsyncFunction("getDemoConfigurationStatus") {
             val context = requireNotNull(appContext.reactContext)
             val status = DemoConfigurationStore(context).status()
@@ -154,16 +185,30 @@ class LMCommentAndroidModule : Module() {
             Unit
         }
 
-        AsyncFunction("getSafeDiagnostics") {
+        AsyncFunction("getSafeDiagnostics") Coroutine { ->
             val context = requireNotNull(appContext.reactContext)
-            mapOf(
-                "contractVersion" to LmCommentContract.VERSION,
-                "androidApi" to Build.VERSION.SDK_INT,
-                "deviceModel" to "${Build.MANUFACTURER} ${Build.MODEL}".trim(),
-                "overlayPermission" to Settings.canDrawOverlays(context),
-                "notificationPermission" to notificationPermission(context),
-                "bubbleStatus" to if (BubbleOverlayService.isRunning) "running" else "stopped",
-            )
+            val configurationStore = DemoConfigurationStore(context)
+            val configuration = configurationStore.read()
+            val relayHealth = RelayHealthProbe().check(configuration)
+            val lastError = StableErrorStore(context).read()
+            val captureResourceCounts = if (DemoConfigurationStore.isApplicationDebuggable(context)) {
+                CaptureResourceCounters.snapshot()
+            } else {
+                null
+            }
+            SafeDiagnosticsSnapshot(
+                appVersion = applicationVersion(context),
+                contractVersion = LmCommentContract.VERSION,
+                androidApi = Build.VERSION.SDK_INT,
+                deviceModel = SafeDiagnosticsPolicy.deviceLabel(Build.MANUFACTURER, Build.MODEL),
+                overlayPermission = if (Settings.canDrawOverlays(context)) "granted" else "denied",
+                notificationPermission = notificationPermission(context),
+                bubbleStatus = if (BubbleOverlayService.isRunning) "running" else "stopped",
+                relayHostname = configurationStore.status().relayHostname,
+                relayHealth = relayHealth,
+                lastStableErrorCode = SafeDiagnosticsPolicy.stableErrorCode(lastError),
+                captureResourceCounts = captureResourceCounts,
+            ).toBridgeMap()
         }
     }
 
@@ -174,6 +219,12 @@ class LMCommentAndroidModule : Module() {
                 PackageManager.PERMISSION_GRANTED
         ) "granted" else "denied"
     }
+
+    @Suppress("DEPRECATION")
+    private fun applicationVersion(context: android.content.Context): String =
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            ?.take(32)
+            ?: "unknown"
 
     companion object {
         private const val NOTIFICATION_PERMISSION_REQUEST = 4201

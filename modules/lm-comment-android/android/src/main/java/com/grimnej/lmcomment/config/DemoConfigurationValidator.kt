@@ -7,7 +7,7 @@ object DemoConfigurationValidator {
     const val MIN_DEMO_TOKEN_LENGTH = 12
     const val MAX_DEMO_TOKEN_LENGTH = 512
 
-    private val developmentHttpHosts = setOf("localhost", "127.0.0.1", "10.0.2.2")
+    internal val developmentHosts = setOf("localhost", "127.0.0.1", "::1", "10.0.2.2")
 
     fun validate(
         relayBaseUrl: String,
@@ -46,6 +46,7 @@ object DemoConfigurationValidator {
         return configuration.copy(
             relayBaseUrl = normalizedUrl,
             demoToken = normalizedToken,
+            allowDevelopmentHttp = isDebuggable && normalizedUrl.startsWith("http://"),
         )
     }
 
@@ -68,8 +69,11 @@ object DemoConfigurationValidator {
 
         val scheme = uri.scheme.lowercase()
         val host = requireNotNull(uri.host).lowercase()
+        require(isDebuggable || host !in developmentHosts) {
+            "Release relay URL must not use a local development host."
+        }
         val allowedScheme = scheme == "https" ||
-            (isDebuggable && scheme == "http" && host in developmentHttpHosts)
+            (isDebuggable && scheme == "http" && host in developmentHosts)
         require(allowedScheme) {
             if (isDebuggable) {
                 "Relay URL must use HTTPS; debug HTTP is limited to local development hosts."

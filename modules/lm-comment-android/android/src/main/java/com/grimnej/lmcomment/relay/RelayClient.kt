@@ -1,5 +1,6 @@
 package com.grimnej.lmcomment.relay
 
+import com.grimnej.lmcomment.config.DemoConfigurationValidator
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -15,7 +16,6 @@ import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicReference
-import javax.net.ssl.HttpsURLConnection
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -28,30 +28,41 @@ import kotlinx.coroutines.withTimeoutOrNull
 class RelayClient private constructor(
     private val relayBaseUrl: String,
     private val demoToken: String,
+    private val allowDevelopmentHttp: Boolean,
     private val timeouts: RelayTimeouts,
     private val ioDispatcher: CoroutineDispatcher,
-    private val connectionFactory: (URL) -> HttpsURLConnection,
+    private val connectionFactory: (URL) -> HttpURLConnection,
 ) {
     constructor(
         relayBaseUrl: String,
         demoToken: String,
+        allowDevelopmentHttp: Boolean = false,
         timeouts: RelayTimeouts = RelayTimeouts(),
     ) : this(
         relayBaseUrl = relayBaseUrl,
         demoToken = demoToken,
+        allowDevelopmentHttp = allowDevelopmentHttp,
         timeouts = timeouts,
         ioDispatcher = Dispatchers.IO,
-        connectionFactory = { url -> url.openConnection() as HttpsURLConnection },
+        connectionFactory = { url -> url.openConnection() as HttpURLConnection },
     )
 
     internal constructor(
         relayBaseUrl: String,
         demoToken: String,
+        allowDevelopmentHttp: Boolean = false,
         timeouts: RelayTimeouts,
         ioDispatcher: CoroutineDispatcher,
-        connectionFactory: (URL) -> HttpsURLConnection,
+        connectionFactory: (URL) -> HttpURLConnection,
         @Suppress("UNUSED_PARAMETER") testOnly: Unit = Unit,
-    ) : this(relayBaseUrl, demoToken, timeouts, ioDispatcher, connectionFactory)
+    ) : this(
+        relayBaseUrl,
+        demoToken,
+        allowDevelopmentHttp,
+        timeouts,
+        ioDispatcher,
+        connectionFactory,
+    )
 
     suspend fun generate(request: GenerationRequest): GenerationResponse {
         val result = withTimeoutOrNull(timeouts.overallMillis) {
@@ -71,7 +82,7 @@ class RelayClient private constructor(
                 throw RelayException(RelayFailureCode.BAD_REQUEST)
             }
 
-            val connectionReference = AtomicReference<HttpsURLConnection?>()
+            val connectionReference = AtomicReference<HttpURLConnection?>()
             val job = currentCoroutineContext().job
             val cancellationHandle = job.invokeOnCompletion(
                 onCancelling = true,
@@ -130,7 +141,7 @@ class RelayClient private constructor(
             }
         }
 
-    private fun configure(connection: HttpsURLConnection, token: String, bodySize: Int) {
+    private fun configure(connection: HttpURLConnection, token: String, bodySize: Int) {
         connection.requestMethod = "POST"
         connection.connectTimeout = timeouts.connectMillis
         connection.readTimeout = timeouts.readMillis
@@ -145,7 +156,7 @@ class RelayClient private constructor(
         connection.setRequestProperty(DEMO_TOKEN_HEADER, token)
     }
 
-    private fun readResponseBody(connection: HttpsURLConnection, status: Int): ByteArray {
+    private fun readResponseBody(connection: HttpURLConnection, status: Int): ByteArray {
         val contentType = connection.contentType.orEmpty()
         if (!contentType.substringBefore(';').trim().equals(JSON_MEDIA_TYPE, ignoreCase = true)) {
             throw RelayException(RelayFailureCode.INVALID_RESPONSE)
@@ -187,8 +198,16 @@ class RelayClient private constructor(
 
     private fun endpointUrl(rawBaseUrl: String): URL = try {
         val base = URI(rawBaseUrl.trim())
+        val scheme = base.scheme.orEmpty().lowercase()
+        val host = base.host.orEmpty().lowercase()
+        val allowedScheme = scheme == "https" ||
+            (
+                allowDevelopmentHttp &&
+                    scheme == "http" &&
+                    host in DemoConfigurationValidator.developmentHosts
+            )
         if (
-            !base.scheme.equals("https", ignoreCase = true) ||
+            !allowedScheme ||
             base.host.isNullOrBlank() ||
             base.rawUserInfo != null ||
             base.rawQuery != null ||

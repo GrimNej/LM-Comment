@@ -28,6 +28,18 @@ class DemoConfigurationValidatorTest {
     }
 
     @Test
+    fun `release configuration rejects local development hosts even with HTTPS`() {
+        listOf("localhost", "127.0.0.1", "10.0.2.2").forEach { host ->
+            assertThrows(IllegalArgumentException::class.java) {
+                DemoConfigurationValidator.validate(
+                    validConfiguration(relayBaseUrl = "https://$host:3000"),
+                    isDebuggable = false,
+                )
+            }
+        }
+    }
+
+    @Test
     fun `debug cleartext is limited to explicit development hosts`() {
         listOf("localhost", "127.0.0.1", "10.0.2.2").forEach { host ->
             val validated = DemoConfigurationValidator.validate(
@@ -35,6 +47,7 @@ class DemoConfigurationValidatorTest {
                 isDebuggable = true,
             )
             assertEquals("http://$host:3000/", validated.relayBaseUrl)
+            assertEquals(true, validated.allowDevelopmentHttp)
         }
 
         assertThrows(IllegalArgumentException::class.java) {
@@ -95,6 +108,32 @@ class DemoConfigurationValidatorTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `updating writing defaults preserves existing private relay credentials`() {
+        val existing = DemoConfigurationValidator.validate(
+            validConfiguration(
+                relayBaseUrl = "https://override.example.test/api",
+                demoToken = "override-demo-token",
+            ),
+            isDebuggable = false,
+        )
+
+        val updated = DemoConfigurationValidator.validate(
+            existing.copy(
+                defaultTone = Tone.WITTY,
+                optionCount = 1,
+                demoMode = false,
+            ),
+            isDebuggable = false,
+        )
+
+        assertEquals(existing.relayBaseUrl, updated.relayBaseUrl)
+        assertEquals(existing.demoToken, updated.demoToken)
+        assertEquals(Tone.WITTY, updated.defaultTone)
+        assertEquals(1, updated.optionCount)
+        assertEquals(false, updated.demoMode)
     }
 
     private fun validConfiguration(

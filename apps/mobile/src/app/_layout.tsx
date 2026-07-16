@@ -1,23 +1,76 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { bootstrapDemoConfiguration } from '@/lib/demo-configuration';
+import {
+  AppMark,
+  AppReadinessProvider,
+  AppThemeProvider,
+  Screen,
+  useAppReadiness,
+  useAppTheme,
+} from '@/ui';
 
 export default function RootLayout() {
-  const scheme = useColorScheme();
-  useEffect(() => {
-    // Configuration stays in native private preferences so capture/generation
-    // remains available after the React Native activity leaves the foreground.
-    void bootstrapDemoConfiguration().catch(() => undefined);
-  }, []);
-
   return (
     <SafeAreaProvider>
-      <StatusBar style={scheme === 'light' ? 'dark' : 'light'} />
-      <Stack screenOptions={{ headerShown: false, animation: 'fade' }} />
+      <AppThemeProvider>
+        <AppReadinessProvider>
+          <AppShell />
+        </AppReadinessProvider>
+      </AppThemeProvider>
     </SafeAreaProvider>
   );
 }
+
+function AppShell() {
+  const { phase } = useAppReadiness();
+  const { colors, isDark, isReduceMotionEnabled } = useAppTheme();
+
+  return (
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      {phase === 'booting' ? (
+        <LaunchGate />
+      ) : (
+        <Stack
+          screenOptions={{
+            animation: isReduceMotionEnabled ? 'none' : 'fade',
+            contentStyle: { backgroundColor: colors.canvas },
+            headerShown: false,
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function LaunchGate() {
+  const { colors, typography } = useAppTheme();
+  return (
+    <Screen contentContainerStyle={styles.launchScreen} scroll={false}>
+      <View style={styles.launchBrand}>
+        <AppMark showWordmark size={58} />
+        <Text style={[typography.body, styles.launchPromise, { color: colors.textSecondary }]}>
+          Context becomes a response only after you review it.
+        </Text>
+      </View>
+      <View
+        accessibilityLiveRegion="polite"
+        accessibilityLabel="Preparing the private demo configuration"
+        style={styles.launchStatus}
+      >
+        <ActivityIndicator color={colors.secondary} size="small" />
+        <Text style={[typography.label, { color: colors.textMuted }]}>PREPARING PRIVATE DEMO</Text>
+      </View>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  launchScreen: { justifyContent: 'space-between', paddingBottom: 34, paddingTop: 70 },
+  launchBrand: { alignItems: 'flex-start', maxWidth: 360 },
+  launchPromise: { marginTop: 24 },
+  launchStatus: { alignItems: 'center', flexDirection: 'row', gap: 12 },
+});
