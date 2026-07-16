@@ -2,13 +2,13 @@
 
 - Checkpoint date: 2026-07-16
 - Branch: `rebuild/lm-comment-hackathon`
-- Latest completed implementation commit: `8873b0e`
-- Latest deployment commit: `c32ca14`
+- Latest completed implementation commit: `d0910d5`
+- Latest deployment commit: `d0910d5`
 - Current phase: H7 - hardening and rehearsal
 - Active implementation blocker: none
 - Physical-device acceptance: pending owner phone connection
 - Demo rehearsal count: 0 / 5
-- Resume from: finish release hardening and connect the owner's phone for physical acceptance
+- Resume from: connect the owner's phone and run the physical acceptance/rehearsal matrix
 
 ## Phase checklist
 
@@ -96,35 +96,68 @@
 - Light/dark screens and 200% Android font scale were visually inspected on API 36; controls remain readable, scrollable, and at least 48 dp.
 - Commit: `8873b0e` (`feat(shell): add judge-ready product experience`).
 
+### H7 release hardening and package freeze
+
+- Relay provider work is bounded to 20 seconds and the Fastify request deadline is 25 seconds so stable timeout responses win before infrastructure timeouts.
+- Multi-stage, production-only Docker image pins Node 22.13.1 and pnpm 10.34.5, runs as the unprivileged `node` user, and includes a health check.
+- Clean Expo prebuild preserves API compatibility through the durable safe-splash config plugin; its generated Android result was verified.
+- Expanded scope, forbidden-route, AccessibilityService, direct-provider, persistence, database, streaming, and APK secret checks protect the release contract.
+- Thirty synthetic quality scenarios cover all five tones; the structural validator passes. Human model-output scoring remains pending and is not claimed.
+- Judge fixtures, presentation script, rehearsal checklist, demo runbook, test-evidence record, and post-hackathon roadmap are present.
+- Content-free live canary verifies response structure and count without printing generated content.
+- Oracle deployment now points atomically to immutable release `d0910d5`; its installed release is about 23 MiB, the host retains about 20 GB free, and unrelated services were left untouched.
+- The phone distribution is frozen as a 53,122,659-byte arm64-only APK with a dedicated 3,072-bit hackathon release certificate, verified v2/v3 signatures, 16 KiB alignment, and SHA-256 `65763EB9549B786FF65EC7E63B5F4D30FCA00C3A8E19C851001A00D05138B754`.
+- Final APK inspection confirms the required package/name/version, separate bubble and capture services, `noHistory=false`, no debuggable/cleartext/Accessibility/dev-launcher manifest surface, no screenshot-like image entries, and no provider key or direct Groq endpoint.
+- H7 files changed: relay/container (`.dockerignore`, `apps/relay/Dockerfile`, `apps/relay/src/app.ts`, relay tests and canary); mobile/native configuration (`apps/mobile/app.config.ts`, safe-splash plugin, Settings, demo-configuration validator and tests); release gates/data (`package.json`, scope and quality validators, quality set/evaluation); and judge documentation (`apps/mobile/README.md`, demo fixtures/script/checklist, `docs/DEMO_RUNBOOK.md`, `docs/POST_HACKATHON_ROADMAP.md`, `docs/TEST_EVIDENCE.md`, and this checkpoint).
+- Commits: `291914e` (`chore(release): harden hackathon delivery`), `e7eb66a` (`docs(demo): add judge runbook and rehearsal kit`), and `d0910d5` (`chore(relay): keep live canary content-free`).
+
 ## Remaining work in mandatory order
 
-1. H7: finish release-only backend/container hardening and final static/build/package scans.
-2. H7 owner gate: install on the priority phone, run portrait/landscape MediaProjection workflows, and complete five consecutive rehearsals.
+1. H7 owner gate: install the frozen APK on the priority phone and run the complete physical-device matrix, including 20 capture-to-copy workflows and cancellation/recovery paths.
+2. H7 rehearsal gate: complete five consecutive judge rehearsals.
+3. H7 owner controls: confirm the Groq dashboard spending limit and record/review the external fallback video.
 
 ## Evidence at this checkpoint
 
-- `pnpm quality`: PASS after H6 - scope, naming, expanded native secret scan, lint, typecheck, 18 relay tests, and relay production build.
-- Native `:lm-comment-android:testDebugUnitTest`: PASS - 84 tests (83 pass, one opt-in live skip), including H6 URL-policy, settings-preservation, bounded health, diagnostics, and stable-error regressions.
-- API 36 x86_64 instrumentation: PASS - private config persistence/safe status plus bundled offline OCR and secure direct-manual behavior (3 tests).
+- `pnpm quality`: PASS after H7 source hardening - scope, naming, secrets, 30-case quality-set validation, lint, typecheck, 19 relay tests, and relay production build.
+- Native `:lm-comment-android:testDebugUnitTest`: PASS - 84 tests, zero failures, zero errors, and one intentional opt-in live skip.
+- Clean `pnpm mobile:prebuild`: PASS; the durable Expo config plugin removes the incompatible API-33-only splash attribute from generated base styles.
+- API 36 x86_64 instrumentation: PASS - 3 / 3 tests covering private configuration, bundled offline OCR, and secure direct-manual behavior.
+- H7 x86_64 debug APK build: PASS.
+- H7 x86_64 release APK clean install and launch on the API 36 emulator: PASS.
+- Final H7 arm64 release build: PASS - 53,122,659 bytes, SHA-256 `65763EB9549B786FF65EC7E63B5F4D30FCA00C3A8E19C851001A00D05138B754`, `arm64-v8a` only.
+- Dedicated release signing: PASS - APK Signature Schemes v2/v3, 3,072-bit RSA certificate SHA-256 `9570D71820DFCA41BA25C8717CEACF2B77A3C867227056F992DD6CB12E080731`, and 16 KiB zip alignment verified.
+- Final APK inspection: PASS - package/name/version/SDK/launcher, service separation, `noHistory=false`, forbidden manifest surfaces, screenshot-like entry names, exact Groq key, generic `gsk_`, `GROQ_API_KEY`, and direct Groq endpoint checks.
+- Release lint: PASS for the app and first-party native module with `react-native-worklets` and `react-native-reanimated` release analyzers explicitly excluded after those upstream analyzer tasks crashed internally; no first-party lint finding is hidden by this exception.
+- Final relay container: PASS - digest `sha256:bffd7ac6e0762a19fe3ac65b2439a7d745e3dd3bebfb5f128fb66830f82201c1`, 57,563,877 bytes, non-root UID 1000, Node 22.13.1, and healthy ephemeral run.
+- Oracle VPS release `d0910d5`: PASS - service active, public HTTPS health good, authenticated content-free Groq canary good, about 20 GB free, and final source/log secret scans clean.
 - Arm64 debug APK: PASS - 102,691,686 bytes (97.93 MiB); APK Signature Scheme v2 verified.
 - Exact local Groq key and generic `gsk_` pattern scan of every decompressed APK entry: PASS.
 - H3 evidence: `artifacts/evidence/h3-crop-ocr-20260715.md`.
 - H4 evidence: `artifacts/evidence/h4-native-relay-20260715.md`.
 - H5 evidence: `artifacts/evidence/h5-results-workflow-20260716.md`.
 - H6 evidence: `artifacts/evidence/h6-product-shell-20260716.md`.
+- H7 evidence: `artifacts/evidence/h7-release-checkpoint-20260716.md`.
+- H7 tracked automated-release evidence: `docs/TEST_EVIDENCE.md`.
 - Relay/VPS evidence: `artifacts/evidence/relay-deployment-20260715.md`.
 - Public HTTPS health, invalid-token sanitization, live Groq structured generation, relay/Caddy log scan, and blocked direct port: PASS.
 - Physical phone install/capture/crop/OCR evidence: PENDING - no ADB phone connected.
 - Fresh H6 x86_64 release APK: PASS - 54,335,309 bytes, SHA-256 `196FD6CCF30A1791241086B3ED8A11CD1BF2A1F61EF932F6BE0F749523469847`, APK Signature Scheme v2 verified, installed on API 36.
+- Final H7 arm64 release APK, signature/hash, manifest/ABI and provider-boundary inspection: PASS. Clean arm64 install remains PENDING on the owner's phone because the available emulator is x86_64.
+- H7 owner-phone stress matrix, five rehearsals, external fallback video, and Groq dashboard spending-limit confirmation: PENDING.
 
 ## Known limitations
 
 - A Google ML Kit Task cannot be force-cancelled. On coroutine cancellation, bitmap cleanup safely waits for the provider Task to reach a terminal state so pixels cannot be recycled while ML Kit may still read them.
 - Physical-phone crop interaction and full MediaProjection-to-OCR repetition remain part of the H7 owner-device gate.
-- The workstation currently runs Node 24.14.0 while the repository pins Node 22.13.x; all quality gates pass, and production uses the pinned Node 22.13.1 runtime.
+- Android release lint currently requires excluding the crashing upstream `react-native-worklets` and `react-native-reanimated` analyzers; the app and first-party module lint successfully.
+- Structural validation covers all 30 quality scenarios, but human review of live model output is still pending.
+- The workstation currently runs Node 24.14.0 while the repository pins Node 22.13.x; all recorded workspace quality gates pass, and production uses the pinned Node 22.13.1 runtime.
 
 ## Inputs needed from the owner
 
 - No more backend credentials, DNS, hosting, or product decisions are needed now.
-- When requested for final testing, connect the priority Android phone with USB debugging enabled and provide its model plus Android version.
-- Final release signing can use a judge-only generated keystore unless the owner wants to supply a permanent keystore; no decision is needed until H7.
+- For final testing, connect the priority Android phone with USB debugging enabled and provide its model plus Android version.
+- Confirm that a spending limit is set in the Groq dashboard; do not share the provider key again.
+- Record the fallback demo externally because secure workflow screens may be black in built-in screen recording, then run and record five consecutive judge rehearsals.
+- A judge-only generated signing keystore is sufficient for this hackathon build unless the owner explicitly wants to preserve a permanent Play Store identity.
