@@ -11,7 +11,7 @@ Status checked on 2026-07-19 against the official ImpactForge overview, rules, s
 - The registration card limits participation to students who are above the legal age of majority. Companies and professional organizations are excluded.
 - Standard excluded locations shown by Devpost: Brazil, Crimea, Cuba, Iran, North Korea, Quebec, and Russia.
 
-Owner action: confirm student status, legal age, country of residence, solo or team entry, and each contributor before submission.
+Confirmed by the owner on 2026-07-19: current student, above the legal age of majority, and solo submission. Confirm the country of residence shown in the Devpost account before the final submission.
 
 ## What ImpactForge asks for
 
@@ -28,9 +28,9 @@ The standard Devpost form also asks for a tagline, thumbnail, built-with tags, p
 
 Create one new public GitHub repository named `LM-Comment`. Do not submit an older project repository and do not make judges hunt for a special branch. Push the current tested history directly to the new repository's `main` branch.
 
-The local repository currently has no Git remote. Its first commit is dated July 15, 2026, after ImpactForge opened on June 19. The development history is useful proof of work, so preserve it.
+Published repository: `https://github.com/GrimNej/LM-Comment`. The tested history is published as `main`. Its first commit is dated July 15, 2026, after ImpactForge opened on June 19.
 
-After creating an empty GitHub repository without an auto-generated README, license, or `.gitignore`, run:
+The repository was created empty and published with:
 
 ```powershell
 git remote add origin https://github.com/GrimNej/LM-Comment.git
@@ -96,10 +96,11 @@ The strongest award positioning is The Forge Award first and Community Champion 
 
 ## Final submission checklist
 
-- [ ] Confirm eligibility and team details.
+- [x] Confirm student status, legal age, and solo entry.
+- [ ] Confirm the Devpost account's country of residence is eligible.
 - [ ] Join ImpactForge on the correct Devpost account.
 - [ ] Create a draft submission before recording the final video.
-- [ ] Create the public GitHub repository and push this history as `main`.
+- [x] Create the public GitHub repository and push this history as `main`.
 - [ ] Publish a GitHub Release with the signed ARM64 APK and checksum.
 - [ ] Upload `docs/assets/impactforge-thumbnail.png` as the Devpost thumbnail.
 - [ ] Record the script in `demo/presentation-script.md` using only synthetic content.

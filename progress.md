@@ -5,10 +5,10 @@
 - Latest completed implementation commit: `ab2a671`
 - Latest deployment commit: `d0910d5`
 - Current phase: H7 - ImpactForge submission packaging and owner acceptance
-- Active implementation blocker: none; GitHub/Devpost account actions and eligibility confirmation remain owner-controlled
+- Active implementation blocker: none; video recording and final Devpost account submission remain owner-controlled
 - Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
-- Resume from: confirm ImpactForge eligibility, publish the repository and APK release, record the prepared demo, complete the Devpost draft, and test the final links
+- Resume from: publish the APK release, record the prepared demo, complete the Devpost draft, confirm residence eligibility, and test the final links
 
 ## Phase checklist
 
@@ -41,16 +41,16 @@
 - Research date: 2026-07-19.
 - Submission-kit commit: `316e9b5` (`docs(submission): prepare ImpactForge entry kit`).
 - Deadline recorded from the official schedule: July 24, 2026 at 12:30 PM Nepal time.
-- Eligibility requiring owner confirmation: student status, legal age of majority, permitted country of residence, and accurate team/contribution list.
+- Eligibility: owner confirmed current student status, legal age of majority, and a solo submission on 2026-07-19. Devpost residence eligibility remains a final account check.
 - Public requirements recorded: project name, story, visual proof, encouraged project link, impact statement, and team. Judging weights are Build Quality 30%, Real-World Impact 25%, Creativity and Approach 20%, User Experience 15%, and Clarity 10%.
-- Repository decision: create one new public `LM-Comment` GitHub repository, preserve this development history, and push the tested HEAD directly as `main`. Publish the signed APK as a GitHub Release asset instead of committing it.
+- Repository publication: `https://github.com/GrimNej/LM-Comment` now contains the complete tested history on `main`. The local branch tracks `origin/main`.
 - Files changed: `demo/presentation-script.md`, `docs/IMPACTFORGE_SUBMISSION.md`, and the SVG/PNG pair at `docs/assets/impactforge-thumbnail.*`.
 - Demo script: 167 spoken words, leaving room for the complete capture, crop, OCR, generation, edit, and copy actions within a two-minute video.
 - Submission thumbnail: 1500 x 1000 PNG, 77,525 bytes, 3:2 aspect ratio, visually inspected after rendering.
 - Exact checks: `pnpm quality` passed after the new files; `git diff --check` passed; 24-commit Git history scan found zero Groq-key-prefix hits, zero private-key headers, and zero suspicious live environment assignments.
 - Evidence path: `docs/IMPACTFORGE_SUBMISSION.md`; authoritative narration: `demo/presentation-script.md`.
-- Next phase: owner creates the GitHub repository and Devpost draft, uploads the APK release and video, confirms eligibility, previews every link while logged out, and submits before the deadline.
-- Known limitations: there is currently no Git remote or hosted video. The logged-in Devpost form and any custom questions could not be inspected without the owner's account. The public ImpactForge page calls a GitHub/live project link optional but encouraged; the recommended public repository removes any ambiguity.
+- Next phase: publish the signed APK release, then the owner creates the Devpost draft, uploads the video, confirms residence eligibility, previews every link while logged out, and submits before the deadline.
+- Known limitations: there is no hosted video yet. The logged-in Devpost form and any custom questions could not be inspected without the owner's account.
 
 ## Completed implementation
 
