@@ -1,34 +1,36 @@
-# LM-Comment presentation script
+# ImpactForge demo script
 
-Target length: about three minutes. Use only synthetic content. Do not open Settings or a terminal during judging.
+Use only the prepared synthetic post. Record the phone clearly and keep the finished video under two minutes.
 
-## Opening
+## Script
 
-> LM-Comment helps you respond to anything visible on your Android screen without manually copying the context into another app.
+Show LM-Comment Home.
 
-1. Open LM-Comment Home and briefly show the `Ready to start` state and privacy message.
-2. Tap **Start bubble**, then return to the prepared synthetic post.
-3. Point out that the user stays in the original app.
-4. Tap the bubble and approve Android's full-display capture prompt.
-5. On the frozen frame, say: “The screenshot stays in app memory on this phone. It is never sent to the AI.”
-6. Crop the relevant words and tap **Extract text**.
-7. Review or edit the OCR result. Say: “OCR runs on-device. The screenshot is never sent. The relay receives the text and generation choices after I tap Generate.”
-8. Select **Witty** or **Professional**, keep three options, and tap **Generate 3 options**.
-9. Select one result, tap **Edit**, make a visible small change, and tap **Save changes**.
-10. Tap **Copy** and show the `Copied` state.
-11. Tap **Close**, confirm that the bubble returns, then stop it from LM-Comment or its notification.
+> LM-Comment helps people who know what they want to say but lose time or confidence finding the right words. It turns text already visible on Android into reply options while keeping the user in control.
 
-Close with:
+Start the bubble and return to the prepared post.
 
-> LM-Comment never posts automatically. The user reviews, edits, and copies the final words.
+> The compact lens works over the app I am already using, so I do not need to copy the post into a separate tool.
 
-## Live fallback
+Tap the bubble, approve Android screen sharing, and crop the relevant text.
 
-If capture fails, retry it once. If the retry fails:
+> The captured frame stays in memory on this phone. It is never saved or uploaded. Text recognition runs on-device, and I choose exactly which words continue.
 
-1. Return to Home and tap **Try with text** or **Open demo guide**.
-2. Select **Respond to a design tradeoff**.
-3. Review the synthetic context and run the same real relay, edit, and copy flow.
-4. Explain: “Manual Text preserves the real generation workflow while avoiding a device-specific capture issue.”
+Extract the text, make one visible correction, choose a tone, keep three options, and generate.
 
-If the relay network is unavailable, switch once to the prepared hotspot. If it is still unavailable, play the owner-recorded offline fallback video. Do not improvise terminal debugging in front of judges.
+> I can review the text, choose the tone, add an instruction, and request up to three alternatives. Only this reviewed text and these choices reach the managed relay. The provider key remains on the server.
+
+Select one result, edit a few words, save it, and tap Copy.
+
+> Nothing is posted automatically. I make the final edit, copy the response, and decide where or whether to send it.
+
+Close the workflow and show the bubble return.
+
+> LM-Comment reduces the friction of communicating clearly for students, multilingual writers, and anyone who finds tone difficult, without taking away authorship.
+
+## Recording priorities
+
+- Keep the screen readable and use a synthetic post with large text.
+- Show the real capture, crop, on-device OCR, tone choice, three results, edit, and Copy state.
+- Do not open Settings, Diagnostics, a terminal, private messages, tokens, or provider dashboards.
+- If live capture fails twice, use the bundled synthetic example and keep the same review, generate, edit, and copy sequence.

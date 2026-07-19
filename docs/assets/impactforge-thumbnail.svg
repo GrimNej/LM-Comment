@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1000" viewBox="0 0 1500 1000">
+  <title>LM-Comment ImpactForge project thumbnail</title>
+  <rect width="1500" height="1000" fill="#101411"/>
+  <path d="M0 780H1500V1000H0Z" fill="#F4F0E6"/>
+  <circle cx="1370" cy="88" r="210" fill="#E96D4C"/>
+  <path d="M80 84H94V700H80Z" fill="#B9E84A"/>
+
+  <g transform="translate(150 170)">
+    <rect x="0" y="0" width="500" height="500" rx="76" fill="#171C18" stroke="#374038" stroke-width="4"/>
+    <g fill="none" stroke="#F4F0E6" stroke-linecap="round" stroke-linejoin="round" stroke-width="30">
+      <path d="M225 140H140V225"/>
+      <path d="M275 140H360V225"/>
+      <path d="M225 360H140V275"/>
+      <path d="M275 360H360V275"/>
+    </g>
+    <circle cx="250" cy="250" r="45" fill="#B9E84A"/>
+  </g>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <text x="735" y="344" fill="#B9E84A" font-size="30" font-weight="650" letter-spacing="2">ANDROID WRITING TOOL</text>
+    <text x="730" y="470" fill="#F4F0E6" font-size="112" font-weight="760" letter-spacing="-5">LM-Comment</text>
+    <text x="735" y="548" fill="#C9CBC1" font-size="38" font-weight="430">Turn words on your screen into a reply</text>
+    <text x="735" y="602" fill="#C9CBC1" font-size="38" font-weight="430">you can edit, copy, and send yourself.</text>
+
+    <text x="90" y="872" fill="#101411" font-size="32" font-weight="700">Capture locally</text>
+    <circle cx="362" cy="861" r="7" fill="#E96D4C"/>
+    <text x="395" y="872" fill="#101411" font-size="32" font-weight="700">Review the text</text>
+    <circle cx="680" cy="861" r="7" fill="#E96D4C"/>
+    <text x="713" y="872" fill="#101411" font-size="32" font-weight="700">Shape your reply</text>
+    <circle cx="1005" cy="861" r="7" fill="#E96D4C"/>
+    <text x="1038" y="872" fill="#101411" font-size="32" font-weight="700">Never auto-post</text>
+    <text x="90" y="940" fill="#646C63" font-size="24" font-weight="500">Built for ImpactForge 2026</text>
+  </g>
+</svg>
