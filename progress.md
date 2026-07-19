@@ -13,6 +13,7 @@
 ## Secure demo-recording checkpoint
 
 - Date: 2026-07-19.
+- Checkpoint commit: `deb61c3` (`docs(demo): document secure emulator recording`).
 - Behavior confirmed: the public app's privacy behavior is unchanged. `CaptureWorkflowActivity` still applies `FLAG_SECURE` before showing synthetic reviewed text or captured pixels, so Android's built-in recorder intentionally receives a black frame.
 - Demo path completed: launched the visible `LMComment_API36` Android 16/API 36 emulator, installed the existing H7 x86_64 release APK, launched package `com.grimnej.lmcomment` version 0.1.0, and opened the real secure workflow with a bundled synthetic fixture.
 - In-memory evidence: Android `dumpsys window` reported `SECURE` on `CaptureWorkflowActivity`. Android's built-in capture surface sampled as 0 mean luminance, 0 percent non-black, and one color. The Windows emulator window sampled as 158.24 mean luminance, 100 percent non-black, and 180 colors. No screenshot file was written or uploaded during this check.
