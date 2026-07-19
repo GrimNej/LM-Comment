@@ -1,6 +1,6 @@
 # LM-Comment progress
 
-- Checkpoint date: 2026-07-16
+- Checkpoint date: 2026-07-19
 - Branch: `rebuild/lm-comment-hackathon`
 - Latest completed implementation commit: `ab2a671`
 - Latest deployment commit: `d0910d5`
@@ -9,6 +9,19 @@
 - Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
 - Resume from: record the prepared demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
+
+## Secure demo-recording checkpoint
+
+- Date: 2026-07-19.
+- Behavior confirmed: the public app's privacy behavior is unchanged. `CaptureWorkflowActivity` still applies `FLAG_SECURE` before showing synthetic reviewed text or captured pixels, so Android's built-in recorder intentionally receives a black frame.
+- Demo path completed: launched the visible `LMComment_API36` Android 16/API 36 emulator, installed the existing H7 x86_64 release APK, launched package `com.grimnej.lmcomment` version 0.1.0, and opened the real secure workflow with a bundled synthetic fixture.
+- In-memory evidence: Android `dumpsys window` reported `SECURE` on `CaptureWorkflowActivity`. Android's built-in capture surface sampled as 0 mean luminance, 0 percent non-black, and one color. The Windows emulator window sampled as 158.24 mean luminance, 100 percent non-black, and 180 colors. No screenshot file was written or uploaded during this check.
+- Exact tests: emulator boot PASS; APK install PASS; package launch PASS; x86_64 ABI/version inspection through `dumpsys package` PASS; secure-window flag inspection PASS; Windows host visibility check PASS.
+- Build evidence: the first fresh x86_64 release attempt was interrupted and left an incomplete generated CMake cache. That cache was preserved under `.cxx` and the clean retry passed `:app:assembleRelease` with 795 tasks, including a fresh x86_64 CMake configure/build. The resulting APK is at `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`. The published arm64 APK and relay were not changed.
+- Files changed: `docs/DEMO_RUNBOOK.md`, `demo/rehearsal-checklist.md`, and `progress.md`.
+- Evidence path: this checkpoint and the running `LMComment_API36` emulator. The recording procedure is in `docs/DEMO_RUNBOOK.md`.
+- Next phase: the owner records the emulator window with OBS or Windows Game Bar, reviews the export for visible secure screens and absent credentials, uploads it to YouTube or Vimeo, and adds the public URL to Devpost.
+- Known limitation: Android-native screen recording cannot record secure crop/results screens by design. Use Windows host capture of the emulator or an external camera pointed at the phone.
 
 ## Phase checklist
 

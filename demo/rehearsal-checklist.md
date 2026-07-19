@@ -10,7 +10,7 @@ Complete this only after the final APK and relay configuration are frozen. Any c
 - [ ] Confirm Home reports `Ready to start` and Diagnostics reports healthy relay status without exposing the demo token.
 - [ ] Confirm the current demo token is active and the Groq spending limit is configured.
 - [ ] Save the APK, presentation script, synthetic fixture, and owner-recorded fallback video offline.
-- [ ] Record a short fallback video of the priority phone with a second camera; the secure workflow may appear black to Android's built-in recorder. Use only synthetic content and do not expose credentials.
+- [ ] Record a short fallback through the Windows Android Emulator window or with a second camera pointed at the priority phone. Android's built-in recorder intentionally shows the secure workflow as black. Use only synthetic content and do not expose credentials.
 
 ## Before each rehearsal
 
