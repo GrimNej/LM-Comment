@@ -8,7 +8,7 @@
 - Active implementation blocker: none; video recording and final Devpost account submission remain owner-controlled
 - Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
-- Resume from: publish the APK release, record the prepared demo, complete the Devpost draft, confirm residence eligibility, and test the final links
+- Resume from: record the prepared demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
 
 ## Phase checklist
 
@@ -43,13 +43,15 @@
 - Deadline recorded from the official schedule: July 24, 2026 at 12:30 PM Nepal time.
 - Eligibility: owner confirmed current student status, legal age of majority, and a solo submission on 2026-07-19. Devpost residence eligibility remains a final account check.
 - Public requirements recorded: project name, story, visual proof, encouraged project link, impact statement, and team. Judging weights are Build Quality 30%, Real-World Impact 25%, Creativity and Approach 20%, User Experience 15%, and Clarity 10%.
-- Repository publication: `https://github.com/GrimNej/LM-Comment` now contains the complete tested history on `main`. The local branch tracks `origin/main`.
+- Repository publication: `https://github.com/GrimNej/LM-Comment` contains the complete tested history on `main`. Publication commit `cd92eaa`; judge-download documentation commit `2d6934c`; the local branch tracks `origin/main`.
+- Frozen release: annotated tag `impactforge-2026` points to commit `cd92eaa`. GitHub Release `https://github.com/GrimNej/LM-Comment/releases/tag/impactforge-2026` is public and contains the signed APK.
+- Public APK evidence: GitHub reports asset state `uploaded`, size 53,184,298 bytes, and digest `sha256:e5a2ef822561230cbfeeb80e1a9e252cbc0104b4fb6b296614bbc158a1e16970`, matching the locally verified release.
 - Files changed: `demo/presentation-script.md`, `docs/IMPACTFORGE_SUBMISSION.md`, and the SVG/PNG pair at `docs/assets/impactforge-thumbnail.*`.
 - Demo script: 167 spoken words, leaving room for the complete capture, crop, OCR, generation, edit, and copy actions within a two-minute video.
 - Submission thumbnail: 1500 x 1000 PNG, 77,525 bytes, 3:2 aspect ratio, visually inspected after rendering.
 - Exact checks: `pnpm quality` passed after the new files; `git diff --check` passed; 24-commit Git history scan found zero Groq-key-prefix hits, zero private-key headers, and zero suspicious live environment assignments.
 - Evidence path: `docs/IMPACTFORGE_SUBMISSION.md`; authoritative narration: `demo/presentation-script.md`.
-- Next phase: publish the signed APK release, then the owner creates the Devpost draft, uploads the video, confirms residence eligibility, previews every link while logged out, and submits before the deadline.
+- Next phase: owner creates the Devpost draft, records and uploads the prepared video, confirms residence eligibility, previews every link while logged out, and submits before the deadline.
 - Known limitations: there is no hosted video yet. The logged-in Devpost form and any custom questions could not be inspected without the owner's account.
 
 ## Completed implementation
