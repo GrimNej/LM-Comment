@@ -63,6 +63,17 @@ Three synthetic examples are built into the app, so the full workflow can be sho
 
 The Android workflow uses a normal native activity. Only the 60 dp lens is an overlay. Capture and lens services are separate foreground services with the Android service types required for their jobs.
 
+## Try the signed Android build
+
+[Download LM-Comment 0.1.0 for ARM64 Android](https://github.com/GrimNej/LM-Comment/releases/download/impactforge-2026/LM-Comment-0.1.0-hackathon-arm64.apk).
+
+- Android 8.0 or newer
+- ARM64 phone or tablet
+- Package: `com.grimnej.lmcomment`
+- SHA-256: `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970`
+
+The release uses a dedicated hackathon signing certificate. Android may ask you to allow installation from the browser or file manager used to open the APK.
+
 ## Requirements
 
 - Node.js 22.13.1

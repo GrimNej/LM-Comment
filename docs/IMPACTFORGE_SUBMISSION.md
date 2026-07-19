@@ -42,7 +42,7 @@ Then create a GitHub Release named `ImpactForge 2026 submission`, attach the sig
 Use these Devpost links:
 
 - Project or code repository: `https://github.com/GrimNej/LM-Comment`
-- Try it out: the GitHub Release URL containing the signed APK
+- Try it out: `https://github.com/GrimNej/LM-Comment/releases/tag/impactforge-2026`
 - Video demo: a public or unlisted YouTube or Vimeo URL that plays without a login and permits embedding
 
 ## Recommended submission copy
@@ -101,7 +101,7 @@ The strongest award positioning is The Forge Award first and Community Champion 
 - [ ] Join ImpactForge on the correct Devpost account.
 - [ ] Create a draft submission before recording the final video.
 - [x] Create the public GitHub repository and push this history as `main`.
-- [ ] Publish a GitHub Release with the signed ARM64 APK and checksum.
+- [x] Publish the `impactforge-2026` GitHub Release with the signed ARM64 APK and checksum.
 - [ ] Upload `docs/assets/impactforge-thumbnail.png` as the Devpost thumbnail.
 - [ ] Record the script in `demo/presentation-script.md` using only synthetic content.
 - [ ] Upload the video to YouTube or Vimeo and test playback while logged out.
