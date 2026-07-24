@@ -1,36 +1,47 @@
-# ImpactForge demo script
+# Prometheus two-minute demo script
 
-Use only the prepared synthetic post. Record the phone clearly and keep the finished video under two minutes.
+Use one prepared synthetic social post. Aim for a finished video shorter than two minutes, with readable screen text and no private accounts or credentials.
 
-## Script
+## Open with the learning problem
 
-Show LM-Comment Home.
+- **Say:** "Writing a thoughtful comment is a skill, but many learners know what they feel and still struggle to turn it into clear, appropriate words. LM-Comment helps them learn through examples and practice, directly where that communication happens."
+- **Show:** A large, fictional social post, followed briefly by the LM-Comment Home screen.
+- **Focus on:** Confidence, tone, and practical communication as the learning problem.
 
-> LM-Comment helps people who know what they want to say but lose time or confidence finding the right words. It turns text already visible on Android into reply options while keeping the user in control.
+## Bring the post into the lesson
 
-Start the bubble and return to the prepared post.
+- **Say:** "The learner starts the small lens, opens any post, and chooses the exact part they want to respond to."
+- **Show:** Start the bubble, return to the fictional post, tap the bubble, approve capture, and crop only the post text.
+- **Focus on:** The learner selects the context. Avoid showing unrelated apps or notifications.
 
-> The compact lens works over the app I am already using, so I do not need to copy the post into a separate tool.
+## Review what the app understood
 
-Tap the bubble, approve Android screen sharing, and crop the relevant text.
+- **Say:** "Text recognition runs on the device. The screenshot is never saved or uploaded, and the learner reviews the extracted words before asking the AI for help."
+- **Show:** Run OCR and make one quick, visible correction in the reviewed text.
+- **Focus on:** Privacy, attention, and user control.
 
-> The captured frame stays in memory on this phone. It is never saved or uploaded. Text recognition runs on-device, and I choose exactly which words continue.
+## Learn from worked examples
 
-Extract the text, make one visible correction, choose a tone, keep three options, and generate.
+- **Say:** "Now the learner chooses a tone and generates several possible comments. These are not automatic posts. They are worked examples that show different ways to acknowledge the author, add a relevant thought, and sound natural."
+- **Show:** Choose a tone, request three options, tap Generate, and pause long enough for all three results to be readable.
+- **Focus on:** Comparing alternatives instead of accepting the first answer blindly.
 
-> I can review the text, choose the tone, add an instruction, and request up to three alternatives. Only this reviewed text and these choices reach the managed relay. The provider key remains on the server.
+## Turn the example into active practice
 
-Select one result, edit a few words, save it, and tap Copy.
+- **Say:** "A learner can use an example when they need immediate support, edit it to match their own voice, or erase it and write a completely new response after seeing how a strong comment is structured."
+- **Show:** Select one result, open its editable field, remove a phrase, and type a short personal replacement.
+- **Focus on:** Make the edit clearly visible. This is the most important learning moment.
 
-> Nothing is posted automatically. I make the final edit, copy the response, and decide where or whether to send it.
+## Complete the learning loop
 
-Close the workflow and show the bubble return.
-
-> LM-Comment reduces the friction of communicating clearly for students, multilingual writers, and anyone who finds tone difficult, without taking away authorship.
+- **Say:** "When the learner is satisfied, they copy the final text and decide where to use it. LM-Comment never posts for them. The learning loop is simple: observe, compare, rewrite, and apply. That makes AI a scaffold for better communication, while the learner keeps authorship."
+- **Show:** Save the edit, tap Copy, return to the fictional post, and paste into its comment field without submitting it. Finish on the LM-Comment logo or Home screen.
+- **Focus on:** Explicit copying, no automatic posting, and the learner's final decision.
 
 ## Recording priorities
 
-- Keep the screen readable and use a synthetic post with large text.
-- Show the real capture, crop, on-device OCR, tone choice, three results, edit, and Copy state.
-- Do not open Settings, Diagnostics, a terminal, private messages, tokens, or provider dashboards.
-- If live capture fails twice, use the bundled synthetic example and keep the same review, generate, edit, and copy sequence.
+- Keep the spoken delivery conversational and confident. Do not read section names aloud.
+- Show the real bubble, crop, OCR, tone, three results, editable response, and Copy action.
+- Spend more screen time on comparing and editing than on setup.
+- Do not claim measured learning outcomes. Describe LM-Comment as an example-and-practice tool.
+- Do not open Settings, Diagnostics, terminals, private messages, tokens, or provider dashboards.
