@@ -1,14 +1,32 @@
 # LM-Comment progress
 
-- Checkpoint date: 2026-07-19
+- Checkpoint date: 2026-07-24
 - Branch: `rebuild/lm-comment-hackathon`
 - Latest completed implementation commit: `ab2a671`
 - Latest deployment commit: `d0910d5`
-- Current phase: H7 - ImpactForge submission packaging and owner acceptance
-- Active implementation blocker: none; video recording and final Devpost account submission remain owner-controlled
+- Current phase: H7 - Prometheus submission packaging and owner acceptance
+- Active implementation blocker: none; Prometheus signup confirmation, video recording, and final Devpost account submission remain owner-controlled
 - Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
-- Resume from: record the prepared demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
+- Resume from: confirm the Prometheus Google signup, record the prepared learning demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
+
+## Prometheus submission checkpoint
+
+- Research date: 2026-07-24.
+- Submission-kit commit: `c11683e` (`docs(submission): prepare Prometheus learning pitch`).
+- Requirements confirmed: build an educational AI/ML tool; submit source code and a video no longer than two minutes; core logic must be new within July 8 to July 30; solo entries and teams up to four are allowed.
+- Judging confirmed: Educational Impact, Creative Use of AI/ML, Technical Execution, and Pitch and Demo are each worth 25 points.
+- Eligibility confirmed from the public card: students age 13 or older, no companies or professional organizations, and standard excluded locations. The owner previously confirmed student status, legal adulthood, and a solo submission. Devpost residence still needs owner confirmation.
+- Fit assessment: LM-Comment meets the educational-tool requirement when presented as an example-and-practice loop. Learners select real context, compare AI-generated reply examples, edit or rewrite one in their own voice, and explicitly copy it. The app does not claim measured learning outcomes or post automatically.
+- Repository evidence: the public `main` branch contains the source code and begins on July 15, 2026, inside the official originality window.
+- Deadline evidence: Devpost displays July 30 at 11:45 PM EDT, equivalent to July 31 at 9:30 AM Nepal time. The rules prose says 11:59 PM, so the earlier platform cutoff controls.
+- Urgent owner gap: the overview links a Google signup form whose page says its deadline was July 18 and requires Google sign-in. Completion cannot be verified from the logged-out browser. If it was not completed, attempt it immediately and contact the organizers if closed.
+- Files changed: `demo/presentation-script.md`, archived `demo/impactforge-presentation-script.md`, `docs/PROMETHEUS_SUBMISSION.md`, and this checkpoint.
+- Demo script: 202 spoken words in six untimed narration-and-screen beats covering the learning problem, capture, on-device OCR, example comparison, active rewriting, explicit copy, and retained authorship.
+- Exact checks: official overview, rules, schedule, resources, updates, gallery, discussions, and linked signup form inspected through a real browser; repository start date and public remote verified; `pnpm check:copy` PASS; `pnpm check:secrets` PASS; `git diff --check` PASS.
+- Evidence paths: `docs/PROMETHEUS_SUBMISSION.md` and `demo/presentation-script.md`.
+- Next phase: owner confirms the signup form, joins the correct challenge account, creates the Devpost draft, records and uploads the sub-two-minute demo, checks every link while logged out, and submits before the platform cutoff.
+- Known limitations: the logged-in submission form and custom fields are not visible without the owner's Devpost account; the Google form's completion status is unknown; the final video does not yet exist.
 
 ## Secure demo-recording checkpoint
 
