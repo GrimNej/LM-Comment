@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Campus Circle demo post</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f4efe5;
+        --card: #fffdf8;
+        --ink: #111611;
+        --muted: #5e665e;
+        --line: #d9d3c8;
+        --lime: #b9f227;
+        --terra: #d66a45;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 12% 0%, rgb(185 242 39 / 28%), transparent 26rem),
+          var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      header {
+        align-items: center;
+        background: rgb(244 239 229 / 92%);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 1.1rem;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      .brand {
+        align-items: center;
+        display: flex;
+        font-size: 1.02rem;
+        font-weight: 850;
+        gap: 0.6rem;
+        letter-spacing: -0.025em;
+      }
+
+      .brand-mark {
+        background: var(--lime);
+        border: 2px solid var(--ink);
+        border-radius: 50%;
+        box-shadow: 0.22rem 0.22rem 0 var(--ink);
+        height: 1.2rem;
+        width: 1.2rem;
+      }
+
+      .demo-label {
+        border: 1px solid var(--ink);
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 0.42rem 0.65rem;
+        text-transform: uppercase;
+      }
+
+      main {
+        margin: 0 auto;
+        max-width: 42rem;
+        padding: 1rem;
+      }
+
+      article {
+        background: var(--card);
+        border: 1px solid var(--ink);
+        border-radius: 1.35rem;
+        box-shadow: 0.45rem 0.45rem 0 var(--ink);
+        overflow: hidden;
+      }
+
+      .profile {
+        align-items: center;
+        display: flex;
+        gap: 0.75rem;
+        padding: 1.1rem 1.1rem 0.9rem;
+      }
+
+      .avatar {
+        align-items: center;
+        background: var(--terra);
+        border: 2px solid var(--ink);
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        font-size: 0.82rem;
+        font-weight: 900;
+        height: 2.8rem;
+        justify-content: center;
+        width: 2.8rem;
+      }
+
+      .name {
+        font-size: 0.98rem;
+        font-weight: 850;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 0.78rem;
+        margin-top: 0.18rem;
+      }
+
+      .race-card {
+        background:
+          linear-gradient(135deg, rgb(17 22 17 / 8%) 25%, transparent 25%) 0 0 / 1.6rem 1.6rem,
+          linear-gradient(315deg, rgb(17 22 17 / 8%) 25%, transparent 25%) 0 0 / 1.6rem 1.6rem,
+          var(--lime);
+        border-block: 1px solid var(--ink);
+        min-height: 8rem;
+        overflow: hidden;
+        padding: 1.2rem;
+        position: relative;
+      }
+
+      .race-card::after {
+        border: 1.1rem solid var(--terra);
+        border-radius: 50%;
+        content: "";
+        height: 10rem;
+        position: absolute;
+        right: -2.3rem;
+        top: -2.4rem;
+        width: 10rem;
+      }
+
+      .distance {
+        font-size: 3.25rem;
+        font-weight: 950;
+        letter-spacing: -0.08em;
+        line-height: 0.9;
+        position: relative;
+        z-index: 1;
+      }
+
+      .finish {
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        margin-top: 0.75rem;
+        position: relative;
+        text-transform: uppercase;
+        z-index: 1;
+      }
+
+      .copy {
+        padding: 1.15rem;
+      }
+
+      h1 {
+        font-size: clamp(1.55rem, 7vw, 2.25rem);
+        letter-spacing: -0.055em;
+        line-height: 1;
+        margin: 0 0 0.85rem;
+      }
+
+      .post-text {
+        font-size: 1.06rem;
+        line-height: 1.55;
+        margin: 0;
+      }
+
+      .tags {
+        color: #32420a;
+        font-size: 0.82rem;
+        font-weight: 800;
+        margin-top: 0.9rem;
+      }
+
+      .stats {
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        display: flex;
+        font-size: 0.8rem;
+        font-weight: 700;
+        gap: 1rem;
+        padding: 0.8rem 1.15rem;
+      }
+
+      .practice {
+        margin-top: 1.35rem;
+      }
+
+      .practice h2 {
+        font-size: 0.88rem;
+        letter-spacing: 0.08em;
+        margin: 0 0 0.55rem;
+        text-transform: uppercase;
+      }
+
+      .composer {
+        align-items: flex-end;
+        display: flex;
+        gap: 0.6rem;
+      }
+
+      textarea {
+        background: var(--card);
+        border: 1px solid var(--ink);
+        border-radius: 1rem;
+        color: var(--ink);
+        flex: 1;
+        font: inherit;
+        line-height: 1.4;
+        min-height: 5.5rem;
+        outline: none;
+        padding: 0.85rem;
+        resize: none;
+      }
+
+      textarea:focus {
+        box-shadow: 0 0 0 0.22rem rgb(185 242 39 / 70%);
+      }
+
+      button {
+        background: var(--ink);
+        border: 1px solid var(--ink);
+        border-radius: 0.85rem;
+        color: white;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 850;
+        padding: 0.9rem 1rem;
+      }
+
+      .notice {
+        color: var(--muted);
+        font-size: 0.7rem;
+        line-height: 1.4;
+        margin: 0.55rem 0 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand"><span class="brand-mark"></span>Campus Circle</div>
+      <div class="demo-label">Fictional demo</div>
+    </header>
+    <main>
+      <article>
+        <div class="profile">
+          <div class="avatar" aria-hidden="true">MR</div>
+          <div>
+            <div class="name">Maya Rai</div>
+            <div class="meta">Student runner · 8 minutes ago</div>
+          </div>
+        </div>
+        <div class="race-card" aria-label="Abstract ten kilometre race graphic">
+          <div class="distance">10K</div>
+          <div class="finish">First finish</div>
+        </div>
+        <div class="copy">
+          <h1>First 10K complete.</h1>
+          <p class="post-text">
+            I finished my first 10K this morning! It rained for most of the route, but the people
+            cheering made every kilometre worth it. Still cannot believe I actually did it.
+          </p>
+          <div class="tags">#First10K #KeepGoing</div>
+        </div>
+        <div class="stats"><span>48 cheers</span><span>7 replies</span></div>
+      </article>
+
+      <section class="practice">
+        <h2>Practice your response</h2>
+        <div class="composer">
+          <textarea id="response" aria-label="Practice your response" placeholder="Write your own response..."></textarea>
+          <button type="button" aria-label="Post disabled for demo">Post</button>
+        </div>
+        <p class="notice">Demo only. The Post button is intentionally inactive.</p>
+      </section>
+    </main>
+  </body>
+</html>
