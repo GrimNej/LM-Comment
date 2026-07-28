@@ -86,6 +86,18 @@
 - Next phase: owner creates the Devpost draft, records and uploads the prepared video, confirms residence eligibility, previews every link while logged out, and submits before the deadline.
 - Known limitations: there is no hosted video yet. The logged-in Devpost form and any custom questions could not be inspected without the owner's account.
 
+## Prometheus silent demo video checkpoint
+
+- Commit: `a79389c` (`docs(demo): add Prometheus video recording kit`).
+- Files changed: `demo/synthetic-post.html` and `demo/prometheus-video-cue-sheet.md`.
+- Behavior completed: a fictional post was served only on localhost, the installed release app completed the real bubble, MediaProjection consent, crop, on-device OCR, editable review, tone selection, generation, result editing, copy, and paste-without-posting workflow, and the captured takes were cut into a branded silent vertical demo.
+- Final artifact: ignored local file `artifacts/demo-video/prometheus-20260728/LM-Comment-Prometheus-Demo-Silent.mp4`, 5,149,745 bytes, 116.6 seconds, H.264/yuv420p, 1080 x 1920, 30 fps, no audio, SHA-256 `27AF7A007D66F790FE36774EFA8640F5F71CF80A829E003917D627D999BD883F`.
+- Raw evidence: `artifacts/demo-video/prometheus-20260728/raw/full-take.mp4` and `artifacts/demo-video/prometheus-20260728/raw/rewrite-take.mp4`.
+- Exact checks: full MP4 decode passed with no FFmpeg errors; ffprobe confirmed duration, dimensions, codec, pixel format, frame rate, and the absence of an audio stream; black-frame detection found no qualifying interval; `pnpm check:copy`, `pnpm check:secrets`, and `git diff --check` passed.
+- Visual evidence: opening card, every workflow beat, revised response, final paste, and closing card were inspected from temporary contact frames. Those QA frames and the test capture were deleted after review. No real account, private message, credential, or notification appears in the final video.
+- Next phase: owner records the prepared voiceover, mixes it over the silent MP4, reviews the final audio level and pronunciation, uploads the finished video, and adds the public link to Devpost.
+- Known limitations: the recording uses the stable API 34 `peekaprompt` emulator because the API 36 AVD cold boot was unstable on this workstation. The footage is intentionally silent, and physical-phone appearance is not claimed by this checkpoint.
+
 ## Completed implementation
 
 ### H0
