@@ -13,6 +13,7 @@
 ## Prometheus PDF presentation checkpoint
 
 - Source checkpoint: public `main` commit `db765c4`.
+- Presentation commit: `5f4b747` (`docs(submission): add Prometheus project deck`).
 - Behavior completed: an eight-slide, 16:9 project presentation now explains the learner problem, the example-and-rewrite loop, the four-step product experience, the screenshot privacy boundary, engineering challenges, verified build evidence, and next steps. Its graphite, violet, and cyan palette and four-corner lens match the application's dark mode.
 - Files changed: local upload artifact `output/pdf/LM-Comment-Prometheus-Presentation.pdf` and this checkpoint. Temporary generator and render files were removed after validation.
 - Exact checks: ReportLab generation PASS; `pdfinfo` PASS with eight 960 x 540 pages; `pdfplumber` extracted text from every page; em dash, en dash, and non-breaking-hyphen scans returned zero; the document is unencrypted and contains no JavaScript; one GitHub link annotation is present; all eight pages rendered at 1920 x 1080 and passed final visual inspection for clipping, overlap, contrast, logo consistency, and footer/page-number consistency.
