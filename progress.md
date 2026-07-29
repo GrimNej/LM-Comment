@@ -2,13 +2,25 @@
 
 - Checkpoint date: 2026-07-29
 - Branch: `rebuild/lm-comment-hackathon`
-- Latest completed implementation commit: `ab2a671`
+- Latest completed implementation commit: `94d21ec`
 - Latest deployment commit: `d0910d5`
 - Current phase: H7 - Prometheus submission packaging and owner acceptance
 - Active implementation blocker: none; Prometheus signup confirmation, video upload, and final Devpost account submission remain owner-controlled
 - Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
 - Resume from: confirm the Prometheus Google signup, upload the completed learning demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
+
+## Prometheus repository and release polish checkpoint
+
+- Implementation commit: `94d21ec` (`feat(brand): polish Prometheus submission`).
+- Behavior completed: the repository now has one canonical four-corner lens and lime-center mark across the app shell, floating bubble, notification icon, launcher sources, README logo, banner, diagrams, and submission thumbnail. The README presents the educational learning loop, privacy boundary, architecture, signed build, and Prometheus submission material without stale challenge branding.
+- Files changed: `README.md`; the three canonical brand SVGs under `apps/mobile/assets/brand/`; `apps/mobile/src/ui/components.tsx`; bubble geometry, rendering, notification vector, and its unit test; `docs/PROMETHEUS_SUBMISSION.md`; `docs/TEST_EVIDENCE.md`; `progress.md`; and the six final assets under `docs/assets/`. Superseded challenge documents and raster artwork were removed.
+- Exact tests: `pnpm brand:generate` PASS; all five documentation SVGs parsed and rendered PASS; final banner, logo, learning flow, architecture, and 1500 x 1000 submission thumbnail visually inspected PASS; README local-reference check PASS; current-tree stale-brand scan PASS with zero matches; `pnpm quality` PASS, including 19 relay tests; native `:lm-comment-android:testDebugUnitTest` PASS with 107 tests, zero failures, zero errors, and one intentional skip; ARM64 release build PASS with 795 Gradle tasks.
+- APK evidence: `artifacts/release/LM-Comment-0.1.0-hackathon-arm64.apk` is 53,081,699 bytes with SHA-256 `67B40D8CDD3565E510F403B090C428DA78577C59C68D4B96B2D6A4CFC1D3F2C3`. APK Signature Schemes v2 and v3, the dedicated 3,072-bit release certificate, 16 KiB alignment, package/version/SDK, and ARM64-only ABI all verify.
+- Boundary evidence: all 1,301 APK entries were scanned in memory. Exact local Groq key, generic `gsk_`, `GROQ_API_KEY`, `api.groq.com`, `.env` entries, and screenshot-like image entries each returned zero matches.
+- Evidence paths: `README.md`, `docs/assets/`, `docs/TEST_EVIDENCE.md`, and the ignored local signed APK under `artifacts/release/`.
+- Next phase: publish the commit and signed APK under the `prometheus-july-2026` GitHub release, then the owner installs that exact APK, verifies the uploaded video is no longer than two minutes, completes the remaining account checks, and submits the Devpost entry.
+- Known limitations: physical-phone acceptance and the skipped stress matrix remain owner-controlled; the final public video URL and Devpost submitted state cannot be recorded without the owner's accounts; the workstation uses Node 24.14.0 while the repository and production relay pin Node 22.13.x.
 
 ## Prometheus submission checkpoint
 
