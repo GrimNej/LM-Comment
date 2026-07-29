@@ -3,36 +3,36 @@
 Use `artifacts/demo-video/prometheus-20260728/LM-Comment-Prometheus-Demo-Silent.mp4`.
 The timings are approximate and leave a little room for natural pauses.
 
-How many times have you found a post on social media that genuinely resonated with you? You open the comments, ready to join the conversation, but the moment you try to type, your mind goes blank. You cannot find the right words, so you close the comments and keep scrolling. That small hesitation can mean missing a chance to share your perspective, practise communication, and become part of a community. Most people are never taught how to write a thoughtful response, so they never get the practice that would make it easier. LM-Comment turns that frozen moment into an opportunity to learn, participate, and connect.
+How many times have you found a post on social media that genuinely resonated with you? You open the comments, ready to join the conversation, but the moment you try to type, your mind goes blank. You cannot find the right words, so you close the comments and keep scrolling. That small hesitation can mean missing a chance to share your perspective, practise communication, and become part of a community. Most people are never taught how to write a thoughtful response, so they never get the practice that would make it easier. LM-Comment turns that frozen moment into an opportunity to learn, participate, and connect by teaching you HOW to comment.
 
 ## 0:00 to 0:15: The learning problem
 
-- **Say:** Writing a thoughtful comment is a skill. Many learners know what they feel but struggle to turn it into clear, appropriate words. LM-Comment gives them examples and a place to practise.
+- **Say:** Here is a post I want to reply to, but I am not sure what to write. I open LM-Comment and tap Start bubble.
 - **On screen:** Opening card, fictional post, and LM-Comment Home.
 
 ## 0:15 to 0:39: Bring the post into the lesson
 
-- **Say:** Start the small lens, open a post, and choose the exact part you want to respond to.
+- **Say:** I go back to the post and tap the bubble. I tap Start now, then move the corners until only the post is selected.
 - **On screen:** Bubble, Android capture consent, and the crop handles selecting only the fictional post.
 
 ## 0:39 to 0:60: Review what the app understood
 
-- **Say:** Text recognition runs on the device. The screenshot is never saved or uploaded. The learner reviews the extracted words and can correct them before using AI.
+- **Say:** LM-Comment reads the words on my phone and shows me the text it found. The screenshot is not saved or sent anywhere. I can check the text and fix anything before I continue.
 - **On screen:** On-device reading state, editable OCR text, and a visible correction.
 
 ## 0:60 to 0:85: Learn from worked examples
 
-- **Say:** Choose a tone and compare several possible comments. They are worked examples, not automatic posts, so the learner can study how each response acknowledges the author and sounds natural.
+- **Say:** Now I choose how I want the comment to sound, select three options, and tap Generate. LM-Comment gives me different replies that I can read and compare.
 - **On screen:** Tone, reply count, generation, and multiple reply choices.
 
 ## 0:85 to 1:08: Turn the example into practice
 
-- **Say:** Use an example for immediate support, edit it into your own voice, or replace it after seeing how a strong comment is structured.
+- **Say:** I open the first reply and tap Edit. The whole comment is editable, so I replace it with a shorter version in my own words and tap Save changes.
 - **On screen:** Open Edit, rewrite the response, save it, and return to the reply list.
 
 ## 1:08 to 1:56: Complete the learning loop
 
-- **Say:** Copy the final text and decide where to use it. LM-Comment never posts for you. The loop is simple: observe, compare, rewrite, and apply. AI provides the scaffold while the learner keeps authorship.
+- **Say:** When I am happy with my comment, I tap Copy, return to the post, and paste it into the comment box. LM-Comment does not post it for me. I still decide whether I want to post it. This way, I learn by seeing an example and rewriting it in my own voice.
 - **On screen:** Copy, paste into the fictional response field without posting, and closing card.
 
 ## Recording note
