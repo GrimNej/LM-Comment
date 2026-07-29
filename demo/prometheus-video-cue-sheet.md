@@ -3,6 +3,8 @@
 Use `artifacts/demo-video/prometheus-20260728/LM-Comment-Prometheus-Demo-Silent.mp4`.
 The timings are approximate and leave a little room for natural pauses.
 
+How many times have you found a post on social media that genuinely resonated with you? You open the comments, ready to join the conversation, but the moment you try to type, your mind goes blank. You cannot find the right words, so you close the comments and keep scrolling. That small hesitation can mean missing a chance to share your perspective, practise communication, and become part of a community. Most people are never taught how to write a thoughtful response, so they never get the practice that would make it easier. LM-Comment turns that frozen moment into an opportunity to learn, participate, and connect.
+
 ## 0:00 to 0:15: The learning problem
 
 - **Say:** Writing a thoughtful comment is a skill. Many learners know what they feel but struggle to turn it into clear, appropriate words. LM-Comment gives them examples and a place to practise.
