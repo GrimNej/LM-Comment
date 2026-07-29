@@ -3,7 +3,7 @@
 Use `artifacts/demo-video/prometheus-20260728/LM-Comment-Prometheus-Demo-Silent.mp4`.
 The timings are approximate and leave a little room for natural pauses.
 
-Have you ever wanted to reply to a post, but could not find the words? LM-Comment helps you learn how to write thoughtful comments and join the conversation.
+Have you ever wanted to comment on a post but did not know what to say? Many people face this every day and miss chances to connect with new communities. LM-Comment teaches you how to comment.
 
 ## 0:00 to 0:15: The learning problem
 
