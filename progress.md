@@ -1,6 +1,6 @@
 # LM-Comment progress
 
-- Checkpoint date: 2026-07-29
+- Checkpoint date: 2026-07-30
 - Branch: `rebuild/lm-comment-hackathon`
 - Latest completed implementation commit: `94d21ec`
 - Latest deployment commit: `d0910d5`
@@ -9,6 +9,17 @@
 - Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
 - Resume from: confirm the Prometheus Google signup, upload the completed learning demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
+
+## Prometheus PDF presentation checkpoint
+
+- Source checkpoint: public `main` commit `db765c4`.
+- Behavior completed: an eight-slide, 16:9 project presentation now explains the learner problem, the example-and-rewrite loop, the four-step product experience, the screenshot privacy boundary, engineering challenges, verified build evidence, and next steps. Its graphite, violet, and cyan palette and four-corner lens match the application's dark mode.
+- Files changed: local upload artifact `output/pdf/LM-Comment-Prometheus-Presentation.pdf` and this checkpoint. Temporary generator and render files were removed after validation.
+- Exact checks: ReportLab generation PASS; `pdfinfo` PASS with eight 960 x 540 pages; `pdfplumber` extracted text from every page; em dash, en dash, and non-breaking-hyphen scans returned zero; the document is unencrypted and contains no JavaScript; one GitHub link annotation is present; all eight pages rendered at 1920 x 1080 and passed final visual inspection for clipping, overlap, contrast, logo consistency, and footer/page-number consistency.
+- Artifact evidence: 85,020 bytes, below the 35 MB upload limit, with SHA-256 `8B1FAE56057C77E51E69C3FC5CACCB5288E51B1B38A0C3A13C2AAC97794D057D`.
+- Evidence path: `output/pdf/LM-Comment-Prometheus-Presentation.pdf`.
+- Next phase: the owner uploads the PDF to the Devpost file field, checks the browser preview, and completes the remaining video, account, and submission steps.
+- Known limitations: the deck uses clean vector representations of the product flow rather than screenshots of private or secure workflow content; physical-phone acceptance remains documented separately as owner-controlled.
 
 ## Prometheus repository and release polish checkpoint
 
