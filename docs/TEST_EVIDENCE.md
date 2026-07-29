@@ -1,6 +1,6 @@
 # Test evidence
 
-Status date: 2026-07-16. This file separates recorded evidence from owner-only acceptance work. [`progress.md`](../progress.md) is the checkpoint authority; raw local reports live under `artifacts/evidence/` and are intentionally ignored by Git because they can contain device metadata.
+Status date: 2026-07-29. This file separates recorded evidence from owner-only acceptance work. [`progress.md`](../progress.md) is the checkpoint authority; raw local reports live under `artifacts/evidence/` and are intentionally ignored by Git because they can contain device metadata.
 
 ## Recorded H6 baseline
 
@@ -33,12 +33,12 @@ The H7 source and relay hardening gates below were rerun after interaction/theme
 | Gate | Command/check | Final result |
 |---|---|---|
 | Workspace quality | `pnpm quality` | PASS: scope, naming, repository copy style, secret and 30-case quality-set validators; lint; typecheck; 19 relay tests; relay build |
-| Native unit suite | from `apps/mobile/android`: `.\gradlew.bat :lm-comment-android:testDebugUnitTest` | PASS: 106 total across 17 suites, zero failures, zero errors, one intentional opt-in live-test skip |
+| Native unit suite | from `apps/mobile/android`: `.\gradlew.bat :lm-comment-android:testDebugUnitTest` | PASS: 107 total across 17 suites, zero failures, zero errors, one intentional opt-in live-test skip |
 | Clean native generation | `pnpm mobile:prebuild` | PASS: clean prebuild; API-33-only splash attribute removed by the durable Expo config plugin |
 | API 36 instrumentation | x86_64 connected Android tests | PASS: 4 / 4 |
 | Android lint | from `apps/mobile/android`: `.\gradlew.bat :app:lintRelease -PreactNativeArchitectures=x86_64 -x :react-native-worklets:lintAnalyzeRelease -x :react-native-reanimated:lintAnalyzeRelease` | PASS: app and LM-Comment module release lint; only the two named upstream analyzers were excluded after they crashed internally |
 | Debug APK | x86_64 `pnpm mobile:android:debug` | PASS |
-| Arm64 release APK | set `LM_COMMENT_ANDROID_ARCH=arm64-v8a`; `pnpm mobile:android:release` | PASS: 53,184,298-byte signed artifact; SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970` |
+| Arm64 release APK | set `LM_COMMENT_ANDROID_ARCH=arm64-v8a`; `pnpm mobile:android:release`; align and sign with the dedicated release key | PASS: 53,081,699-byte signed artifact; SHA-256 `67B40D8CDD3565E510F403B090C428DA78577C59C68D4B96B2D6A4CFC1D3F2C3` |
 | Relay container | build `apps/relay/Dockerfile` and record image digest | PASS: `sha256:bffd7ac6e0762a19fe3ac65b2439a7d745e3dd3bebfb5f128fb66830f82201c1`; 57,563,877 bytes; Node 22.13.1; non-root UID 1000; healthy ephemeral run |
 | Relay health | public `/healthz` plus authenticated synthetic canary | PASS: public HTTPS health and content-free authenticated Groq canary; VPS `current` points to `d0910d5` and the service is active |
 | VPS isolation and safety | current release, free storage, source/log secret scans | PASS: immutable 23 MiB release, approximately 20 GB free, unrelated services preserved, final source/log scans clean |

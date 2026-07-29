@@ -48,4 +48,29 @@ class BubbleGlyphGeometryTest {
         assertEquals(bottomRight.horizontal.endX, bottomRight.vertical.startX, 0f)
         assertEquals(bottomRight.horizontal.endY, bottomRight.vertical.startY, 0f)
     }
+
+    @Test
+    fun `bubble uses the canonical packaged logo proportions`() {
+        val marks = BubbleGlyphGeometry.cornerMarks.associateBy { it.corner }
+        val topLeft = marks.getValue(BubbleGlyphCorner.TOP_LEFT)
+        val topRight = marks.getValue(BubbleGlyphCorner.TOP_RIGHT)
+        val bottomLeft = marks.getValue(BubbleGlyphCorner.BOTTOM_LEFT)
+        val bottomRight = marks.getValue(BubbleGlyphCorner.BOTTOM_RIGHT)
+
+        assertEquals(0.297f, topLeft.horizontal.startX, 0.0001f)
+        assertEquals(0.297f, topLeft.horizontal.startY, 0.0001f)
+        assertEquals(0.703f, topRight.horizontal.endX, 0.0001f)
+        assertEquals(0.703f, bottomLeft.vertical.startY, 0.0001f)
+        assertEquals(0.703f, bottomRight.vertical.startY, 0.0001f)
+        assertEquals(
+            0.152f,
+            topLeft.horizontal.endX - topLeft.horizontal.startX,
+            0.0001f,
+        )
+        assertEquals(
+            0.152f,
+            bottomRight.vertical.startY - bottomRight.vertical.endY,
+            0.0001f,
+        )
+    }
 }

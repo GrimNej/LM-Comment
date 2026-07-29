@@ -4,7 +4,7 @@ Status checked on July 24, 2026 against the official overview, rules, schedule, 
 
 ## Current verdict
 
-LM-Comment meets the project, AI, technical, team-size, source-code, and build-window requirements. It is not yet submission-ready because the owner-controlled registration and video steps remain incomplete or unconfirmed.
+LM-Comment meets the project, AI, technical, team-size, source-code, and build-window requirements. The owner confirmed that the demo video is ready on July 29. Registration, public video upload, residence confirmation, and the final Devpost submission remain owner-controlled.
 
 The strongest educational framing is not "AI writes comments for people." It is "learners observe examples, compare alternatives, rewrite in their own voice, and apply the result themselves." The editable response field and explicit Copy action support that framing without claiming that the app has measured learning outcomes.
 
@@ -16,7 +16,7 @@ The strongest educational framing is not "AI writes comments for people." It is 
 | Functional, stable, intuitive prototype | PASS WITH OWNER TESTS PENDING | Signed Android APK, public relay, automated checks, API 36 runtime evidence, and a polished UI exist. The final physical-phone matrix remains owner-controlled. |
 | Source code submission | PASS | Public repository: `https://github.com/GrimNej/LM-Comment`. Submit the main repository URL, not a special branch. |
 | Code written in the July 8 to July 30 window | PASS FROM REPOSITORY HISTORY | The repository's first commit is dated July 15, 2026. Open-source libraries and pretrained models are explicitly allowed. |
-| Video no longer than two minutes | PENDING | Record `demo/presentation-script.md`. Judges state that anything after two minutes will not be watched. Aim below 1 minute 55 seconds. |
+| Video no longer than two minutes | OWNER CONFIRMED READY, RUNTIME CHECK NEEDED | The final demo video is ready. Verify the exported duration before upload because judges state that anything after two minutes will not be watched. |
 | Solo or team of up to four | PASS | The owner confirmed this is a solo project. |
 | Student and age 13 or older | PASS | The owner previously confirmed student status and legal adulthood. |
 | Eligible residence | OWNER CONFIRMATION NEEDED | Devpost excludes Brazil, Crimea, Cuba, Iran, North Korea, Quebec, and Russia. Confirm the residence saved in the Devpost account. |
@@ -48,7 +48,8 @@ Short educational statement:
 - [ ] Create the Devpost draft and inspect every custom submission field.
 - [x] Keep the public GitHub repository on `main`.
 - [x] Keep the signed APK available through the public GitHub Release.
-- [ ] Record the learning-focused script in `demo/presentation-script.md` and keep the final export below two minutes.
+- [x] Prepare the learning-focused demo video.
+- [ ] Verify that the final uploaded runtime is no longer than two minutes.
 - [ ] Upload the video to a host accepted by Devpost and verify that it plays without the creator account.
 - [ ] Add the repository URL, video, project story, built-with tags, thumbnail, and solo contribution.
 - [ ] Preview every link while logged out.

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">LM-Comment logo</title>
+  <desc id="desc">Four inward-facing crop corners surround one lime signal point.</desc>
+  <defs>
+    <linearGradient id="frame" x1="22" y1="18" x2="234" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#171C18"/>
+      <stop offset="1" stop-color="#0C100D"/>
+    </linearGradient>
+    <radialGradient id="signal" cx="0" cy="0" r="1" gradientTransform="translate(119 112) rotate(48) scale(42)">
+      <stop stop-color="#D7FF67"/>
+      <stop offset="1" stop-color="#B9E84A"/>
+    </radialGradient>
+    <filter id="signalGlow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .corner {
+        stroke-dasharray: 82;
+        animation: draw 2.4s cubic-bezier(.22, 1, .36, 1) forwards;
+      }
+      .corner:nth-of-type(2) { animation-delay: .12s; }
+      .corner:nth-of-type(3) { animation-delay: .24s; }
+      .corner:nth-of-type(4) { animation-delay: .36s; }
+      .signal {
+        animation: settle 1.1s .7s cubic-bezier(.22, 1, .36, 1) both;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      .halo {
+        animation: pulse 3.2s 1.4s ease-out infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      @keyframes draw {
+        from { stroke-dashoffset: 82; }
+        to { stroke-dashoffset: 0; }
+      }
+      @keyframes settle {
+        from { opacity: 0; transform: scale(.45); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes pulse {
+        0%, 30% { opacity: .5; transform: scale(.7); }
+        85%, 100% { opacity: 0; transform: scale(1.9); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; }
+      }
+    </style>
+  </defs>
+
+  <rect x="12" y="12" width="232" height="232" rx="58" fill="url(#frame)" stroke="#374038" stroke-width="2"/>
+  <g fill="none" stroke="#F4F0E6" stroke-linecap="round" stroke-linejoin="round" stroke-width="16">
+    <path class="corner" d="M115 76H76v39"/>
+    <path class="corner" d="M141 76h39v39"/>
+    <path class="corner" d="M115 180H76v-39"/>
+    <path class="corner" d="M141 180h39v-39"/>
+  </g>
+  <circle class="halo" cx="128" cy="128" r="28" fill="none" stroke="#B9E84A" stroke-width="4"/>
+  <circle class="signal" cx="128" cy="128" r="23" fill="url(#signal)" filter="url(#signalGlow)"/>
+</svg>

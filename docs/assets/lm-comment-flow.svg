@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 330" role="img" aria-labelledby="title desc">
+  <title id="title">How LM-Comment works</title>
+  <desc id="desc">A learner selects a post, checks on-device text recognition, compares reply examples, rewrites one, and copies the final words without automatic posting.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="330">
+      <stop stop-color="#0C100D"/><stop offset="1" stop-color="#171C18"/>
+    </linearGradient>
+    <linearGradient id="line" x1="104" y1="0" x2="1176" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B9E84A"/><stop offset=".62" stop-color="#B9E84A"/><stop offset="1" stop-color="#E96D4C"/>
+    </linearGradient>
+    <filter id="glow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .sans { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      .mono { font-family: "Space Mono", Consolas, monospace; }
+      .path { stroke-dasharray: 7 9; animation: move 11s linear infinite; }
+      .ring {
+        animation: pulse 3.2s ease-out infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      .r2 { animation-delay: -1.05s; }
+      .r3 { animation-delay: -2.1s; }
+      @keyframes move { to { stroke-dashoffset: -160; } }
+      @keyframes pulse {
+        0%, 25% { opacity: .55; transform: scale(.65); }
+        85%, 100% { opacity: 0; transform: scale(1.45); }
+      }
+      @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    </style>
+  </defs>
+
+  <rect width="1280" height="330" rx="24" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1278" height="328" rx="23" fill="none" stroke="#F4F0E6" stroke-opacity=".16" stroke-width="2"/>
+  <text x="48" y="44" class="mono" fill="#B9E84A" font-size="10" letter-spacing="1.8">FROM HESITATION TO A REPLY IN YOUR OWN VOICE</text>
+  <text x="1232" y="44" class="mono" fill="#899188" font-size="8" text-anchor="end">THE APP NEVER POSTS FOR YOU</text>
+
+  <path id="flowPath" d="M104 162H1176" fill="none" stroke="url(#line)" stroke-width="2.5" class="path"/>
+  <circle r="5" fill="#F4F0E6" filter="url(#glow)">
+    <animateMotion dur="7s" repeatCount="indefinite"><mpath href="#flowPath"/></animateMotion>
+  </circle>
+  <circle r="4" fill="#B9E84A" filter="url(#glow)">
+    <animateMotion dur="7s" begin="-2.3s" repeatCount="indefinite"><mpath href="#flowPath"/></animateMotion>
+  </circle>
+  <circle r="4" fill="#E96D4C" filter="url(#glow)">
+    <animateMotion dur="7s" begin="-4.6s" repeatCount="indefinite"><mpath href="#flowPath"/></animateMotion>
+  </circle>
+
+  <g transform="translate(104 162)">
+    <circle r="36" fill="#171C18" stroke="#B9E84A"/>
+    <circle r="48" fill="none" stroke="#B9E84A" stroke-opacity=".25" class="ring"/>
+    <path d="M-13-9h26M-13 0h20M-13 9h23" stroke="#B9E84A" stroke-width="2.2" stroke-linecap="round"/>
+    <text y="76" class="mono" fill="#B9E84A" font-size="8" text-anchor="middle">01 / FIND</text>
+    <text y="98" class="sans" fill="#F4F0E6" font-size="14" font-weight="750" text-anchor="middle">Choose a post</text>
+    <text y="116" class="sans" fill="#899188" font-size="9" text-anchor="middle">A real moment to practise</text>
+  </g>
+  <g transform="translate(372 162)">
+    <circle r="36" fill="#171C18" stroke="#B9E84A"/>
+    <circle r="48" fill="none" stroke="#B9E84A" stroke-opacity=".25" class="ring r2"/>
+    <path d="M-15-15h10M-15-15v10M15-15H5M15-15v10M-15 15h10M-15 15V5M15 15H5M15 15V5" fill="none" stroke="#F4F0E6" stroke-width="2.2" stroke-linecap="round"/>
+    <circle r="5" fill="#B9E84A"/>
+    <text y="76" class="mono" fill="#B9E84A" font-size="8" text-anchor="middle">02 / SELECT</text>
+    <text y="98" class="sans" fill="#F4F0E6" font-size="14" font-weight="750" text-anchor="middle">Crop the context</text>
+    <text y="116" class="sans" fill="#899188" font-size="9" text-anchor="middle">One in-memory capture</text>
+  </g>
+  <g transform="translate(640 162)">
+    <circle r="38" fill="#1B2418" stroke="#B9E84A"/>
+    <circle r="50" fill="none" stroke="#B9E84A" stroke-opacity=".25" class="ring r3"/>
+    <path d="M-14-8h28M-14 0h22M-14 8h25" stroke="#B9E84A" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="m8 9 5 5 9-12" fill="none" stroke="#F4F0E6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text y="76" class="mono" fill="#B9E84A" font-size="8" text-anchor="middle">03 / CHECK</text>
+    <text y="98" class="sans" fill="#F4F0E6" font-size="14" font-weight="750" text-anchor="middle">Review the words</text>
+    <text y="116" class="sans" fill="#899188" font-size="9" text-anchor="middle">OCR runs on your phone</text>
+  </g>
+  <g transform="translate(908 162)">
+    <circle r="36" fill="#171C18" stroke="#B9E84A"/>
+    <circle r="48" fill="none" stroke="#B9E84A" stroke-opacity=".25" class="ring"/>
+    <rect x="-17" y="-14" width="34" height="8" rx="4" fill="#B9E84A"/>
+    <rect x="-17" y="-2" width="27" height="8" rx="4" fill="#6F786E"/>
+    <rect x="-17" y="10" width="31" height="8" rx="4" fill="#E96D4C"/>
+    <text y="76" class="mono" fill="#B9E84A" font-size="8" text-anchor="middle">04 / COMPARE</text>
+    <text y="98" class="sans" fill="#F4F0E6" font-size="14" font-weight="750" text-anchor="middle">Study reply examples</text>
+    <text y="116" class="sans" fill="#899188" font-size="9" text-anchor="middle">Choose tone and structure</text>
+  </g>
+  <g transform="translate(1176 162)">
+    <circle r="36" fill="#2A2019" stroke="#E96D4C"/>
+    <circle r="48" fill="none" stroke="#E96D4C" stroke-opacity=".28" class="ring r2"/>
+    <path d="m-14 10 4-15 20-8 5 5-8 20-15 4Z" fill="none" stroke="#F4F0E6" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="m-10-5 15 15" stroke="#E96D4C" stroke-width="2"/>
+    <text y="76" class="mono" fill="#E96D4C" font-size="8" text-anchor="middle">05 / REWRITE</text>
+    <text y="98" class="sans" fill="#F4F0E6" font-size="14" font-weight="750" text-anchor="middle">Make it your own</text>
+    <text y="116" class="sans" fill="#899188" font-size="9" text-anchor="middle">Edit, copy, decide</text>
+  </g>
+</svg>

@@ -26,11 +26,11 @@ internal data class BubbleCornerMark(
  * deterministic and directly unit-testable.
  */
 internal object BubbleGlyphGeometry {
-    private const val LEFT = 0.29f
-    private const val TOP = 0.29f
-    private const val RIGHT = 0.71f
-    private const val BOTTOM = 0.69f
-    private const val ARM = 0.12f
+    private const val LEFT = 0.297f
+    private const val TOP = 0.297f
+    private const val RIGHT = 0.703f
+    private const val BOTTOM = 0.703f
+    private const val ARM = 0.152f
 
     val cornerMarks = listOf(
         BubbleCornerMark(

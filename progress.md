@@ -1,14 +1,14 @@
 # LM-Comment progress
 
-- Checkpoint date: 2026-07-24
+- Checkpoint date: 2026-07-29
 - Branch: `rebuild/lm-comment-hackathon`
 - Latest completed implementation commit: `ab2a671`
 - Latest deployment commit: `d0910d5`
 - Current phase: H7 - Prometheus submission packaging and owner acceptance
-- Active implementation blocker: none; Prometheus signup confirmation, video recording, and final Devpost account submission remain owner-controlled
+- Active implementation blocker: none; Prometheus signup confirmation, video upload, and final Devpost account submission remain owner-controlled
 - Physical-device acceptance: pending owner test of the new APK on the Nothing A001
 - Demo rehearsal count: 0 / 5
-- Resume from: confirm the Prometheus Google signup, record the prepared learning demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
+- Resume from: confirm the Prometheus Google signup, upload the completed learning demo, complete the Devpost draft, confirm residence eligibility, and test the final Devpost/video links
 
 ## Prometheus submission checkpoint
 
@@ -21,12 +21,12 @@
 - Repository evidence: the public `main` branch contains the source code and begins on July 15, 2026, inside the official originality window.
 - Deadline evidence: Devpost displays July 30 at 11:45 PM EDT, equivalent to July 31 at 9:30 AM Nepal time. The rules prose says 11:59 PM, so the earlier platform cutoff controls.
 - Urgent owner gap: the overview links a Google signup form whose page says its deadline was July 18 and requires Google sign-in. Completion cannot be verified from the logged-out browser. If it was not completed, attempt it immediately and contact the organizers if closed.
-- Files changed: `demo/presentation-script.md`, archived `demo/impactforge-presentation-script.md`, `docs/PROMETHEUS_SUBMISSION.md`, and this checkpoint.
+- Files changed: `demo/presentation-script.md`, `docs/PROMETHEUS_SUBMISSION.md`, and this checkpoint.
 - Demo script: 202 spoken words in six untimed narration-and-screen beats covering the learning problem, capture, on-device OCR, example comparison, active rewriting, explicit copy, and retained authorship.
 - Exact checks: official overview, rules, schedule, resources, updates, gallery, discussions, and linked signup form inspected through a real browser; repository start date and public remote verified; `pnpm check:copy` PASS; `pnpm check:secrets` PASS; `git diff --check` PASS.
 - Evidence paths: `docs/PROMETHEUS_SUBMISSION.md` and `demo/presentation-script.md`.
-- Next phase: owner confirms the signup form, joins the correct challenge account, creates the Devpost draft, records and uploads the sub-two-minute demo, checks every link while logged out, and submits before the platform cutoff.
-- Known limitations: the logged-in submission form and custom fields are not visible without the owner's Devpost account; the Google form's completion status is unknown; the final video does not yet exist.
+- Next phase: owner confirms the signup form, joins the correct challenge account, creates the Devpost draft, uploads the completed demo, checks every link while logged out, and submits before the platform cutoff.
+- Known limitations: the logged-in submission form and custom fields are not visible without the owner's Devpost account; the Google form's completion status and public video URL are unknown.
 
 ## Secure demo-recording checkpoint
 
@@ -62,29 +62,11 @@
 - Files changed: Expo layout, Settings, theme, and token files; native bridge types; bubble anchor/window/service; appearance preference storage; capture gate/activity; crop/workflow visuals; and corresponding JVM/instrumentation tests.
 - Exact tests: `pnpm quality` passed; clean `pnpm mobile:prebuild` passed; native JVM tests passed 106 total with 0 failures, 0 errors, and 1 intentional live skip; Android 16 instrumentation passed 4 / 4; scoped release lint passed; ARM64 and x86_64 release builds passed.
 - Runtime evidence: Android 16 x86_64 release launch passed; System/Light/Dark switching passed; Dark persisted after force-stop/relaunch; the bubble window reached exact x=0; drag-to-dismiss removed both overlay and service; in-memory full-frame OCR recognized 433 characters of underlying content and contained none of the consent title, mode, or Share button text. No screenshot was taken or stored for this check.
-- Final artifact: `artifacts/release/LM-Comment-0.1.0-hackathon-arm64.apk`, 53,184,298 bytes, SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970`, arm64-v8a only, v2/v3 signed with certificate SHA-256 `9570D71820DFCA41BA25C8717CEACF2B77A3C867227056F992DD6CB12E080731`, and 16 KiB aligned.
+- Final artifact: `artifacts/release/LM-Comment-0.1.0-hackathon-arm64.apk`, 53,081,699 bytes, SHA-256 `67B40D8CDD3565E510F403B090C428DA78577C59C68D4B96B2D6A4CFC1D3F2C3`, arm64-v8a only, v2/v3 signed with certificate SHA-256 `9570D71820DFCA41BA25C8717CEACF2B77A3C867227056F992DD6CB12E080731`, and 16 KiB aligned.
 - APK evidence: package/name/version/SDK/ABI, separate overlay and capture services, `noHistory=false`, alignment, signature, and provider-boundary scans passed. There are zero provider-key, provider-endpoint, `.env` entry, and screenshot-like image entry hits.
 - Evidence paths: `docs/TEST_EVIDENCE.md` and ignored local report `artifacts/evidence/h7-bubble-capture-theme-regression-20260716.md`.
 - Tests intentionally skipped at owner request: the 20-run phone capture matrix, cancellation/recovery matrix, rotations, lock cycles, permission revocation, five judge rehearsals, and visual inspection on the Nothing A001.
 - Next phase and limitation: owner acceptance on the Nothing A001. Emulator evidence passes, but the OEM-specific consent animation and physical appearance are not claimed until the owner tests this APK.
-
-## ImpactForge submission checkpoint
-
-- Research date: 2026-07-19.
-- Submission-kit commit: `316e9b5` (`docs(submission): prepare ImpactForge entry kit`).
-- Deadline recorded from the official schedule: July 24, 2026 at 12:30 PM Nepal time.
-- Eligibility: owner confirmed current student status, legal age of majority, and a solo submission on 2026-07-19. Devpost residence eligibility remains a final account check.
-- Public requirements recorded: project name, story, visual proof, encouraged project link, impact statement, and team. Judging weights are Build Quality 30%, Real-World Impact 25%, Creativity and Approach 20%, User Experience 15%, and Clarity 10%.
-- Repository publication: `https://github.com/GrimNej/LM-Comment` contains the complete tested history on `main`. Publication commit `cd92eaa`; judge-download documentation commit `2d6934c`; the local branch tracks `origin/main`.
-- Frozen release: annotated tag `impactforge-2026` points to commit `cd92eaa`. GitHub Release `https://github.com/GrimNej/LM-Comment/releases/tag/impactforge-2026` is public and contains the signed APK.
-- Public APK evidence: GitHub reports asset state `uploaded`, size 53,184,298 bytes, and digest `sha256:e5a2ef822561230cbfeeb80e1a9e252cbc0104b4fb6b296614bbc158a1e16970`, matching the locally verified release.
-- Files changed: `demo/presentation-script.md`, `docs/IMPACTFORGE_SUBMISSION.md`, and the SVG/PNG pair at `docs/assets/impactforge-thumbnail.*`.
-- Demo script: 167 spoken words, leaving room for the complete capture, crop, OCR, generation, edit, and copy actions within a two-minute video.
-- Submission thumbnail: 1500 x 1000 PNG, 77,525 bytes, 3:2 aspect ratio, visually inspected after rendering.
-- Exact checks: `pnpm quality` passed after the new files; `git diff --check` passed; 24-commit Git history scan found zero Groq-key-prefix hits, zero private-key headers, and zero suspicious live environment assignments.
-- Evidence path: `docs/IMPACTFORGE_SUBMISSION.md`; authoritative narration: `demo/presentation-script.md`.
-- Next phase: owner creates the Devpost draft, records and uploads the prepared video, confirms residence eligibility, previews every link while logged out, and submits before the deadline.
-- Known limitations: there is no hosted video yet. The logged-in Devpost form and any custom questions could not be inspected without the owner's account.
 
 ## Prometheus silent demo video checkpoint
 
@@ -98,8 +80,9 @@
 - Presenter-intro update: commit `d4b120f` adds the owner's polished opening hook to `demo/prometheus-video-cue-sheet.md` without changing any existing time cue. `pnpm check:copy` and `git diff --check` passed; no application code or video artifact changed.
 - Narration update: commit `20cfb1f` rewrites every Say section as friendly, literal screen narration using the visible button names and actions. All timings and On screen cues remain unchanged. `pnpm check:copy` and `git diff --check` passed; no application code or video artifact changed.
 - Opening-duration update: commit `744fe0c` expands the presenter hook to 66 words, about 25 seconds at 160 words per minute. It covers the frozen moment, lack of practice, missed community connections, daily impact, and learning through examples and practice. `pnpm check:copy` and `git diff --check` passed; no application code, time cue, or video artifact changed.
-- Next phase: owner records the prepared voiceover, mixes it over the silent MP4, reviews the final audio level and pronunciation, uploads the finished video, and adds the public link to Devpost.
-- Known limitations: the recording uses the stable API 34 `peekaprompt` emulator because the API 36 AVD cold boot was unstable on this workstation. The footage is intentionally silent, and physical-phone appearance is not claimed by this checkpoint.
+- Owner update: the final demo video was confirmed ready on 2026-07-29. Its public hosting URL remains owner-controlled and is not stored in the repository.
+- Next phase: owner uploads the finished video, verifies playback while logged out, and adds the public link to Devpost.
+- Known limitations: the app footage uses the stable API 34 `peekaprompt` emulator because the API 36 AVD cold boot was unstable on this workstation. Physical-phone appearance is not claimed by this checkpoint.
 
 ## Completed implementation
 
@@ -190,7 +173,7 @@
 - Judge fixtures, presentation script, rehearsal checklist, demo runbook, test-evidence record, and post-hackathon roadmap are present.
 - Content-free live canary verifies response structure and count without printing generated content.
 - Oracle deployment now points atomically to immutable release `d0910d5`; its installed release is about 23 MiB, the host retains about 20 GB free, and unrelated services were left untouched.
-- The refreshed phone distribution is frozen as a 53,184,298-byte arm64-only APK with a dedicated 3,072-bit hackathon release certificate, verified v2/v3 signatures, 16 KiB alignment, and SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970`.
+- The refreshed phone distribution is frozen as a 53,081,699-byte arm64-only APK with a dedicated 3,072-bit hackathon release certificate, verified v2/v3 signatures, 16 KiB alignment, and SHA-256 `67B40D8CDD3565E510F403B090C428DA78577C59C68D4B96B2D6A4CFC1D3F2C3`.
 - Final APK inspection confirms the required package/name/version, separate bubble and capture services, `noHistory=false`, no debuggable/cleartext/Accessibility/dev-launcher manifest surface, no screenshot-like image entries, and no provider key or direct Groq endpoint.
 - H7 files changed: relay/container (`.dockerignore`, `apps/relay/Dockerfile`, `apps/relay/src/app.ts`, relay tests and canary); mobile/native configuration (`apps/mobile/app.config.ts`, safe-splash plugin, Settings, demo-configuration validator and tests); release gates/data (`package.json`, scope and quality validators, quality set/evaluation); and judge documentation (`apps/mobile/README.md`, demo fixtures/script/checklist, `docs/DEMO_RUNBOOK.md`, `docs/POST_HACKATHON_ROADMAP.md`, `docs/TEST_EVIDENCE.md`, and this checkpoint).
 - Commits: `291914e` (`chore(release): harden hackathon delivery`), `e7eb66a` (`docs(demo): add judge runbook and rehearsal kit`), and `d0910d5` (`chore(relay): keep live canary content-free`).
@@ -204,12 +187,12 @@
 ## Evidence at this checkpoint
 
 - `pnpm quality`: PASS after H7 source hardening - scope, naming, secrets, 30-case quality-set validation, lint, typecheck, 19 relay tests, and relay production build.
-- Native `:lm-comment-android:testDebugUnitTest`: PASS - 106 tests across 17 suites, zero failures, zero errors, and one intentional opt-in live skip.
+- Native `:lm-comment-android:testDebugUnitTest`: PASS - 107 tests across 17 suites, zero failures, zero errors, and one intentional opt-in live skip.
 - Clean `pnpm mobile:prebuild`: PASS; the durable Expo config plugin removes the incompatible API-33-only splash attribute from generated base styles.
 - API 36 x86_64 instrumentation: PASS - 4 / 4 tests covering private configuration, private appearance persistence, bundled offline OCR, and secure direct-manual behavior.
 - H7 x86_64 debug APK build: PASS.
 - H7 x86_64 release APK clean install and launch on the API 36 emulator: PASS.
-- Final refreshed arm64 release build: PASS - 53,184,298 bytes, SHA-256 `E5A2EF822561230CBFEEB80E1A9E252CBC0104B4FB6B296614BBC158A1E16970`, `arm64-v8a` only.
+- Final refreshed arm64 release build: PASS - 53,081,699 bytes, SHA-256 `67B40D8CDD3565E510F403B090C428DA78577C59C68D4B96B2D6A4CFC1D3F2C3`, `arm64-v8a` only.
 - Dedicated release signing: PASS - APK Signature Schemes v2/v3, 3,072-bit RSA certificate SHA-256 `9570D71820DFCA41BA25C8717CEACF2B77A3C867227056F992DD6CB12E080731`, and 16 KiB zip alignment verified.
 - Final APK inspection: PASS - package/name/version/SDK/launcher, service separation, `noHistory=false`, forbidden manifest surfaces, screenshot-like entry names, exact Groq key, generic `gsk_`, `GROQ_API_KEY`, and direct Groq endpoint checks.
 - Release lint: PASS for the app and first-party native module with `react-native-worklets` and `react-native-reanimated` release analyzers explicitly excluded after those upstream analyzer tasks crashed internally; no first-party lint finding is hidden by this exception.

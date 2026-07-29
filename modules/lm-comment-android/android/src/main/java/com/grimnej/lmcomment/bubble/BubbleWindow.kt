@@ -455,8 +455,8 @@ private class ContextLensBubbleView(
         }
         canvas.drawCircle(
             centerX,
-            drawTop + drawSize * 0.49f,
-            drawSize * 0.075f,
+            drawTop + drawSize * 0.50f,
+            drawSize * 0.09f,
             signalPaint,
         )
     }

@@ -129,8 +129,8 @@ export type AppMarkProps = {
 export function AppMark({ size = 54, showWordmark = false }: AppMarkProps) {
   const { colors } = useAppTheme();
   const frameSize = Math.max(size, 36);
-  const stroke = Math.max(2, Math.round(frameSize / 24));
-  const cornerSize = frameSize * 0.28;
+  const stroke = Math.max(2, Math.round(frameSize / 16));
+  const cornerSize = frameSize * 0.375;
   const cornerColor = colors.textPrimary;
   const sharedCorner = {
     borderColor: cornerColor,
@@ -178,10 +178,10 @@ export function AppMark({ size = 54, showWordmark = false }: AppMarkProps) {
             styles.markSignal,
             {
               backgroundColor: colors.signal,
-              height: frameSize * 0.18,
-              left: frameSize * 0.41,
-              top: frameSize * 0.41,
-              width: frameSize * 0.18,
+              height: frameSize * 0.44,
+              left: frameSize * 0.28,
+              top: frameSize * 0.28,
+              width: frameSize * 0.44,
             },
           ]}
         />

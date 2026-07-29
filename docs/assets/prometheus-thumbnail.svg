@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1000" role="img" aria-labelledby="title desc">
+  <title id="title">LM-Comment Prometheus July AI Challenge thumbnail</title>
+  <desc id="desc">LM-Comment teaches thoughtful commenting through on-device context selection, AI examples, and active rewriting.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1500" y2="1000">
+      <stop stop-color="#0C100D"/><stop offset="1" stop-color="#171C18"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(1260 130) rotate(110) scale(420)">
+      <stop stop-color="#B9E84A" stop-opacity=".23"/><stop offset="1" stop-color="#B9E84A" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse">
+      <path d="M34 0H0v34" fill="none" stroke="#F4F0E6" stroke-opacity=".035"/>
+    </pattern>
+    <filter id="shadow" x="-30%" y="-35%" width="170%" height="190%">
+      <feDropShadow dx="10" dy="12" stdDeviation="0" flood-color="#000000" flood-opacity=".28"/>
+    </filter>
+    <style>
+      .sans { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+      .mono { font-family: "Space Mono", Consolas, monospace; }
+    </style>
+  </defs>
+
+  <rect width="1500" height="1000" fill="url(#bg)"/>
+  <rect width="1500" height="1000" fill="url(#grid)"/>
+  <rect width="1500" height="1000" fill="url(#halo)"/>
+  <rect x="56" y="56" width="1388" height="888" rx="32" fill="none" stroke="#F4F0E6" stroke-opacity=".18" stroke-width="2"/>
+  <path d="M56 740H1444V944H56Z" fill="#F4F0E6"/>
+  <rect x="56" y="740" width="16" height="204" fill="#B9E84A"/>
+  <rect x="1428" y="740" width="16" height="204" fill="#E96D4C"/>
+
+  <g transform="translate(110 108)" filter="url(#shadow)">
+    <rect width="470" height="470" rx="92" fill="#171C18" stroke="#4A544B" stroke-width="4"/>
+    <g fill="none" stroke="#F4F0E6" stroke-linecap="round" stroke-linejoin="round" stroke-width="30">
+      <path d="M211 139H139v72"/>
+      <path d="M259 139h72v72"/>
+      <path d="M211 331H139v-72"/>
+      <path d="M259 331h72v-72"/>
+    </g>
+    <circle cx="235" cy="235" r="43" fill="#B9E84A"/>
+  </g>
+
+  <text x="650" y="183" class="mono" fill="#B9E84A" font-size="24" letter-spacing="3">PROMETHEUS JULY AI CHALLENGE</text>
+  <text x="640" y="330" class="sans" fill="#F4F0E6" font-size="110" font-weight="820" letter-spacing="-5">LM-Comment</text>
+  <text x="646" y="422" class="sans" fill="#F4F0E6" font-size="48" font-weight="760">See how a good reply works.</text>
+  <text x="646" y="484" class="sans" fill="#B9E84A" font-size="51" font-weight="760">Rewrite it in your voice.</text>
+  <text x="650" y="550" class="sans" fill="#AEB4AA" font-size="27">An Android learning tool for thoughtful online communication.</text>
+
+  <g class="sans" fill="#101411">
+    <text x="110" y="827" font-size="31" font-weight="780">Choose real context</text>
+    <circle cx="430" cy="816" r="7" fill="#E96D4C"/>
+    <text x="465" y="827" font-size="31" font-weight="780">Compare examples</text>
+    <circle cx="764" cy="816" r="7" fill="#E96D4C"/>
+    <text x="799" y="827" font-size="31" font-weight="780">Rewrite actively</text>
+    <circle cx="1070" cy="816" r="7" fill="#E96D4C"/>
+    <text x="1105" y="827" font-size="31" font-weight="780">Stay the author</text>
+    <text x="110" y="891" fill="#646C63" font-size="22" font-weight="650">On-device OCR · Editable AI examples · No automatic posting</text>
+  </g>
+</svg>
